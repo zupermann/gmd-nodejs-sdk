@@ -34,7 +34,14 @@ GMD.apiCall = (method, params, callback) => {
         }
         
     }
-    GMD.callHttp(method, GMD.baseURL + (new URLSearchParams(params)).toString(), pass, callback);
+    let url;
+    if(params && params.hasOwnProperty('baseURL')){
+        url = params.baseURL;
+        delete params.baseURL;
+    } else {
+        url = GMD.baseURL;
+    }
+    GMD.callHttp(method, url + (new URLSearchParams(params)).toString(), pass, callback);
 }
 
 GMD.getPublicKey = (pass) => {
