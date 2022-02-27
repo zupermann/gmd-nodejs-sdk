@@ -42,4 +42,7 @@ const paramsGetAccounts = {
     pageSize: 5,
     page: 0
 }
+GMD.apiCall('get', paramsGetAccounts, (res)=>{
+    console.log('Result trasnactions: \n'+JSON.stringify(res, null, 2));
+})
 ```
