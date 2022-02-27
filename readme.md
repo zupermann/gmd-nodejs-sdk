@@ -40,11 +40,13 @@ GMD.apiCall('get', paramsGetTransactions, (res)=>{
 })
 ```
 - Getting accounts (ordered by balance):
+- Example of specifying a GMD node in the request:
 ```
 const paramsGetAccounts = {
     requestType: 'getAccountsBulk',
     pageSize: 5,
-    page: 0
+    page: 0,
+    baseURL: 'https://node.thecoopnetwork.io'
 }
 GMD.apiCall('get', paramsGetAccounts, (res)=>{
     console.log('Result trasnactions: \n'+JSON.stringify(res, null, 2));
