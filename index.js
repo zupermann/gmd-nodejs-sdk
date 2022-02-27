@@ -1,1 +1,1 @@
-module.exports = require('./gmd-crypto').GMD;
+module.exports = require('./gmd-crypto');

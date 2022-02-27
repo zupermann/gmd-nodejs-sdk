@@ -1,7 +1,11 @@
 ### Examples on hot to call the GMD node API
 - For a complete list of API methods and their exact parameters you can see them on any node in a browser at address <GMD node address>/test (e.g. https://node.thecoopnetwork.io/test )
 - By default the remote GMD node will be https://node.thecoopnetwork.io. If you want to change it, use:
-`GMD.setURL('https://node.thecoopnetwork.io')`
+```
+GMD = require('gmd-nodejs-sdk');
+GMD.setURL('https://node.thecoopnetwork.io')
+```
+
 
 
 - Creating GMD transfers each 15 minutes:
