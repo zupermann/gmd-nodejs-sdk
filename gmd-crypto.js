@@ -41,7 +41,7 @@ GMD.apiCall = (method, params, callback) => {
     } else {
         url = GMD.baseURL;
     }
-    GMD.callHttp(method, url + (new URLSearchParams(params)).toString(), pass, callback);
+    GMD.callHttp(method, url +'/nxt?'+ (new URLSearchParams(params)).toString(), pass, callback);
 }
 
 GMD.getPublicKey = (pass) => {
