@@ -1,6 +1,6 @@
 {
   "name": "gmd-nodejs-sdk",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "SDK to interact with Coop Network GMD node using NodeJS",
   "main": "gmd-crypto.js",
   "scripts": {
