@@ -23,7 +23,7 @@
     "SDK"
   ],
   "author": "George A. (https://github.com/zupermann)",
-  "license": "MIT",
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/zupermann/gmd-nodejs-sdk/issues"
   },

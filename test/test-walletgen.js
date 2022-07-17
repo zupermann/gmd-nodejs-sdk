@@ -7,6 +7,7 @@ TestWalletGen.test = () => {
     test2b();
     test2error();
     test3();
+    test4();
 };
 
 test1 = () => {
@@ -39,6 +40,12 @@ test2error = () => {
 test3 = () => {
     console.log('testing checkRSAddress');
     GMD.checkRSAddress('GMD-XRDW-5KPH-8ZQ7-65G9L').then(console.log).catch(console.log);
+}
+
+test4 = async () => {
+    console.log('getBalance');
+    let balance = await GMD.getBalance('GMD-43MP-76UW-L69N-ALW39');
+    console.log('balance=' + balance)
 }
 
 module.exports = TestWalletGen;

@@ -116,4 +116,11 @@ GMD.checkRSAddress = async (rsAccount) => {
     })
 }
 
+//returns a promise that will resolve to a balanceNQT 
+GMD.getBalance = async (rsAccount) => {
+    return GMD.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => {
+        return data.balanceNQT;
+    });
+}
+
 module.exports = GMD;
