@@ -1,6 +1,19 @@
 ### Intro 
+
 - This is an SDK to interact with Coop Network Node.
 - Main use is for local signing of transactions.
+- Offers helper functions to easily call Coop Networl node API.
+
+### Instructions
+- To run tests: 
+  ```
+  npm install
+  npm run test
+  ```
+- To use in your NodeJS app:
+  ```
+  npm install gmd-nodejs-sdk
+  ```
 
 ### Examples on hot to call the GMD node API
 - For a complete list of API methods and their exact parameters you can see them on any node in a browser at address <GMD node address>/test (e.g. https://node.thecoopnetwork.io/test )

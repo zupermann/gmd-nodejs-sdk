@@ -4,6 +4,8 @@ TestWalletGen = {}
 TestWalletGen.test = () => {
     test1();
     test2();
+    test2b();
+    test2error();
     test3();
 };
 
@@ -14,16 +16,30 @@ test1 = () => {
 }
 
 test2 = () => {
-    //GMD.baseURL = 'test-errors';
     GMD.generateAccount().then(data => {
         console.log("Generated wallet " + JSON.stringify(data, null, 2))
     }).catch(e => { console.log("Error: " + e) })
 }
 
-test3 = () => {
-    console.log('testing checkRSAddress');
-    GMD.checkRSAddress('GMD-XRDW-5KPH-8ZQ7-65G9L').then(console.log).catch(console.log(err));
+test2b = () => {
+    GMD.generateAccount('any random passphrase created on other system for example on ethereum network. there is no limit on the number of words').then(data => {
+        console.log("Generated wallet from password " + JSON.stringify(data, null, 2))
+    }).catch(e => { console.log("Error: " + e) })
 }
 
-module.exports = TestPassGen;
+test2error = () => {
+    let save = GMD.baseURL;
+    GMD.baseURL = 'test-errors';
+    GMD.generateAccount().then(data => {
+        console.log("Generated wallet " + JSON.stringify(data, null, 2))
+    }).catch(e => { console.log("Error: " + e) })
+    GMD.baseURL = save;
+}
+
+test3 = () => {
+    console.log('testing checkRSAddress');
+    GMD.checkRSAddress('GMD-XRDW-5KPH-8ZQ7-65G9L').then(console.log).catch(console.log);
+}
+
+module.exports = TestWalletGen;
 

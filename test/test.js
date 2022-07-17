@@ -10,9 +10,9 @@ const TestGet = require('./test-get');
 
 console.log('executing test');
 TestSend.test();
-TestEvents.test();
 TestWalletGen.test();
 TestGet.test();
+TestEvents.test();
 
 
 
