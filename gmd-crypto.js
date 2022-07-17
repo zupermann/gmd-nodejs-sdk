@@ -102,13 +102,12 @@ GMD.generateAccount = (secretPassphrase) => {
     }
     const publicKey = cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
 
-    //return new Promise((resolve, reject) => {
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
         return data;
     });
-    //})
 }
+
 //returns true if RS account checsum and format is checks out, false is invalid address.
 //Actual check is done remotely on a Coop Network Node, so lack of connectivity will result in error thrown.
 GMD.checkRSAddress = async (rsAccount) => {
