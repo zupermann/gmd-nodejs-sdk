@@ -5,16 +5,16 @@ cryptoUtil = {};
 
 cryptoUtil.strToHex = (str) => {
     result = '';
-    for (let i=0; i<str.length; i++) {
-      result += str.charCodeAt(i).toString(16);
+    for (let i = 0; i < str.length; i++) {
+        result += str.charCodeAt(i).toString(16);
     }
-    return result;   
+    return result;
 }
 
 cryptoUtil.hexToString = (hex) => {
     string = '';
     for (let i = 0; i < hex.length; i += 2) {
-      string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+        string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     }
     return string;
 }
@@ -29,7 +29,7 @@ cryptoUtil.hexToBytes = (hex) => {
 cryptoUtil.bytesToHex = (byteArray) => {
     return Array.from(byteArray, (byte) => {
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-      }).join('')
+    }).join('')
 }
 
 cryptoUtil.bytesToWords = (byteArray) => {
@@ -78,13 +78,13 @@ cryptoUtil.wordsToBytes = (wordArr) => {
     }
     const bytes = new Array(wordArr.sigBytes);
     let offset = 0;
-    
+
     for (let i = 0; i < len - 1; i++) {
         let word = wordArr.words[i];
         bytes[offset++] = (word >> 24) & 0xff;
         bytes[offset++] = (word >> 16) & 0xff;
         bytes[offset++] = (word >> 8) & 0xff;
-        bytes[offset++] =  word & 0xff;
+        bytes[offset++] = word & 0xff;
     }
     word = wordArr.words[len - 1];
     bytes[offset++] = (word >> 24) & 0xff;
@@ -117,10 +117,14 @@ cryptoUtil.signBytes = (message, passPhrase) => {
     return cryptoUtil.bytesToHex(v.concat(h));
 }
 
-cryptoUtil.getPublicKey = (passHex)=> {
+cryptoUtil.getPublicKey = (passHex) => {
     const passBytes = cryptoUtil.hexToBytes(passHex);
     const digest = cryptoUtil.SHA256(passBytes);  //TODO also get public key from RS address - request to node?
     return cryptoUtil.bytesToHex(curve25519.keygen(digest).p);
 }
+
+// cryptoUtil.randomArray = (byteSize) => {
+//     return CryptoJS.lib.WordArray.random(size);
+// }
 
 module.exports = cryptoUtil;

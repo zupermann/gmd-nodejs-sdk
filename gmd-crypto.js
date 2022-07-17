@@ -24,16 +24,16 @@ GMD.isSignedTransactionResponse = (data) => {
         data.hasOwnProperty('fullHash');
 };
 
-GMD.apiCall = (method, params, callback) => {
-    let { pass, url, httpTimeout } = GMD.processParams(params);
+GMD.apiCall = (method, params) => {
+    let { pass, url, httpTimeout } = processParams(params);
     config = { method: method, url: url + '/nxt?' + (new URLSearchParams(params)).toString() };
     if (httpTimeout && httpTimeout > 0) {
         config.httpTimeout = httpTimeout;
     }
-    GMD.callHttp(config, pass, callback);
+    return GMD.callHttp(config, pass);
 }
 
-GMD.processParams = (params) => {
+processParams = (params) => {
     let pass = null;
     let url;
     let httpTimeout;
@@ -67,23 +67,54 @@ GMD.getPublicKey = (pass) => {
 }
 
 
-GMD.callHttp = (config, pass, callback) => {
-    axios(config).then((res) => {
+GMD.callHttp = (config, pass) => {
+    return axios(config).then((res) => {
         console.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
         handleAPICallResponse(res.data, pass);
-        if (callback) callback(res.data);
-    }, (error) => {
-        console.log(error);
-        if (callback) callback(error);
-    });
+        return res.data;
+    })
 }
 
 handleAPICallResponse = (data, pass) => {
     if (GMD.isTransaction(data) && !GMD.isSignedTransactionResponse(data) && pass) {
         const signature = GMD.signTransaction(data.unsignedTransactionBytes, pass);
         console.log('signature ' + signature);
-        GMD.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signature });
+        GMD.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signature }).then(data => {
+            console.log('Succesfully posted the transaction broadcast. Data: ' + JSON.stringify(data, null, 2));
+        }).catch(err => {
+            console.log('Error posting transaction broadcast: ' + err);
+        });
     }
+}
+
+//Helper functions
+
+GMD.getAccountId = (publicKey) => {
+    return GMD.apiCall('get', { requestType: 'getAccountId', publicKey: publicKey });
+}
+
+//generate full GMD account.
+//Optional parameter secretPassphrase: if not provided, a secret 12 word passphrase will be generated
+GMD.generateAccount = (secretPassphrase) => {
+    if (!secretPassphrase) {
+        const PassPhraseGenerator = require('./pass-gen');
+        secretPassphrase = PassPhraseGenerator.generatePass();
+    }
+    const publicKey = cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
+
+    //return new Promise((resolve, reject) => {
+    return GMD.getAccountId(publicKey).then((data) => {
+        data.secretPassphrase = secretPassphrase;
+        return data;
+    });
+    //})
+}
+//returns true if RS account checsum and format is checks out, false is invalid address.
+//Actual check is done remotely on a Coop Network Node, so lack of connectivity will result in error thrown.
+GMD.checkRSAddress = async (rsAccount) => {
+    return GMD.apiCall('get', { requestType: 'rsConvert', account: rsAccount }).then(data => {
+        return data.hasOwnProperty('accountLongId');
+    })
 }
 
 module.exports = GMD;

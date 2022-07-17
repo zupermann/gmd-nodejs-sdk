@@ -5,11 +5,6 @@ GMDEvents = {
         'Block.BLOCK_POPPED',
         'Block.BLOCK_PUSHED'
     ],
-    BLOCK_EVENTS: [
-        'Block.BLOCK_GENERATED',
-        'Block.BLOCK_POPPED',
-        'Block.BLOCK_PUSHED'
-    ],
     PEER_EVENTS: [
         'Peer.ADD_INBOUND',
         'Peer.ADDED_ACTIVE_PEER',
@@ -48,8 +43,8 @@ GMDEvents.registerEventListener = async (listener, errorHandler) => {
 
 const startListening = (id) => {
     console.log('startListening');
-    GMD.apiCall('post', { requestType: 'eventRegister', httpTimeout: 5000 }, (res) => {
-        console.log('start listening callback ' + JSON.stringify(res, null, 2))
+    GMD.apiCall('post', { requestType: 'eventRegister', httpTimeout: 5000 }).then((res) => {
+        console.log('start listening callback ' + JSON.stringify(res, null, 2));
         if (res && res.registered) {
             console.log('succesfully registered')
         } else {
@@ -62,7 +57,7 @@ const startListening = (id) => {
 const eventWait = async () => {
     console.log('waiting for event...')
     while (eventListeners.length > 0) {
-        GMD.apiCall('post', { requestType: 'eventWait' }, (res) => {
+        GMD.apiCall('post', { requestType: 'eventWait' }).then((res) => {
             console.log("event wait response: " + JSON.stringify(res, null, 2));
             if (res.hasOwnProperty('errorCode') && res.errorCode == 8) {
                 console.log('No events registered');
@@ -71,7 +66,7 @@ const eventWait = async () => {
         });
         await new Promise(resolve => setTimeout(resolve, 15000));
     }
-    console.log('exiting waiting for event loop')
+    console.log('exit waiting for event loop')
 }
 
 GMDEvents.unRegisterEventListener = (id) => {

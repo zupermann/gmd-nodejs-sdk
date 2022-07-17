@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "axios": "^0.26.0",
-    "crypto-js": "^4.1.1",
-    "node-cron": "^3.0.0"
+    "crypto-js": "^4.1.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "keywords": [
     "CoopNetwork",
@@ -21,7 +23,7 @@
     "SDK"
   ],
   "author": "George A. (https://github.com/zupermann)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/zupermann/gmd-nodejs-sdk/issues"
   },

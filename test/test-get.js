@@ -27,9 +27,9 @@ const test2 = () => {
         page: 0,
         baseURL: 'https://node.thecoopnetwork.io'
     }
-    GMD.apiCall('get', paramsGetAccounts, (res) => {
+    GMD.apiCall('get', paramsGetAccounts).then((res) => {
         console.log('Result trasnactions: \n' + JSON.stringify(res, null, 2));
-    })
+    });
 }
 ///////////////////////////
 
