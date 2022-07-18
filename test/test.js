@@ -12,7 +12,7 @@ console.log('executing test');
 TestSend.test();
 TestWalletGen.test();
 TestGet.test();
-TestEvents.test();
+//TestEvents.test();
 
 
 
