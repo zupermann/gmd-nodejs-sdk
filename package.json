@@ -4,7 +4,7 @@
   "description": "SDK to interact with Coop Network GMD node using NodeJS",
   "main": "gmd-crypto.js",
   "scripts": {
-    "test": "echo \"No test specified\""
+    "test": "node ./test/test.js"
   },
   "repository": {
     "type": "git",
@@ -13,6 +13,9 @@
   "dependencies": {
     "axios": "^0.26.0",
     "crypto-js": "^4.1.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "keywords": [
     "CoopNetwork",
