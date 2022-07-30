@@ -4,7 +4,7 @@ const words = ["like", "just", "love", "know", "never", "want", "time", "out", "
 PassPhraseGenerator = {}
 
 PassPhraseGenerator.generatePass = (numberOfWords) => {
-    const crypto = require('crypto').webcrypto; //Node equivalent of window.crypto in browser
+    const crypto = require('./get-crypto');
     if (!numberOfWords) {
         numberOfWords = 12;
     }

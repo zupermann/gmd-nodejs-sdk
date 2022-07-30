@@ -1,14 +1,15 @@
 const axios = require('axios');
 const crypto = require('./crypto-util');
+const cryptoUtil = require('./crypto-util');
 
-GMD = { baseURL: 'https://node.thecoopnetwork.io' };
+const GMD = { baseURL: 'https://node.thecoopnetwork.io' };
 
 GMD.setURL = (url) => {
     GMD.baseURL = url;
 }
 
-GMD.signTransaction = (unsignedTransaction, passPhrase) => {
-    const signature = crypto.signBytes(unsignedTransaction, passPhrase);
+GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
+    const signature = await crypto.signBytes(unsignedTransaction, passPhrase);
     return unsignedTransaction.substr(0, 192) + signature + unsignedTransaction.substr(320);
 }
 
@@ -24,8 +25,8 @@ GMD.isSignedTransactionResponse = (data) => {
         data.hasOwnProperty('fullHash');
 };
 
-GMD.apiCall = (method, params) => {
-    let { pass, url, httpTimeout } = processParams(params);
+GMD.apiCall = async (method, params) => {
+    let { pass, url, httpTimeout } = await processParams(params);
     config = { method: method, url: url + '/nxt?' + (new URLSearchParams(params)).toString() };
     if (httpTimeout && httpTimeout > 0) {
         config.httpTimeout = httpTimeout;
@@ -33,7 +34,7 @@ GMD.apiCall = (method, params) => {
     return GMD.callHttp(config, pass);
 }
 
-processParams = (params) => {
+processParams = async (params) => {
     let pass = null;
     let url;
     let httpTimeout;
@@ -42,7 +43,7 @@ processParams = (params) => {
             pass = params.secretPhrase;
             delete params.secretPhrase; //password is not sent to server - remove it from params - it is needed only to do local signing
             if (!params.hasOwnProperty('publicKey')) {
-                params.publicKey = GMD.getPublicKey(pass);
+                params.publicKey = await GMD.getPublicKey(pass);
             }
         }
 
@@ -62,7 +63,7 @@ processParams = (params) => {
 }
 
 
-GMD.getPublicKey = (pass) => {
+GMD.getPublicKey = async (pass) => {
     return crypto.getPublicKey(crypto.strToHex(pass));
 }
 
@@ -70,14 +71,13 @@ GMD.getPublicKey = (pass) => {
 GMD.callHttp = (config, pass) => {
     return axios(config).then((res) => {
         console.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
-        handleAPICallResponse(res.data, pass);
-        return res.data;
+        return handleAPICallResponse(res.data, pass);;
     })
 }
 
-handleAPICallResponse = (data, pass) => {
+handleAPICallResponse = async (data, pass) => {
     if (GMD.isTransaction(data) && !GMD.isSignedTransactionResponse(data) && pass) {
-        const signature = GMD.signTransaction(data.unsignedTransactionBytes, pass);
+        const signature = await GMD.signTransaction(data.unsignedTransactionBytes, pass);
         console.log('signature ' + signature);
         GMD.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signature }).then(data => {
             console.log('Succesfully posted the transaction broadcast. Data: ' + JSON.stringify(data, null, 2));
@@ -85,6 +85,7 @@ handleAPICallResponse = (data, pass) => {
             console.log('Error posting transaction broadcast: ' + err);
         });
     }
+    return data;
 }
 
 //Helper functions
@@ -95,12 +96,12 @@ GMD.getAccountId = (publicKey) => {
 
 //generate full GMD account.
 //Optional parameter secretPassphrase: if not provided, a secret 12 word passphrase will be generated
-GMD.generateAccount = (secretPassphrase) => {
+GMD.generateAccount = async (secretPassphrase) => {
     if (!secretPassphrase) {
         const PassPhraseGenerator = require('./pass-gen');
         secretPassphrase = PassPhraseGenerator.generatePass();
     }
-    const publicKey = cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
+    const publicKey = await cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;

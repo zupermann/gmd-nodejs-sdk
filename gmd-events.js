@@ -1,5 +1,5 @@
 const GMD = require('./gmd-crypto')
-GMDEvents = {
+const GMDEvents = {
     BLOCK_EVENTS: [
         'Block.BLOCK_GENERATED',
         'Block.BLOCK_POPPED',
