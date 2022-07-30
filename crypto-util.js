@@ -1,6 +1,6 @@
-const CryptoJS = require("crypto-js");
+const crypto = require('./get-crypto');
 const curve25519 = require('./curve25519');
-cryptoUtil = {};
+const cryptoUtil = {};
 
 
 cryptoUtil.strToHex = (str) => {
@@ -61,15 +61,24 @@ cryptoUtil.bytesToString = (bytesArray) => {
     return String.fromCharCode.apply(null, bytesArray);
 }
 
-cryptoUtil.SHA256 = (in1, in2) => {
-    var sha256 = CryptoJS.algo.SHA256.create();
-    sha256.update(cryptoUtil.bytesToWords(in1));
-    if (in2) {
-        sha256.update(cryptoUtil.bytesToWords(in2));
+cryptoUtil.SHA256 = async (in1, in2) => {
+    if (in1) {
+        if (in2) {
+            input = in1.concat(in2);
+        } else {
+            input = in1;
+        }
+    } else {
+        if (in2) {
+            input = in2;
+        }
     }
-    var hash = sha256.finalize();
-    return cryptoUtil.wordsToBytes(hash);
+
+    arrayBufferInput = Uint8Array.from(input);
+    output = await crypto.subtle.digest('SHA-256', arrayBufferInput);
+    return Array.from(new Uint8Array(output));
 }
+
 
 cryptoUtil.wordsToBytes = (wordArr) => {
     const len = wordArr.words.length;
@@ -104,27 +113,23 @@ cryptoUtil.wordsToBytes = (wordArr) => {
 
 
 
-cryptoUtil.signBytes = (message, passPhrase) => {
+cryptoUtil.signBytes = async (message, passPhrase) => {
     const messageBytes = cryptoUtil.hexToBytes(message);
     const secretPhraseBytes = cryptoUtil.hexToBytes(cryptoUtil.strToHex(passPhrase));
-    const digest = cryptoUtil.SHA256(secretPhraseBytes);
+    const digest = await cryptoUtil.SHA256(secretPhraseBytes);
     const s = curve25519.keygen(digest).s;
-    var m = cryptoUtil.SHA256(messageBytes);
-    var x = cryptoUtil.SHA256(m, s);
+    var m = await cryptoUtil.SHA256(messageBytes);
+    var x = await cryptoUtil.SHA256(m, s);
     var y = curve25519.keygen(x).p;
-    var h = cryptoUtil.SHA256(m, y);
+    var h = await cryptoUtil.SHA256(m, y);
     var v = curve25519.sign(h, x, s);
     return cryptoUtil.bytesToHex(v.concat(h));
 }
 
-cryptoUtil.getPublicKey = (passHex) => {
+cryptoUtil.getPublicKey = async (passHex) => {
     const passBytes = cryptoUtil.hexToBytes(passHex);
-    const digest = cryptoUtil.SHA256(passBytes);  //TODO also get public key from RS address - request to node?
+    const digest = await cryptoUtil.SHA256(passBytes);  //TODO also get public key from RS address - request to node?
     return cryptoUtil.bytesToHex(curve25519.keygen(digest).p);
 }
-
-// cryptoUtil.randomArray = (byteSize) => {
-//     return CryptoJS.lib.WordArray.random(size);
-// }
 
 module.exports = cryptoUtil;

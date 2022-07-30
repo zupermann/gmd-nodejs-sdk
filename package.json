@@ -4,15 +4,24 @@
   "description": "SDK to interact with Coop Network GMD node using NodeJS",
   "main": "gmd-crypto.js",
   "scripts": {
-    "test": "node ./test/test.js"
+    "test": "node ./test/test.js",
+    "build-browser": "browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zupermann/gmd-nodejs-sdk.git"
   },
+  "browser": {
+    "./get-crypto.js": "./browser/get-crypto-window.js",
+    "axios": false,
+    "./get-axios.js": "./browser/get-axios-browser.js"
+  },
   "dependencies": {
-    "axios": "^0.26.0",
-    "crypto-js": "^4.1.1"
+    "axios": "^0.26.0"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "uglify-js": "^3.16.3"
   },
   "engines": {
     "node": ">=16.0.0"

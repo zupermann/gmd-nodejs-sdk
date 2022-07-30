@@ -1,0 +1,56 @@
+<html>
+
+<body>
+    <p1>Example to use GMD SDK in browser.</p1>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="./dist/gmd-sdk.js"></script>
+    <script>
+        /**
+         *  Example on how to genearate a wallet
+         */
+        GMD.generateAccount().then(data => console.log('Generated wallet ${JSON.stringify(data, null, 2))}'));
+
+        /**
+         *  Example on how to genearate a wallet based on a passphrase
+         */
+        GMD.generateAccount('this is a passphrase example any numer of words is fine').then(data => console.log('Generated wallet with a provided passphrase: ${JSON.stringify(data, null, 2))}'));
+
+        /**
+         *  Example on how to set globally the URL of the GMD node. In this case we set it to testnet.
+         *  It is also possible to specify a URL on a specific node
+         *  My default main net node https://node.thecoopnetwork.io is used.
+         *  
+         */
+        console.log("Setting url to testnet:");
+        GMD.setURL('https://node.thecoopnetwork.io:6877');
+
+        /**
+         * Example on how to send on testnet 0.001 GMD to wallet GMD-43MP-76UW-L69N-ALW39.
+         *          
+         */
+        console.log('Sending money to GMD-43MP-76UW-L69N-ALW39');
+        GMD.sendMoney('GMD-43MP-76UW-L69N-ALW39', '100000', 'screen drawn leave power connect confidence liquid everytime wall either poet shook', '100000000')
+            .then(console.log);
+
+        /**
+         * Example on how to call an api on the node. In this example we call a main net node to retrieve a list of accounts.
+         * For a complete list of all API available on a node, please visit https://node.thecoopnetwork.io/test
+         * To specify the node, use "baseURL".
+         */
+        paramsGetAccounts = {
+            requestType: 'getAccountsBulk',
+            pageSize: 3,
+            page: 0,
+            baseURL: 'https://node.thecoopnetwork.io'
+        }
+        GMD.apiCall('get', paramsGetAccounts).then((res) => {
+            console.log('List of first 3 accounts: \n' + JSON.stringify(res, null, 2));
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>
