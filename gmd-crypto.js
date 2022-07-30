@@ -123,4 +123,15 @@ GMD.getBalance = async (rsAccount) => {
     });
 }
 
+GMD.sendMoney = (recipient, amountNQT, passPhrase, feeNQT) => {
+    return GMD.apiCall('post', {
+        requestType: 'sendMoney',
+        recipient: recipient,
+        amountNQT: amountNQT,
+        secretPhrase: passPhrase,
+        feeNQT: feeNQT,
+        deadline: '1440'
+    });
+}
+
 module.exports = GMD;

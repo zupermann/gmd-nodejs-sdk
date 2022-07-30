@@ -5,7 +5,8 @@ GMD.setURL('https://node.thecoopnetwork.io:6877'); //testnet node
 const TestSend = {
     test: () => {
         //test1();
-        test2();
+        console.log('TestSend execute...');
+        TestSend.test3();
     }
 };
 
@@ -39,6 +40,14 @@ test2 = () => {
     GMD.apiCall('post', dataSendMoney).then((res) => {
         console.log('Data received back on api calls:\n' + JSON.stringify(res, null, 2));
     });
+}
+
+TestSend.test3 = () => {
+    console.log('sending 1 GMD to ALW39 from CJMBC');
+    GMD.sendMoney('GMD-43MP-76UW-L69N-ALW39',
+        '100000000',
+        'screen drawn leave power connect confidence liquid everytime wall either poet shook',
+        '100000000').then(console.log);
 }
 
 module.exports = TestSend;
