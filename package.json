@@ -12,7 +12,9 @@
     "url": "git+https://github.com/zupermann/gmd-nodejs-sdk.git"
   },
   "browser": {
-    "./get-crypto.js": "./browser/get-crypto-window.js"
+    "./get-crypto.js": "./browser/get-crypto-window.js",
+    "axios": false,
+    "./get-axios.js": "./browser/get-axios-browser.js"
   },
   "dependencies": {
     "axios": "^0.26.0"

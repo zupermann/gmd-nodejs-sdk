@@ -1,4 +1,4 @@
-const axios = require('axios');
+const axios = require('./get-axios');
 const crypto = require('./crypto-util');
 const cryptoUtil = require('./crypto-util');
 
@@ -25,13 +25,13 @@ GMD.isSignedTransactionResponse = (data) => {
         data.hasOwnProperty('fullHash');
 };
 
-GMD.apiCall = async (method, params) => {
+GMD.apiCall = async (method, params, doNotSign) => {
     let { pass, url, httpTimeout } = await processParams(params);
     config = { method: method, url: url + '/nxt?' + (new URLSearchParams(params)).toString() };
     if (httpTimeout && httpTimeout > 0) {
         config.httpTimeout = httpTimeout;
     }
-    return GMD.callHttp(config, pass);
+    return GMD.callHttp(config, pass, doNotSign);
 }
 
 processParams = async (params) => {
@@ -68,14 +68,17 @@ GMD.getPublicKey = async (pass) => {
 }
 
 
-GMD.callHttp = (config, pass) => {
+GMD.callHttp = (config, pass, doNotSign) => {
     return axios(config).then((res) => {
         console.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
-        return handleAPICallResponse(res.data, pass);;
+        return handleAPICallResponse(res.data, pass, doNotSign);;
     })
 }
 
-handleAPICallResponse = async (data, pass) => {
+handleAPICallResponse = async (data, pass, doNotSign) => {
+    if (doNotSign) {
+        return data;
+    }
     if (GMD.isTransaction(data) && !GMD.isSignedTransactionResponse(data) && pass) {
         const signature = await GMD.signTransaction(data.unsignedTransactionBytes, pass);
         console.log('signature ' + signature);

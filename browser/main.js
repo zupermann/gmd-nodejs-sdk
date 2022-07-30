@@ -1,2 +1,2 @@
-var { GMD, GMDEvents } = require('../index');
+var { GMD } = require('../index');
 window.GMD = GMD;
