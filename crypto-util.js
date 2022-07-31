@@ -4,7 +4,7 @@ const cryptoUtil = {};
 
 
 cryptoUtil.strToHex = (str) => {
-    result = '';
+    let result = '';
     for (let i = 0; i < str.length; i++) {
         result += str.charCodeAt(i).toString(16);
     }
@@ -12,7 +12,7 @@ cryptoUtil.strToHex = (str) => {
 }
 
 cryptoUtil.hexToString = (hex) => {
-    string = '';
+    let string = '';
     for (let i = 0; i < hex.length; i += 2) {
         string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     }
@@ -62,6 +62,7 @@ cryptoUtil.bytesToString = (bytesArray) => {
 }
 
 cryptoUtil.SHA256 = async (in1, in2) => {
+    let input;
     if (in1) {
         if (in2) {
             input = in1.concat(in2);
@@ -74,8 +75,8 @@ cryptoUtil.SHA256 = async (in1, in2) => {
         }
     }
 
-    arrayBufferInput = Uint8Array.from(input);
-    output = await crypto.subtle.digest('SHA-256', arrayBufferInput);
+    let arrayBufferInput = Uint8Array.from(input);
+    let output = await crypto.subtle.digest('SHA-256', arrayBufferInput);
     return Array.from(new Uint8Array(output));
 }
 
@@ -95,7 +96,7 @@ cryptoUtil.wordsToBytes = (wordArr) => {
         bytes[offset++] = (word >> 8) & 0xff;
         bytes[offset++] = word & 0xff;
     }
-    word = wordArr.words[len - 1];
+    let word = wordArr.words[len - 1];
     bytes[offset++] = (word >> 24) & 0xff;
     if (wordArr.sigBytes % 4 == 0) {
         bytes[offset++] = (word >> 16) & 0xff;

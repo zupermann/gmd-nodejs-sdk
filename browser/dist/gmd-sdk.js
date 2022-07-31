@@ -1,4 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+/* eslint-disable no-undef */
 module.exports = axios;
 },{}],2:[function(require,module,exports){
 module.exports = window.crypto;
@@ -12,7 +13,7 @@ const cryptoUtil = {};
 
 
 cryptoUtil.strToHex = (str) => {
-    result = '';
+    let result = '';
     for (let i = 0; i < str.length; i++) {
         result += str.charCodeAt(i).toString(16);
     }
@@ -20,7 +21,7 @@ cryptoUtil.strToHex = (str) => {
 }
 
 cryptoUtil.hexToString = (hex) => {
-    string = '';
+    let string = '';
     for (let i = 0; i < hex.length; i += 2) {
         string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     }
@@ -70,6 +71,7 @@ cryptoUtil.bytesToString = (bytesArray) => {
 }
 
 cryptoUtil.SHA256 = async (in1, in2) => {
+    let input;
     if (in1) {
         if (in2) {
             input = in1.concat(in2);
@@ -82,8 +84,8 @@ cryptoUtil.SHA256 = async (in1, in2) => {
         }
     }
 
-    arrayBufferInput = Uint8Array.from(input);
-    output = await crypto.subtle.digest('SHA-256', arrayBufferInput);
+    let arrayBufferInput = Uint8Array.from(input);
+    let output = await crypto.subtle.digest('SHA-256', arrayBufferInput);
     return Array.from(new Uint8Array(output));
 }
 
@@ -103,7 +105,7 @@ cryptoUtil.wordsToBytes = (wordArr) => {
         bytes[offset++] = (word >> 8) & 0xff;
         bytes[offset++] = word & 0xff;
     }
-    word = wordArr.words[len - 1];
+    let word = wordArr.words[len - 1];
     bytes[offset++] = (word >> 24) & 0xff;
     if (wordArr.sigBytes % 4 == 0) {
         bytes[offset++] = (word >> 16) & 0xff;
@@ -218,17 +220,17 @@ var curve25519 = function () {
      *   k [out] your private key for key agreement
      *   k  [in]  32 random bytes
      */
-    function clamp (k) {
+    function clamp(k) {
         k[31] &= 0x7F;
         k[31] |= 0x40;
-        k[ 0] &= 0xF8;
+        k[0] &= 0xF8;
     }
 
     //endregion
 
     //region radix 2^8 math
 
-    function cpy32 (d, s) {
+    function cpy32(d, s) {
         for (var i = 0; i < 32; i++)
             d[i] = s[i];
     }
@@ -236,7 +238,7 @@ var curve25519 = function () {
     /* p[m..n+m-1] = q[m..n+m-1] + z * x */
     /* n is the size of x */
     /* n+m is the size of p and q */
-    function mula_small (p, q, m, x, n, z) {
+    function mula_small(p, q, m, x, n, z) {
         m = m | 0;
         n = n | 0;
         z = z | 0;
@@ -254,7 +256,7 @@ var curve25519 = function () {
     /* p += x * y * z  where z is a small integer
      * x is size 32, y is size t, p is size 32+t
      * y is allowed to overlap with p+32 if you don't care about the upper half  */
-    function mula32 (p, x, y, t, z) {
+    function mula32(p, x, y, t, z) {
         t = t | 0;
         z = z | 0;
 
@@ -263,7 +265,7 @@ var curve25519 = function () {
         var i = 0;
         for (; i < t; i++) {
             var zy = z * (y[i] & 0xFF);
-            w += mula_small(p, p, i, x, n, zy) + (p[i+n] & 0xFF) + zy * (x[n] & 0xFF);
+            w += mula_small(p, p, i, x, n, zy) + (p[i + n] & 0xFF) + zy * (x[n] & 0xFF);
             p[i + n] = w & 0xFF;
             w >>= 8;
         }
@@ -276,7 +278,7 @@ var curve25519 = function () {
      * requires t > 0 && d[t-1] !== 0
      * requires that r[-1] and d[-1] are valid memory locations
      * q may overlap with r+t */
-    function divmod (q, r, n, d, t) {
+    function divmod(q, r, n, d, t) {
         n = n | 0;
         t = t | 0;
 
@@ -300,10 +302,11 @@ var curve25519 = function () {
             r[n] = 0;
         }
 
-        r[t-1] = rn & 0xFF;
+        r[t - 1] = rn & 0xFF;
     }
 
-    function numsize (x, n) {
+    function numsize(x, n) {
+        // eslint-disable-next-line no-empty
         while (n-- !== 0 && x[n] === 0) { }
         return n + 1;
     }
@@ -313,7 +316,7 @@ var curve25519 = function () {
      * as 32-byte signed.
      * x and y must have 64 bytes space for temporary use.
      * requires that a[-1] and b[-1] are valid memory locations  */
-    function egcd32 (x, y, a, b) {
+    function egcd32(x, y, a, b) {
         var an, bn = 32, qn, i;
         for (i = 0; i < 32; i++)
             x[i] = y[i] = 0;
@@ -322,6 +325,7 @@ var curve25519 = function () {
         if (an === 0)
             return y; /* division by zero */
         var temp = new Array(32);
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             qn = bn - an + 1;
             divmod(temp, b, bn, a, an);
@@ -346,18 +350,18 @@ var curve25519 = function () {
     //region pack / unpack
 
     /* Convert to internal format from little-endian byte format */
-    function unpack (x, m) {
+    function unpack(x, m) {
         for (var i = 0; i < KEY_SIZE; i += 2)
             x[i / 2] = m[i] & 0xFF | ((m[i + 1] & 0xFF) << 8);
     }
 
     /* Check if reduced-form input >= 2^255-19 */
-    function is_overflow (x) {
+    function is_overflow(x) {
         return (
             ((x[0] > P26 - 19)) &&
-                ((x[1] & x[3] & x[5] & x[7] & x[9]) === P25) &&
-                ((x[2] & x[4] & x[6] & x[8]) === P26)
-            ) || (x[9] > P25);
+            ((x[1] & x[3] & x[5] & x[7] & x[9]) === P25) &&
+            ((x[2] & x[4] & x[6] & x[8]) === P26)
+        ) || (x[9] > P25);
     }
 
     /* Convert from internal format to little-endian byte format.  The
@@ -365,7 +369,7 @@ var curve25519 = function () {
      *     unpack, mul, sqr
      *     set --  if input in range 0 .. P25
      * If you're unsure if the number is reduced, first multiply it by 1.  */
-    function pack (x, m) {
+    function pack(x, m) {
         for (var i = 0; i < UNPACKED_SIZE; ++i) {
             m[2 * i] = x[i] & 0x00FF;
             m[2 * i + 1] = (x[i] & 0xFF00) >> 8;
@@ -374,18 +378,18 @@ var curve25519 = function () {
 
     //endregion
 
-    function createUnpackedArray () {
+    function createUnpackedArray() {
         return new Uint16Array(UNPACKED_SIZE);
     }
 
     /* Copy a number */
-    function cpy (d, s) {
+    function cpy(d, s) {
         for (var i = 0; i < UNPACKED_SIZE; ++i)
             d[i] = s[i];
     }
 
     /* Set a number to value, which must be in range -185861411 .. 185861411 */
-    function set (d, s) {
+    function set(d, s) {
         d[0] = s;
         for (var i = 1; i < UNPACKED_SIZE; ++i)
             d[i] = 0;
@@ -411,7 +415,7 @@ var curve25519 = function () {
     /* Calculates a reciprocal.  The output is in reduced form, the inputs need not
      * be.  Simply calculates  y = x^(p-2)  so it's not too fast. */
     /* When sqrtassist is true, it instead calculates y = x^((p-5)/8) */
-    function recip (y, x, sqrtassist) {
+    function recip(y, x, sqrtassist) {
         var t0 = createUnpackedArray();
         var t1 = createUnpackedArray();
         var t2 = createUnpackedArray();
@@ -484,14 +488,14 @@ var curve25519 = function () {
     }
 
     /* checks if x is "negative", requires reduced input */
-    function is_negative (x) {
+    function is_negative(x) {
         var isOverflowOrNegative = is_overflow(x) || x[9] < 0;
         var leastSignificantBit = x[0] & 1;
         return ((isOverflowOrNegative ? 1 : 0) ^ leastSignificantBit) & 0xFFFFFFFF;
     }
 
     /* a square root */
-    function sqrt (x, u) {
+    function sqrt(x, u) {
         var v = createUnpackedArray();
         var t1 = createUnpackedArray();
         var t2 = createUnpackedArray();
@@ -509,76 +513,76 @@ var curve25519 = function () {
 
     //region JavaScript Fast Math
 
-    function c255lsqr8h (a7, a6, a5, a4, a3, a2, a1, a0) {
+    function c255lsqr8h(a7, a6, a5, a4, a3, a2, a1, a0) {
         var r = [];
         var v;
-        r[0] = (v = a0*a0) & 0xFFFF;
-        r[1] = (v = ((v / 0x10000) | 0) + 2*a0*a1) & 0xFFFF;
-        r[2] = (v = ((v / 0x10000) | 0) + 2*a0*a2 + a1*a1) & 0xFFFF;
-        r[3] = (v = ((v / 0x10000) | 0) + 2*a0*a3 + 2*a1*a2) & 0xFFFF;
-        r[4] = (v = ((v / 0x10000) | 0) + 2*a0*a4 + 2*a1*a3 + a2*a2) & 0xFFFF;
-        r[5] = (v = ((v / 0x10000) | 0) + 2*a0*a5 + 2*a1*a4 + 2*a2*a3) & 0xFFFF;
-        r[6] = (v = ((v / 0x10000) | 0) + 2*a0*a6 + 2*a1*a5 + 2*a2*a4 + a3*a3) & 0xFFFF;
-        r[7] = (v = ((v / 0x10000) | 0) + 2*a0*a7 + 2*a1*a6 + 2*a2*a5 + 2*a3*a4) & 0xFFFF;
-        r[8] = (v = ((v / 0x10000) | 0) + 2*a1*a7 + 2*a2*a6 + 2*a3*a5 + a4*a4) & 0xFFFF;
-        r[9] = (v = ((v / 0x10000) | 0) + 2*a2*a7 + 2*a3*a6 + 2*a4*a5) & 0xFFFF;
-        r[10] = (v = ((v / 0x10000) | 0) + 2*a3*a7 + 2*a4*a6 + a5*a5) & 0xFFFF;
-        r[11] = (v = ((v / 0x10000) | 0) + 2*a4*a7 + 2*a5*a6) & 0xFFFF;
-        r[12] = (v = ((v / 0x10000) | 0) + 2*a5*a7 + a6*a6) & 0xFFFF;
-        r[13] = (v = ((v / 0x10000) | 0) + 2*a6*a7) & 0xFFFF;
-        r[14] = (v = ((v / 0x10000) | 0) + a7*a7) & 0xFFFF;
+        r[0] = (v = a0 * a0) & 0xFFFF;
+        r[1] = (v = ((v / 0x10000) | 0) + 2 * a0 * a1) & 0xFFFF;
+        r[2] = (v = ((v / 0x10000) | 0) + 2 * a0 * a2 + a1 * a1) & 0xFFFF;
+        r[3] = (v = ((v / 0x10000) | 0) + 2 * a0 * a3 + 2 * a1 * a2) & 0xFFFF;
+        r[4] = (v = ((v / 0x10000) | 0) + 2 * a0 * a4 + 2 * a1 * a3 + a2 * a2) & 0xFFFF;
+        r[5] = (v = ((v / 0x10000) | 0) + 2 * a0 * a5 + 2 * a1 * a4 + 2 * a2 * a3) & 0xFFFF;
+        r[6] = (v = ((v / 0x10000) | 0) + 2 * a0 * a6 + 2 * a1 * a5 + 2 * a2 * a4 + a3 * a3) & 0xFFFF;
+        r[7] = (v = ((v / 0x10000) | 0) + 2 * a0 * a7 + 2 * a1 * a6 + 2 * a2 * a5 + 2 * a3 * a4) & 0xFFFF;
+        r[8] = (v = ((v / 0x10000) | 0) + 2 * a1 * a7 + 2 * a2 * a6 + 2 * a3 * a5 + a4 * a4) & 0xFFFF;
+        r[9] = (v = ((v / 0x10000) | 0) + 2 * a2 * a7 + 2 * a3 * a6 + 2 * a4 * a5) & 0xFFFF;
+        r[10] = (v = ((v / 0x10000) | 0) + 2 * a3 * a7 + 2 * a4 * a6 + a5 * a5) & 0xFFFF;
+        r[11] = (v = ((v / 0x10000) | 0) + 2 * a4 * a7 + 2 * a5 * a6) & 0xFFFF;
+        r[12] = (v = ((v / 0x10000) | 0) + 2 * a5 * a7 + a6 * a6) & 0xFFFF;
+        r[13] = (v = ((v / 0x10000) | 0) + 2 * a6 * a7) & 0xFFFF;
+        r[14] = (v = ((v / 0x10000) | 0) + a7 * a7) & 0xFFFF;
         r[15] = ((v / 0x10000) | 0);
         return r;
     }
 
-    function c255lsqrmodp (r, a) {
+    function c255lsqrmodp(r, a) {
         var x = c255lsqr8h(a[15], a[14], a[13], a[12], a[11], a[10], a[9], a[8]);
         var z = c255lsqr8h(a[7], a[6], a[5], a[4], a[3], a[2], a[1], a[0]);
         var y = c255lsqr8h(a[15] + a[7], a[14] + a[6], a[13] + a[5], a[12] + a[4], a[11] + a[3], a[10] + a[2], a[9] + a[1], a[8] + a[0]);
 
         var v;
-        r[0] = (v = 0x800000 + z[0] + (y[8] -x[8] -z[8] + x[0] -0x80) * 38) & 0xFFFF;
-        r[1] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[1] + (y[9] -x[9] -z[9] + x[1]) * 38) & 0xFFFF;
-        r[2] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[2] + (y[10] -x[10] -z[10] + x[2]) * 38) & 0xFFFF;
-        r[3] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[3] + (y[11] -x[11] -z[11] + x[3]) * 38) & 0xFFFF;
-        r[4] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[4] + (y[12] -x[12] -z[12] + x[4]) * 38) & 0xFFFF;
-        r[5] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[5] + (y[13] -x[13] -z[13] + x[5]) * 38) & 0xFFFF;
-        r[6] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[6] + (y[14] -x[14] -z[14] + x[6]) * 38) & 0xFFFF;
-        r[7] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[7] + (y[15] -x[15] -z[15] + x[7]) * 38) & 0xFFFF;
-        r[8] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[8] + y[0] -x[0] -z[0] + x[8] * 38) & 0xFFFF;
-        r[9] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[9] + y[1] -x[1] -z[1] + x[9] * 38) & 0xFFFF;
-        r[10] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[10] + y[2] -x[2] -z[2] + x[10] * 38) & 0xFFFF;
-        r[11] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[11] + y[3] -x[3] -z[3] + x[11] * 38) & 0xFFFF;
-        r[12] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[12] + y[4] -x[4] -z[4] + x[12] * 38) & 0xFFFF;
-        r[13] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[13] + y[5] -x[5] -z[5] + x[13] * 38) & 0xFFFF;
-        r[14] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[14] + y[6] -x[6] -z[6] + x[14] * 38) & 0xFFFF;
-        var r15 = 0x7fff80 + ((v / 0x10000) | 0) + z[15] + y[7] -x[7] -z[7] + x[15] * 38;
+        r[0] = (v = 0x800000 + z[0] + (y[8] - x[8] - z[8] + x[0] - 0x80) * 38) & 0xFFFF;
+        r[1] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[1] + (y[9] - x[9] - z[9] + x[1]) * 38) & 0xFFFF;
+        r[2] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[2] + (y[10] - x[10] - z[10] + x[2]) * 38) & 0xFFFF;
+        r[3] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[3] + (y[11] - x[11] - z[11] + x[3]) * 38) & 0xFFFF;
+        r[4] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[4] + (y[12] - x[12] - z[12] + x[4]) * 38) & 0xFFFF;
+        r[5] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[5] + (y[13] - x[13] - z[13] + x[5]) * 38) & 0xFFFF;
+        r[6] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[6] + (y[14] - x[14] - z[14] + x[6]) * 38) & 0xFFFF;
+        r[7] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[7] + (y[15] - x[15] - z[15] + x[7]) * 38) & 0xFFFF;
+        r[8] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[8] + y[0] - x[0] - z[0] + x[8] * 38) & 0xFFFF;
+        r[9] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[9] + y[1] - x[1] - z[1] + x[9] * 38) & 0xFFFF;
+        r[10] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[10] + y[2] - x[2] - z[2] + x[10] * 38) & 0xFFFF;
+        r[11] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[11] + y[3] - x[3] - z[3] + x[11] * 38) & 0xFFFF;
+        r[12] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[12] + y[4] - x[4] - z[4] + x[12] * 38) & 0xFFFF;
+        r[13] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[13] + y[5] - x[5] - z[5] + x[13] * 38) & 0xFFFF;
+        r[14] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[14] + y[6] - x[6] - z[6] + x[14] * 38) & 0xFFFF;
+        var r15 = 0x7fff80 + ((v / 0x10000) | 0) + z[15] + y[7] - x[7] - z[7] + x[15] * 38;
         c255lreduce(r, r15);
     }
 
-    function c255lmul8h (a7, a6, a5, a4, a3, a2, a1, a0, b7, b6, b5, b4, b3, b2, b1, b0) {
+    function c255lmul8h(a7, a6, a5, a4, a3, a2, a1, a0, b7, b6, b5, b4, b3, b2, b1, b0) {
         var r = [];
         var v;
-        r[0] = (v = a0*b0) & 0xFFFF;
-        r[1] = (v = ((v / 0x10000) | 0) + a0*b1 + a1*b0) & 0xFFFF;
-        r[2] = (v = ((v / 0x10000) | 0) + a0*b2 + a1*b1 + a2*b0) & 0xFFFF;
-        r[3] = (v = ((v / 0x10000) | 0) + a0*b3 + a1*b2 + a2*b1 + a3*b0) & 0xFFFF;
-        r[4] = (v = ((v / 0x10000) | 0) + a0*b4 + a1*b3 + a2*b2 + a3*b1 + a4*b0) & 0xFFFF;
-        r[5] = (v = ((v / 0x10000) | 0) + a0*b5 + a1*b4 + a2*b3 + a3*b2 + a4*b1 + a5*b0) & 0xFFFF;
-        r[6] = (v = ((v / 0x10000) | 0) + a0*b6 + a1*b5 + a2*b4 + a3*b3 + a4*b2 + a5*b1 + a6*b0) & 0xFFFF;
-        r[7] = (v = ((v / 0x10000) | 0) + a0*b7 + a1*b6 + a2*b5 + a3*b4 + a4*b3 + a5*b2 + a6*b1 + a7*b0) & 0xFFFF;
-        r[8] = (v = ((v / 0x10000) | 0) + a1*b7 + a2*b6 + a3*b5 + a4*b4 + a5*b3 + a6*b2 + a7*b1) & 0xFFFF;
-        r[9] = (v = ((v / 0x10000) | 0) + a2*b7 + a3*b6 + a4*b5 + a5*b4 + a6*b3 + a7*b2) & 0xFFFF;
-        r[10] = (v = ((v / 0x10000) | 0) + a3*b7 + a4*b6 + a5*b5 + a6*b4 + a7*b3) & 0xFFFF;
-        r[11] = (v = ((v / 0x10000) | 0) + a4*b7 + a5*b6 + a6*b5 + a7*b4) & 0xFFFF;
-        r[12] = (v = ((v / 0x10000) | 0) + a5*b7 + a6*b6 + a7*b5) & 0xFFFF;
-        r[13] = (v = ((v / 0x10000) | 0) + a6*b7 + a7*b6) & 0xFFFF;
-        r[14] = (v = ((v / 0x10000) | 0) + a7*b7) & 0xFFFF;
+        r[0] = (v = a0 * b0) & 0xFFFF;
+        r[1] = (v = ((v / 0x10000) | 0) + a0 * b1 + a1 * b0) & 0xFFFF;
+        r[2] = (v = ((v / 0x10000) | 0) + a0 * b2 + a1 * b1 + a2 * b0) & 0xFFFF;
+        r[3] = (v = ((v / 0x10000) | 0) + a0 * b3 + a1 * b2 + a2 * b1 + a3 * b0) & 0xFFFF;
+        r[4] = (v = ((v / 0x10000) | 0) + a0 * b4 + a1 * b3 + a2 * b2 + a3 * b1 + a4 * b0) & 0xFFFF;
+        r[5] = (v = ((v / 0x10000) | 0) + a0 * b5 + a1 * b4 + a2 * b3 + a3 * b2 + a4 * b1 + a5 * b0) & 0xFFFF;
+        r[6] = (v = ((v / 0x10000) | 0) + a0 * b6 + a1 * b5 + a2 * b4 + a3 * b3 + a4 * b2 + a5 * b1 + a6 * b0) & 0xFFFF;
+        r[7] = (v = ((v / 0x10000) | 0) + a0 * b7 + a1 * b6 + a2 * b5 + a3 * b4 + a4 * b3 + a5 * b2 + a6 * b1 + a7 * b0) & 0xFFFF;
+        r[8] = (v = ((v / 0x10000) | 0) + a1 * b7 + a2 * b6 + a3 * b5 + a4 * b4 + a5 * b3 + a6 * b2 + a7 * b1) & 0xFFFF;
+        r[9] = (v = ((v / 0x10000) | 0) + a2 * b7 + a3 * b6 + a4 * b5 + a5 * b4 + a6 * b3 + a7 * b2) & 0xFFFF;
+        r[10] = (v = ((v / 0x10000) | 0) + a3 * b7 + a4 * b6 + a5 * b5 + a6 * b4 + a7 * b3) & 0xFFFF;
+        r[11] = (v = ((v / 0x10000) | 0) + a4 * b7 + a5 * b6 + a6 * b5 + a7 * b4) & 0xFFFF;
+        r[12] = (v = ((v / 0x10000) | 0) + a5 * b7 + a6 * b6 + a7 * b5) & 0xFFFF;
+        r[13] = (v = ((v / 0x10000) | 0) + a6 * b7 + a7 * b6) & 0xFFFF;
+        r[14] = (v = ((v / 0x10000) | 0) + a7 * b7) & 0xFFFF;
         r[15] = ((v / 0x10000) | 0);
         return r;
     }
 
-    function c255lmulmodp (r, a, b) {
+    function c255lmulmodp(r, a, b) {
         // Karatsuba multiplication scheme: x*y = (b^2+b)*x1*y1 - b*(x1-x0)*(y1-y0) + (b+1)*x0*y0
         var x = c255lmul8h(a[15], a[14], a[13], a[12], a[11], a[10], a[9], a[8], b[15], b[14], b[13], b[12], b[11], b[10], b[9], b[8]);
         var z = c255lmul8h(a[7], a[6], a[5], a[4], a[3], a[2], a[1], a[0], b[7], b[6], b[5], b[4], b[3], b[2], b[1], b[0]);
@@ -586,26 +590,26 @@ var curve25519 = function () {
             b[15] + b[7], b[14] + b[6], b[13] + b[5], b[12] + b[4], b[11] + b[3], b[10] + b[2], b[9] + b[1], b[8] + b[0]);
 
         var v;
-        r[0] = (v = 0x800000 + z[0] + (y[8] -x[8] -z[8] + x[0] -0x80) * 38) & 0xFFFF;
-        r[1] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[1] + (y[9] -x[9] -z[9] + x[1]) * 38) & 0xFFFF;
-        r[2] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[2] + (y[10] -x[10] -z[10] + x[2]) * 38) & 0xFFFF;
-        r[3] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[3] + (y[11] -x[11] -z[11] + x[3]) * 38) & 0xFFFF;
-        r[4] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[4] + (y[12] -x[12] -z[12] + x[4]) * 38) & 0xFFFF;
-        r[5] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[5] + (y[13] -x[13] -z[13] + x[5]) * 38) & 0xFFFF;
-        r[6] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[6] + (y[14] -x[14] -z[14] + x[6]) * 38) & 0xFFFF;
-        r[7] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[7] + (y[15] -x[15] -z[15] + x[7]) * 38) & 0xFFFF;
-        r[8] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[8] + y[0] -x[0] -z[0] + x[8] * 38) & 0xFFFF;
-        r[9] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[9] + y[1] -x[1] -z[1] + x[9] * 38) & 0xFFFF;
-        r[10] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[10] + y[2] -x[2] -z[2] + x[10] * 38) & 0xFFFF;
-        r[11] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[11] + y[3] -x[3] -z[3] + x[11] * 38) & 0xFFFF;
-        r[12] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[12] + y[4] -x[4] -z[4] + x[12] * 38) & 0xFFFF;
-        r[13] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[13] + y[5] -x[5] -z[5] + x[13] * 38) & 0xFFFF;
-        r[14] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[14] + y[6] -x[6] -z[6] + x[14] * 38) & 0xFFFF;
-        var r15 = 0x7fff80 + ((v / 0x10000) | 0) + z[15] + y[7] -x[7] -z[7] + x[15] * 38;
+        r[0] = (v = 0x800000 + z[0] + (y[8] - x[8] - z[8] + x[0] - 0x80) * 38) & 0xFFFF;
+        r[1] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[1] + (y[9] - x[9] - z[9] + x[1]) * 38) & 0xFFFF;
+        r[2] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[2] + (y[10] - x[10] - z[10] + x[2]) * 38) & 0xFFFF;
+        r[3] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[3] + (y[11] - x[11] - z[11] + x[3]) * 38) & 0xFFFF;
+        r[4] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[4] + (y[12] - x[12] - z[12] + x[4]) * 38) & 0xFFFF;
+        r[5] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[5] + (y[13] - x[13] - z[13] + x[5]) * 38) & 0xFFFF;
+        r[6] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[6] + (y[14] - x[14] - z[14] + x[6]) * 38) & 0xFFFF;
+        r[7] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[7] + (y[15] - x[15] - z[15] + x[7]) * 38) & 0xFFFF;
+        r[8] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[8] + y[0] - x[0] - z[0] + x[8] * 38) & 0xFFFF;
+        r[9] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[9] + y[1] - x[1] - z[1] + x[9] * 38) & 0xFFFF;
+        r[10] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[10] + y[2] - x[2] - z[2] + x[10] * 38) & 0xFFFF;
+        r[11] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[11] + y[3] - x[3] - z[3] + x[11] * 38) & 0xFFFF;
+        r[12] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[12] + y[4] - x[4] - z[4] + x[12] * 38) & 0xFFFF;
+        r[13] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[13] + y[5] - x[5] - z[5] + x[13] * 38) & 0xFFFF;
+        r[14] = (v = 0x7fff80 + ((v / 0x10000) | 0) + z[14] + y[6] - x[6] - z[6] + x[14] * 38) & 0xFFFF;
+        var r15 = 0x7fff80 + ((v / 0x10000) | 0) + z[15] + y[7] - x[7] - z[7] + x[15] * 38;
         c255lreduce(r, r15);
     }
 
-    function c255lreduce (a, a15) {
+    function c255lreduce(a, a15) {
         var v = a15;
         a[15] = v & 0x7FFF;
         v = ((v / 0x8000) | 0) * 19;
@@ -617,7 +621,7 @@ var curve25519 = function () {
         a[15] += v;
     }
 
-    function c255laddmodp (r, a, b) {
+    function c255laddmodp(r, a, b) {
         var v;
         r[0] = (v = (((a[15] / 0x8000) | 0) + ((b[15] / 0x8000) | 0)) * 19 + a[0] + b[0]) & 0xFFFF;
         for (var i = 1; i <= 14; ++i)
@@ -626,7 +630,7 @@ var curve25519 = function () {
         r[15] = ((v / 0x10000) | 0) + (a[15] & 0x7FFF) + (b[15] & 0x7FFF);
     }
 
-    function c255lsubmodp (r, a, b) {
+    function c255lsubmodp(r, a, b) {
         var v;
         r[0] = (v = 0x80000 + (((a[15] / 0x8000) | 0) - ((b[15] / 0x8000) | 0) - 1) * 19 + a[0] - b[0]) & 0xFFFF;
         for (var i = 1; i <= 14; ++i)
@@ -635,13 +639,13 @@ var curve25519 = function () {
         r[15] = ((v / 0x10000) | 0) + 0x7ff8 + (a[15] & 0x7FFF) - (b[15] & 0x7FFF);
     }
 
-    function c255lmulasmall (r, a, m) {
+    function c255lmulasmall(r, a, m) {
         var v;
         r[0] = (v = a[0] * m) & 0xFFFF;
         for (var i = 1; i <= 14; ++i)
-            r[i] = (v = ((v / 0x10000) | 0) + a[i]*m) & 0xFFFF;
+            r[i] = (v = ((v / 0x10000) | 0) + a[i] * m) & 0xFFFF;
 
-        var r15 = ((v / 0x10000) | 0) + a[15]*m;
+        var r15 = ((v / 0x10000) | 0) + a[15] * m;
         c255lreduce(r, r15);
     }
 
@@ -653,7 +657,7 @@ var curve25519 = function () {
 
     /* t1 = ax + az
      * t2 = ax - az  */
-    function mont_prep (t1, t2, ax, az) {
+    function mont_prep(t1, t2, ax, az) {
         add(t1, ax, az);
         sub(t2, ax, az);
     }
@@ -664,7 +668,7 @@ var curve25519 = function () {
      *  X(Q) = (t3+t4)/(t3-t4)
      *  X(P-Q) = dx
      * clobbers t1 and t2, preserves t3 and t4  */
-    function mont_add (t1, t2, t3, t4, ax, az, dx) {
+    function mont_add(t1, t2, t3, t4, ax, az, dx) {
         mul(ax, t2, t3);
         mul(az, t1, t4);
         add(t1, ax, az);
@@ -678,7 +682,7 @@ var curve25519 = function () {
      *  X(B) = bx/bz
      *  X(Q) = (t3+t4)/(t3-t4)
      * clobbers t1 and t2, preserves t3 and t4  */
-    function mont_dbl (t1, t2, t3, t4, bx, bz) {
+    function mont_dbl(t1, t2, t3, t4, bx, bz) {
         sqr(t1, t3);
         sqr(t2, t4);
         mul(bx, t1, t2);
@@ -690,7 +694,7 @@ var curve25519 = function () {
 
     /* Y^2 = X^3 + 486662 X^2 + X
      * t is a temporary  */
-    function x_to_y2 (t, y2, x) {
+    function x_to_y2(t, y2, x) {
         sqr(t, x);
         mul_small(y2, x, 486662);
         add(t, t, y2);
@@ -699,7 +703,7 @@ var curve25519 = function () {
     }
 
     /* P = kG   and  s = sign(P)/k  */
-    function core (Px, s, k, Gx) {
+    function core(Px, s, k, Gx) {
         var dx = createUnpackedArray();
         var t1 = createUnpackedArray();
         var t2 = createUnpackedArray();
@@ -826,7 +830,7 @@ var curve25519 = function () {
      * returns signature value on success, undefined on failure (use different x or h)
      */
 
-    function sign (h, x, s) {
+    function sign(h, x, s) {
         // v = (x - h) s  mod q
         var w, i;
         var h1 = new Array(32)
@@ -849,7 +853,7 @@ var curve25519 = function () {
         // when adding the order because v < ORDER and 2*ORDER < 2^256
         var v = new Array(32);
         mula_small(v, x1, 0, h1, 32, -1);
-        mula_small(v, v , 0, ORDER, 32, 1);
+        mula_small(v, v, 0, ORDER, 32, 1);
 
         // tmp1 = (x-h)*s mod q
         mula32(tmp1, v, s, 32, 1);
@@ -867,7 +871,7 @@ var curve25519 = function () {
      *   P  [in]  public key
      *   Returns signature public key
      */
-    function verify (v, h, P) {
+    function verify(v, h, P) {
         /* Y = v abs(P) + h G  */
         var d = new Array(32);
         var p = [createUnpackedArray(), createUnpackedArray()];
@@ -985,7 +989,7 @@ var curve25519 = function () {
      * s may be NULL if you don't care
      *
      * WARNING: if s is not NULL, this function has data-dependent timing */
-    function keygen (k) {
+    function keygen(k) {
         var P = [];
         var s = [];
         k = k || [];
@@ -1013,7 +1017,7 @@ const cryptoUtil = require('./crypto-util');
 const GMD = { baseURL: 'https://node.thecoopnetwork.io' };
 
 /**
- * 
+ *
  * @param {String} url of the GMD node. By default main net 'https://node.thecoopnetwork.io' is used.
  */
 GMD.setURL = (url) => {
@@ -1021,7 +1025,7 @@ GMD.setURL = (url) => {
 }
 
 /**
- * 
+ *
  * @param {String} unsignedTransaction bytes as hex string.
  * @param {String} passPhrase usually 12 word passphrase
  * @returns Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
@@ -1032,41 +1036,45 @@ GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
 }
 
 /**
- * 
- * @param {JSON} data Transaction data JSON input. 
+ *
+ * @param {JSON} data Transaction data JSON input.
  * @returns boolean: true if JSON input contains properties "transactionJSON" and "unsignedTransactionBytes", false otherise.
  */
 GMD.isTransaction = (data) => {
     return data &&
-        data.hasOwnProperty('transactionJSON') &&
-        data.hasOwnProperty('unsignedTransactionBytes');
+        hasProperty(data, 'transactionJSON') &&
+        hasProperty(data, 'unsignedTransactionBytes');
+}
+
+const hasProperty = (obj, key) => {
+    return Object.prototype.hasOwnProperty.call(obj, key);
 }
 
 /**
- * 
- * @param {JSON} data Transaction data JSON input. 
+ *
+ * @param {JSON} data Transaction data JSON input.
  * @returns boolean: true if json represents transaction and contains "signatureHash" and "fullHash" properties.
  */
 GMD.isSignedTransactionResponse = (data) => {
     return GMD.isTransaction(data) &&
-        data.hasOwnProperty('signatureHash') &&
-        data.hasOwnProperty('fullHash');
+        hasProperty(data, 'signatureHash') &&
+        hasProperty(data, 'fullHash');
 };
 
 /**
- *  API call to a GMD node. This call is done over network. 
- 
- *  
- * 
+ *  API call to a GMD node. This call is done over network.
+
+ *
+ *
  * @param {String} method HTTP method (only 'get' or 'post' are used)
- * @param {JSON} params *  Full set of API methods and parameters can be seen here: https://node.thecoopnetwork.io/test. 
+ * @param {JSON} params *  Full set of API methods and parameters can be seen here: https://node.thecoopnetwork.io/test.
  *  All parameters will be passed as a single json via 'params' parameter. Exception to this is 'secretPhrase' parameter which
  * should not be included in params, and even if you include it, the SDK will delete it before making the API call to the node.
  *  In addition to all parameters described above there are the following parameters:
  *  'requestType': [mandatory] wich is the name of the GMD API method (e.g. 'sendMoney', 'sendMessage', 'getPolls' etc..)
  *  'baseURL': [optional] URL of the GMD node where this request is performed. By default https://node.thecoopnetwork.io main net is used.
  *  'httpTimeout' [optional] parameter for HTTP request to specify a timeout when GMD node not reachable. Axios default is used if this param is not specified.
- *  Example: 
+ *  Example:
  *  params = {
         requestType: 'getAccountsBulk',
         pageSize: 3,
@@ -1076,8 +1084,8 @@ GMD.isSignedTransactionResponse = (data) => {
  * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
  */
 GMD.apiCall = async (method, params) => {
-    let { url, httpTimeout } = processParams(params);
-    config = { method: method, url: url + '/nxt?' + (new URLSearchParams(params)).toString() };
+    const { url, httpTimeout } = processParams(params);
+    const config = { method, url: url + '/nxt?' + (new URLSearchParams(params)).toString() };
     if (httpTimeout && httpTimeout > 0) {
         config.httpTimeout = httpTimeout;
     }
@@ -1097,27 +1105,26 @@ GMD.apiCall = async (method, params) => {
  * @returns Promise that will resove to a JSON with the returned details of the broadcasted transaction.
  */
 GMD.apiCallAndSign = async (method, params, passPhrase) => {
-    let transaction = await GMD.apiCall(method, params);
-    console.log('==============1 ' + transaction);
+    const transaction = await GMD.apiCall(method, params);
     if (GMD.isTransaction(transaction) && !GMD.isSignedTransactionResponse(transaction) && passPhrase) {
-        let signedTransaction = await GMD.signTransaction(transaction.unsignedTransactionBytes, passPhrase);
+        const signedTransaction = await GMD.signTransaction(transaction.unsignedTransactionBytes, passPhrase);
         return GMD.broadcastSignedTransaction(signedTransaction);
     }
 }
 
-processParams = (params) => {
+const processParams = (params) => {
     let url;
     let httpTimeout;
     if (params) {
-        if (params.hasOwnProperty('secretPhrase')) {
-            delete params.secretPhrase; //password is not sent to server - remove it from params - it is needed only to do local signing
+        if (hasProperty(params, 'secretPhrase')) {
+            delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
         }
-        if (params.hasOwnProperty('httpTimeout')) {
+        if (hasProperty(params, 'httpTimeout')) {
             httpTimeout = params.httpTimeout;
             delete params.httpTimeout;
         }
 
-        if (params.hasOwnProperty('baseURL')) {
+        if (hasProperty(params, 'baseURL')) {
             url = params.baseURL;
             delete params.baseURL;
         } else {
@@ -1129,7 +1136,7 @@ processParams = (params) => {
 
 /**
  * Cryptographic transform of a secret to a public key. No request is sent, transformation happens locally.
- * 
+ *
  * @param {String} pass  - secret passphrase, usually 12 words.
  * @returns - public key, hex string format
  */
@@ -1137,9 +1144,7 @@ GMD.getPublicKey = async (pass) => {
     return crypto.getPublicKey(crypto.strToHex(pass));
 }
 
-
-
-//Helper functions
+// Helper functions
 
 /**
  * Helper function to broadcast a signed transaction
@@ -1155,25 +1160,24 @@ GMD.broadcastSignedTransaction = (signedTransaction) => {
 }
 
 /**
- * 
+ *
  * @param {String} publicKey Public key in hex string format
  * @returns Promise that will resove to a json with account details: acount id, RS account id and public key.
  */
 GMD.getAccountId = (publicKey) => {
-    return GMD.apiCall('get', { requestType: 'getAccountId', publicKey: publicKey });
+    return GMD.apiCall('get', { requestType: 'getAccountId', publicKey });
 }
 
 /**
- *  Getting public key from RS account is not cryptographically possible. 
- * However, the mapping RS account <-> public key is available on the node if this account exists on the chain 
+ *  Getting public key from RS account is not cryptographically possible.
+ * However, the mapping RS account <-> public key is available on the node if this account exists on the chain
  * (if at least one transaction has been made).
  */
 GMD.getPublicKeyFromRS = (rsAccount) => {
     return GMD.apiCall('get', { requestType: 'getAccountPublicKey', account: rsAccount }).then(data => {
         return data.publicKey;
-    })
+    });
 }
-
 
 /**
  * Generate full GMD account.
@@ -1190,7 +1194,7 @@ GMD.generateAccount = async (secretPassphrase) => {
 }
 
 /**
- * 
+ *
  * @param {*} secretPassphrase is transformed to a public key and that key is sent to a node to get the account id details.
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, secret passphrase.
  */
@@ -1200,27 +1204,27 @@ GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
         return data;
-    });
-}
-
-/**
- * 
- * @param {*} rsAccount 
- * @returns true if RS account checsum and format is checks out, false is invalid address. Actual check is done remotely on a Coop Network Node, so lack of connectivity will result in error thrown.
- */
-GMD.checkRSAddress = async (rsAccount) => {
-    return GMD.apiCall('get', { requestType: 'rsConvert', account: rsAccount }).then(data => {
-        return data.hasOwnProperty('accountLongId');
     })
 }
 
 /**
- * Returns a promise that will resolve to a balanceNQT 
+ *
+ * @param {*} rsAccount
+ * @returns true if RS account checsum and format is checks out, false is invalid address. Actual check is done remotely on a Coop Network Node, so lack of connectivity will result in error thrown.
+ */
+GMD.checkRSAddress = async (rsAccount) => {
+    return GMD.apiCall('get', { requestType: 'rsConvert', account: rsAccount }).then(data => {
+        return hasProperty(data, 'accountLongId');
+    })
+}
+
+/**
+ * Returns a promise that will resolve to a balanceNQT
  */
 GMD.getBalance = async (rsAccount) => {
     return GMD.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => {
         return data.balanceNQT;
-    });
+    })
 }
 
 /**
@@ -1228,7 +1232,7 @@ GMD.getBalance = async (rsAccount) => {
  * 1. Creates an unsigned transaction for sending GMD by calling appropriate API on the node.
  * 2. Waits for the transaction created on step 1 to be received from the node and signs it locally.
  * 3. Broadcasts to the GMD nodes the signed transaction.
- * 
+ *
  * @param {String} recipient RS destination account ('GMD-...' format)
  * @param {String} amountNQT Amount to be transfered in NQT. 1 GMD = 100000000 NQT.
  * @param {String} passPhrase Secret passphrase, used for step 2, local signing.
@@ -1246,8 +1250,8 @@ GMD.sendMoney = (recipient, amountNQT, passPhrase, feeNQT) => {
  * @param {String} amountNQT same as GMD.sendMoney()
  * @param {String} senderPublicKey sender public key.
  * @param {String} feeNQT same as GMD.sendMoney()
- * @returns Promise that resolves to a transaction JSON. If signing on other device, create a QR code with the string found in 
- * transaction.unsignedTransactionBytes property. This string may be signed on the other device with GMD.signTransaction() (assuming 
+ * @returns Promise that resolves to a transaction JSON. If signing on other device, create a QR code with the string found in
+ * transaction.unsignedTransactionBytes property. This string may be signed on the other device with GMD.signTransaction() (assuming
  * the other device uses this SDK)
  */
 GMD.createUnsignedSendMoneyTransaction = (recipient, amountNQT, senderPublicKey, feeNQT) => {
@@ -1255,34 +1259,32 @@ GMD.createUnsignedSendMoneyTransaction = (recipient, amountNQT, senderPublicKey,
 }
 
 const sendMoneyAPICall = async (signIt, recipient, amountNQT, from, feeNQT) => {
-    params = {
+    const params = {
         requestType: 'sendMoney',
-        recipient: recipient,
-        amountNQT: amountNQT,
-        feeNQT: feeNQT,
+        recipient,
+        amountNQT,
+        feeNQT,
         deadline: '1440'
-    }
+    };
 
     if (signIt) {
         params.publicKey = await GMD.getPublicKey(from);
     } else {
         params.publicKey = from;
     }
-    let transaction = await GMD.apiCall('post', params);
+    const transaction = await GMD.apiCall('post', params);
     if (signIt) {
         if (GMD.isTransaction(transaction) && !GMD.isSignedTransactionResponse(transaction) && from) {
-            let signedTransaction = await GMD.signTransaction(transaction.unsignedTransactionBytes, from);
+            const signedTransaction = await GMD.signTransaction(transaction.unsignedTransactionBytes, from);
             return GMD.broadcastSignedTransaction(signedTransaction);
         }
     } else {
         return transaction;
     }
-
 }
 
-
-
 module.exports = GMD;
+
 },{"./crypto-util":4,"./get-axios":1,"./pass-gen":9}],7:[function(require,module,exports){
 const GMD = require('./gmd-crypto')
 const GMDEvents = {
@@ -1315,11 +1317,11 @@ GMDEvents.ALL_EVENTS = GMDEvents.BLOCK_EVENTS.concat(GMDEvents.PEER_EVENTS).conc
 
 let eventListeners = [];
 
-GMDEvents.registerEventListener = async (listener, errorHandler) => {
+GMDEvents.registerEventListener = async (listener) => {
 
-    initialLen = eventListeners.length;
-    id = Math.floor(Math.random() * 10000000000000000);
-    count = eventListeners.push({ listener: listener, id: id });
+    let initialLen = eventListeners.length;
+    let id = Math.floor(Math.random() * 10000000000000000);
+    let count = eventListeners.push({ listener: listener, id: id });
     if (initialLen == 0 && count == 1) {
         await new Promise(resolve => setTimeout(resolve, 3000));
         startListening(id);
@@ -1345,7 +1347,7 @@ const eventWait = async () => {
     while (eventListeners.length > 0) {
         GMD.apiCall('post', { requestType: 'eventWait' }).then((res) => {
             console.log("event wait response: " + JSON.stringify(res, null, 2));
-            if (res.hasOwnProperty('errorCode') && res.errorCode == 8) {
+            if (Object.prototype.hasOwnProperty.call(res, 'errorCode') && res.errorCode == 8) {
                 console.log('No events registered');
                 eventListeners.pop();
             }
@@ -1356,7 +1358,7 @@ const eventWait = async () => {
 }
 
 GMDEvents.unRegisterEventListener = (id) => {
-    tempListeners = eventListeners.filter(el => el.id !== id);
+    let tempListeners = eventListeners.filter(el => el.id !== id);
     eventListeners = tempListeners;
     console.log('trying to remove listener. new listener size: ' + eventListeners.length)
 }
@@ -1375,7 +1377,7 @@ module.exports = {
 
 const words = ["like", "just", "love", "know", "never", "want", "time", "out", "there", "make", "look", "eye", "down", "only", "think", "heart", "back", "then", "into", "about", "more", "away", "still", "them", "take", "thing", "even", "through", "long", "always", "world", "too", "friend", "tell", "try", "hand", "thought", "over", "here", "other", "need", "smile", "again", "much", "cry", "been", "night", "ever", "little", "said", "end", "some", "those", "around", "mind", "people", "girl", "leave", "dream", "left", "turn", "myself", "give", "nothing", "really", "off", "before", "something", "find", "walk", "wish", "good", "once", "place", "ask", "stop", "keep", "watch", "seem", "everything", "wait", "got", "yet", "made", "remember", "start", "alone", "run", "hope", "maybe", "believe", "body", "hate", "after", "close", "talk", "stand", "own", "each", "hurt", "help", "home", "god", "soul", "new", "many", "two", "inside", "should", "true", "first", "fear", "mean", "better", "play", "another", "gone", "change", "use", "wonder", "someone", "hair", "cold", "open", "best", "any", "behind", "happen", "water", "dark", "laugh", "stay", "forever", "name", "work", "show", "sky", "break", "came", "deep", "door", "put", "black", "together", "upon", "happy", "such", "great", "white", "matter", "fill", "past", "please", "burn", "cause", "enough", "touch", "moment", "soon", "voice", "scream", "anything", "stare", "sound", "red", "everyone", "hide", "kiss", "truth", "death", "beautiful", "mine", "blood", "broken", "very", "pass", "next", "forget", "tree", "wrong", "air", "mother", "understand", "lip", "hit", "wall", "memory", "sleep", "free", "high", "realize", "school", "might", "skin", "sweet", "perfect", "blue", "kill", "breath", "dance", "against", "fly", "between", "grow", "strong", "under", "listen", "bring", "sometimes", "speak", "pull", "person", "become", "family", "begin", "ground", "real", "small", "father", "sure", "feet", "rest", "young", "finally", "land", "across", "today", "different", "guy", "line", "fire", "reason", "reach", "second", "slowly", "write", "eat", "smell", "mouth", "step", "learn", "three", "floor", "promise", "breathe", "darkness", "push", "earth", "guess", "save", "song", "above", "along", "both", "color", "house", "almost", "sorry", "anymore", "brother", "okay", "dear", "game", "fade", "already", "apart", "warm", "beauty", "heard", "notice", "question", "shine", "began", "piece", "whole", "shadow", "secret", "street", "within", "finger", "point", "morning", "whisper", "child", "moon", "green", "story", "glass", "kid", "silence", "since", "soft", "yourself", "empty", "shall", "angel", "answer", "baby", "bright", "dad", "path", "worry", "hour", "drop", "follow", "power", "war", "half", "flow", "heaven", "act", "chance", "fact", "least", "tired", "children", "near", "quite", "afraid", "rise", "sea", "taste", "window", "cover", "nice", "trust", "lot", "sad", "cool", "force", "peace", "return", "blind", "easy", "ready", "roll", "rose", "drive", "held", "music", "beneath", "hang", "mom", "paint", "emotion", "quiet", "clear", "cloud", "few", "pretty", "bird", "outside", "paper", "picture", "front", "rock", "simple", "anyone", "meant", "reality", "road", "sense", "waste", "bit", "leaf", "thank", "happiness", "meet", "men", "smoke", "truly", "decide", "self", "age", "book", "form", "alive", "carry", "escape", "damn", "instead", "able", "ice", "minute", "throw", "catch", "leg", "ring", "course", "goodbye", "lead", "poem", "sick", "corner", "desire", "known", "problem", "remind", "shoulder", "suppose", "toward", "wave", "drink", "jump", "woman", "pretend", "sister", "week", "human", "joy", "crack", "grey", "pray", "surprise", "dry", "knee", "less", "search", "bleed", "caught", "clean", "embrace", "future", "king", "son", "sorrow", "chest", "hug", "remain", "sat", "worth", "blow", "daddy", "final", "parent", "tight", "also", "create", "lonely", "safe", "cross", "dress", "evil", "silent", "bone", "fate", "perhaps", "anger", "class", "scar", "snow", "tiny", "tonight", "continue", "control", "dog", "edge", "mirror", "month", "suddenly", "comfort", "given", "loud", "quickly", "gaze", "plan", "rush", "stone", "town", "battle", "ignore", "spirit", "stood", "stupid", "yours", "brown", "build", "dust", "hey", "kept", "pay", "phone", "twist", "although", "ball", "beyond", "hidden", "nose", "taken", "fail", "float", "pure", "somehow", "wash", "wrap", "angry", "cheek", "creature", "forgotten", "heat", "rip", "single", "space", "special", "weak", "whatever", "yell", "anyway", "blame", "job", "choose", "country", "curse", "drift", "echo", "figure", "grew", "laughter", "neck", "suffer", "worse", "yeah", "disappear", "foot", "forward", "knife", "mess", "somewhere", "stomach", "storm", "beg", "idea", "lift", "offer", "breeze", "field", "five", "often", "simply", "stuck", "win", "allow", "confuse", "enjoy", "except", "flower", "seek", "strength", "calm", "grin", "gun", "heavy", "hill", "large", "ocean", "shoe", "sigh", "straight", "summer", "tongue", "accept", "crazy", "everyday", "exist", "grass", "mistake", "sent", "shut", "surround", "table", "ache", "brain", "destroy", "heal", "nature", "shout", "sign", "stain", "choice", "doubt", "glance", "glow", "mountain", "queen", "stranger", "throat", "tomorrow", "city", "either", "fish", "flame", "rather", "shape", "spin", "spread", "ash", "distance", "finish", "image", "imagine", "important", "nobody", "shatter", "warmth", "became", "feed", "flesh", "funny", "lust", "shirt", "trouble", "yellow", "attention", "bare", "bite", "money", "protect", "amaze", "appear", "born", "choke", "completely", "daughter", "fresh", "friendship", "gentle", "probably", "six", "deserve", "expect", "grab", "middle", "nightmare", "river", "thousand", "weight", "worst", "wound", "barely", "bottle", "cream", "regret", "relationship", "stick", "test", "crush", "endless", "fault", "itself", "rule", "spill", "art", "circle", "join", "kick", "mask", "master", "passion", "quick", "raise", "smooth", "unless", "wander", "actually", "broke", "chair", "deal", "favorite", "gift", "note", "number", "sweat", "box", "chill", "clothes", "lady", "mark", "park", "poor", "sadness", "tie", "animal", "belong", "brush", "consume", "dawn", "forest", "innocent", "pen", "pride", "stream", "thick", "clay", "complete", "count", "draw", "faith", "press", "silver", "struggle", "surface", "taught", "teach", "wet", "bless", "chase", "climb", "enter", "letter", "melt", "metal", "movie", "stretch", "swing", "vision", "wife", "beside", "crash", "forgot", "guide", "haunt", "joke", "knock", "plant", "pour", "prove", "reveal", "steal", "stuff", "trip", "wood", "wrist", "bother", "bottom", "crawl", "crowd", "fix", "forgive", "frown", "grace", "loose", "lucky", "party", "release", "surely", "survive", "teacher", "gently", "grip", "speed", "suicide", "travel", "treat", "vein", "written", "cage", "chain", "conversation", "date", "enemy", "however", "interest", "million", "page", "pink", "proud", "sway", "themselves", "winter", "church", "cruel", "cup", "demon", "experience", "freedom", "pair", "pop", "purpose", "respect", "shoot", "softly", "state", "strange", "bar", "birth", "curl", "dirt", "excuse", "lord", "lovely", "monster", "order", "pack", "pants", "pool", "scene", "seven", "shame", "slide", "ugly", "among", "blade", "blonde", "closet", "creek", "deny", "drug", "eternity", "gain", "grade", "handle", "key", "linger", "pale", "prepare", "swallow", "swim", "tremble", "wheel", "won", "cast", "cigarette", "claim", "college", "direction", "dirty", "gather", "ghost", "hundred", "loss", "lung", "orange", "present", "swear", "swirl", "twice", "wild", "bitter", "blanket", "doctor", "everywhere", "flash", "grown", "knowledge", "numb", "pressure", "radio", "repeat", "ruin", "spend", "unknown", "buy", "clock", "devil", "early", "false", "fantasy", "pound", "precious", "refuse", "sheet", "teeth", "welcome", "add", "ahead", "block", "bury", "caress", "content", "depth", "despite", "distant", "marry", "purple", "threw", "whenever", "bomb", "dull", "easily", "grasp", "hospital", "innocence", "normal", "receive", "reply", "rhyme", "shade", "someday", "sword", "toe", "visit", "asleep", "bought", "center", "consider", "flat", "hero", "history", "ink", "insane", "muscle", "mystery", "pocket", "reflection", "shove", "silently", "smart", "soldier", "spot", "stress", "train", "type", "view", "whether", "bus", "energy", "explain", "holy", "hunger", "inch", "magic", "mix", "noise", "nowhere", "prayer", "presence", "shock", "snap", "spider", "study", "thunder", "trail", "admit", "agree", "bag", "bang", "bound", "butterfly", "cute", "exactly", "explode", "familiar", "fold", "further", "pierce", "reflect", "scent", "selfish", "sharp", "sink", "spring", "stumble", "universe", "weep", "women", "wonderful", "action", "ancient", "attempt", "avoid", "birthday", "branch", "chocolate", "core", "depress", "drunk", "especially", "focus", "fruit", "honest", "match", "palm", "perfectly", "pillow", "pity", "poison", "roar", "shift", "slightly", "thump", "truck", "tune", "twenty", "unable", "wipe", "wrote", "coat", "constant", "dinner", "drove", "egg", "eternal", "flight", "flood", "frame", "freak", "gasp", "glad", "hollow", "motion", "peer", "plastic", "root", "screen", "season", "sting", "strike", "team", "unlike", "victim", "volume", "warn", "weird", "attack", "await", "awake", "built", "charm", "crave", "despair", "fought", "grant", "grief", "horse", "limit", "message", "ripple", "sanity", "scatter", "serve", "split", "string", "trick", "annoy", "blur", "boat", "brave", "clearly", "cling", "connect", "fist", "forth", "imagination", "iron", "jock", "judge", "lesson", "milk", "misery", "nail", "naked", "ourselves", "poet", "possible", "princess", "sail", "size", "snake", "society", "stroke", "torture", "toss", "trace", "wise", "bloom", "bullet", "cell", "check", "cost", "darling", "during", "footstep", "fragile", "hallway", "hardly", "horizon", "invisible", "journey", "midnight", "mud", "nod", "pause", "relax", "shiver", "sudden", "value", "youth", "abuse", "admire", "blink", "breast", "bruise", "constantly", "couple", "creep", "curve", "difference", "dumb", "emptiness", "gotta", "honor", "plain", "planet", "recall", "rub", "ship", "slam", "soar", "somebody", "tightly", "weather", "adore", "approach", "bond", "bread", "burst", "candle", "coffee", "cousin", "crime", "desert", "flutter", "frozen", "grand", "heel", "hello", "language", "level", "movement", "pleasure", "powerful", "random", "rhythm", "settle", "silly", "slap", "sort", "spoken", "steel", "threaten", "tumble", "upset", "aside", "awkward", "bee", "blank", "board", "button", "card", "carefully", "complain", "crap", "deeply", "discover", "drag", "dread", "effort", "entire", "fairy", "giant", "gotten", "greet", "illusion", "jeans", "leap", "liquid", "march", "mend", "nervous", "nine", "replace", "rope", "spine", "stole", "terror", "accident", "apple", "balance", "boom", "childhood", "collect", "demand", "depression", "eventually", "faint", "glare", "goal", "group", "honey", "kitchen", "laid", "limb", "machine", "mere", "mold", "murder", "nerve", "painful", "poetry", "prince", "rabbit", "shelter", "shore", "shower", "soothe", "stair", "steady", "sunlight", "tangle", "tease", "treasure", "uncle", "begun", "bliss", "canvas", "cheer", "claw", "clutch", "commit", "crimson", "crystal", "delight", "doll", "existence", "express", "fog", "football", "gay", "goose", "guard", "hatred", "illuminate", "mass", "math", "mourn", "rich", "rough", "skip", "stir", "student", "style", "support", "thorn", "tough", "yard", "yearn", "yesterday", "advice", "appreciate", "autumn", "bank", "beam", "bowl", "capture", "carve", "collapse", "confusion", "creation", "dove", "feather", "girlfriend", "glory", "government", "harsh", "hop", "inner", "loser", "moonlight", "neighbor", "neither", "peach", "pig", "praise", "screw", "shield", "shimmer", "sneak", "stab", "subject", "throughout", "thrown", "tower", "twirl", "wow", "army", "arrive", "bathroom", "bump", "cease", "cookie", "couch", "courage", "dim", "guilt", "howl", "hum", "husband", "insult", "led", "lunch", "mock", "mostly", "natural", "nearly", "needle", "nerd", "peaceful", "perfection", "pile", "price", "remove", "roam", "sanctuary", "serious", "shiny", "shook", "sob", "stolen", "tap", "vain", "void", "warrior", "wrinkle", "affection", "apologize", "blossom", "bounce", "bridge", "cheap", "crumble", "decision", "descend", "desperately", "dig", "dot", "flip", "frighten", "heartbeat", "huge", "lazy", "lick", "odd", "opinion", "process", "puzzle", "quietly", "retreat", "score", "sentence", "separate", "situation", "skill", "soak", "square", "stray", "taint", "task", "tide", "underneath", "veil", "whistle", "anywhere", "bedroom", "bid", "bloody", "burden", "careful", "compare", "concern", "curtain", "decay", "defeat", "describe", "double", "dreamer", "driver", "dwell", "evening", "flare", "flicker", "grandma", "guitar", "harm", "horrible", "hungry", "indeed", "lace", "melody", "monkey", "nation", "object", "obviously", "rainbow", "salt", "scratch", "shown", "shy", "stage", "stun", "third", "tickle", "useless", "weakness", "worship", "worthless", "afternoon", "beard", "boyfriend", "bubble", "busy", "certain", "chin", "concrete", "desk", "diamond", "doom", "drawn", "due", "felicity", "freeze", "frost", "garden", "glide", "harmony", "hopefully", "hunt", "jealous", "lightning", "mama", "mercy", "peel", "physical", "position", "pulse", "punch", "quit", "rant", "respond", "salty", "sane", "satisfy", "savior", "sheep", "slept", "social", "sport", "tuck", "utter", "valley", "wolf", "aim", "alas", "alter", "arrow", "awaken", "beaten", "belief", "brand", "ceiling", "cheese", "clue", "confidence", "connection", "daily", "disguise", "eager", "erase", "essence", "everytime", "expression", "fan", "flag", "flirt", "foul", "fur", "giggle", "glorious", "ignorance", "law", "lifeless", "measure", "mighty", "muse", "north", "opposite", "paradise", "patience", "patient", "pencil", "petal", "plate", "ponder", "possibly", "practice", "slice", "spell", "stock", "strife", "strip", "suffocate", "suit", "tender", "tool", "trade", "velvet", "verse", "waist", "witch", "aunt", "bench", "bold", "cap", "certainly", "click", "companion", "creator", "dart", "delicate", "determine", "dish", "dragon", "drama", "drum", "dude", "everybody", "feast", "forehead", "former", "fright", "fully", "gas", "hook", "hurl", "invite", "juice", "manage", "moral", "possess", "raw", "rebel", "royal", "scale", "scary", "several", "slight", "stubborn", "swell", "talent", "tea", "terrible", "thread", "torment", "trickle", "usually", "vast", "violence", "weave", "acid", "agony", "ashamed", "awe", "belly", "blend", "blush", "character", "cheat", "common", "company", "coward", "creak", "danger", "deadly", "defense", "define", "depend", "desperate", "destination", "dew", "duck", "dusty", "embarrass", "engine", "example", "explore", "foe", "freely", "frustrate", "generation", "glove", "guilty", "health", "hurry", "idiot", "impossible", "inhale", "jaw", "kingdom", "mention", "mist", "moan", "mumble", "mutter", "observe", "ode", "pathetic", "pattern", "pie", "prefer", "puff", "rape", "rare", "revenge", "rude", "scrape", "spiral", "squeeze", "strain", "sunset", "suspend", "sympathy", "thigh", "throne", "total", "unseen", "weapon", "weary"];
 
-PassPhraseGenerator = {}
+const PassPhraseGenerator = {}
 
 PassPhraseGenerator.generatePass = (numberOfWords) => {
     const crypto = require('./get-crypto');
@@ -1392,11 +1394,6 @@ PassPhraseGenerator.generatePass = (numberOfWords) => {
     crypto.getRandomValues(rndArray);
     return passPhrase.join(" ");
 };
-
-
-
-
-
 
 module.exports = PassPhraseGenerator;
 

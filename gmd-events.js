@@ -29,11 +29,11 @@ GMDEvents.ALL_EVENTS = GMDEvents.BLOCK_EVENTS.concat(GMDEvents.PEER_EVENTS).conc
 
 let eventListeners = [];
 
-GMDEvents.registerEventListener = async (listener, errorHandler) => {
+GMDEvents.registerEventListener = async (listener) => {
 
-    initialLen = eventListeners.length;
-    id = Math.floor(Math.random() * 10000000000000000);
-    count = eventListeners.push({ listener: listener, id: id });
+    let initialLen = eventListeners.length;
+    let id = Math.floor(Math.random() * 10000000000000000);
+    let count = eventListeners.push({ listener: listener, id: id });
     if (initialLen == 0 && count == 1) {
         await new Promise(resolve => setTimeout(resolve, 3000));
         startListening(id);
@@ -59,7 +59,7 @@ const eventWait = async () => {
     while (eventListeners.length > 0) {
         GMD.apiCall('post', { requestType: 'eventWait' }).then((res) => {
             console.log("event wait response: " + JSON.stringify(res, null, 2));
-            if (res.hasOwnProperty('errorCode') && res.errorCode == 8) {
+            if (Object.prototype.hasOwnProperty.call(res, 'errorCode') && res.errorCode == 8) {
                 console.log('No events registered');
                 eventListeners.pop();
             }
@@ -70,7 +70,7 @@ const eventWait = async () => {
 }
 
 GMDEvents.unRegisterEventListener = (id) => {
-    tempListeners = eventListeners.filter(el => el.id !== id);
+    let tempListeners = eventListeners.filter(el => el.id !== id);
     eventListeners = tempListeners;
     console.log('trying to remove listener. new listener size: ' + eventListeners.length)
 }

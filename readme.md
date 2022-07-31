@@ -5,6 +5,7 @@
 - Offers helper functions to easily call Coop Networl node API.
 - This SDK was initially designed for NodeJS. For running it in browser please see browser directory
   - please read browser/readme.md and browser/index.html example
+- For more API details please read comments in gmd-crypto.js file.
 
 ### Instructions
 - To run tests: 
@@ -17,7 +18,7 @@
   npm install gmd-nodejs-sdk
   ```
 
-#### For browser usage please .
+##### For browser usage please see browser directory readme.md and index.html example.
 
 ### Examples on hot to call the GMD node API
 - For a complete list of API methods and their exact parameters you can see them on any node in a browser at address <GMD node address>/test (e.g. https://node.thecoopnetwork.io/test )
@@ -34,45 +35,34 @@ GMD.setURL('https://node2.thecoopnetwork.io')
 
 ```
 require('node-cron').schedule('0,15,30,45 * * * *', () => {
-  const dataSendMoney = {
-    requestType: 'sendMoney',
-    recipient: 'GMD-43MP-76UW-L69N-ALW39',
-    amountNQT: '10000000000',
-    secretPhrase: 'my secret passphrase that will not be sent on the wire but only be used for local signing',
-    feeNQT: '1000000000',
-    deadline: '15'
-  };
-
-  GMD.apiCall('post', dataSendMoney, (res)=> {
-    console.log('This is a callback example. Data received back on api calls:\n'+JSON.stringify(res, null, 2));
-  });
+  GMD.sendMoney('GMD-43MP-76UW-L69N-ALW39', '200000', 'my secret passphrase that will not be sent on the wire but only be used for local    signing', '100000000');
 });
 ```
 
 - Getting last transactions:
     - optional parameters allow filtering by transaction type, subtype, sender or receiver.
 ```
-const paramsGetTransactions = { 
-    requestType: 'getTransactionsBulk',
-    pageSize: 5,
-    page: 0
-}
-GMD.apiCall('get', paramsGetTransactions, (res)=>{
-    console.log('Result trasnactions: \n'+JSON.stringify(res, null, 2));
-})
+  paramsGetTransactions = {
+      requestType: 'getTransactionsBulk',
+      pageSize: 3,
+      page: 0
+  }
+  GMD.apiCall('get', paramsGetTransactions, (res) => {
+      console.log('Result trasnactions: \n' + JSON.stringify(res, null, 2));
+  })
 ```
 - Getting accounts (ordered by balance):
 - Example of specifying a GMD node in the request:
 ```
-const paramsGetAccounts = {
-    requestType: 'getAccountsBulk',
-    pageSize: 5,
-    page: 0,
-    baseURL: 'https://node.thecoopnetwork.io'
-}
-GMD.apiCall('get', paramsGetAccounts, (res)=>{
-    console.log('Result trasnactions: \n'+JSON.stringify(res, null, 2));
-})
+  paramsGetAccounts = {
+      requestType: 'getAccountsBulk',
+      pageSize: 3,
+      page: 0,
+      baseURL: 'https://node.thecoopnetwork.io'
+  }
+  GMD.apiCall('get', paramsGetAccounts).then((res) => {
+      console.log('Result trasnactions: \n' + JSON.stringify(res, null, 2));
+  });
 ```
 - Generating a new wallet:
   ```
