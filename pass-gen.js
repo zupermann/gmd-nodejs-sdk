@@ -8,7 +8,7 @@ PassPhraseGenerator.generatePass = (numberOfWords) => {
     if (!numberOfWords) {
         numberOfWords = 12;
     }
-    console.log("generating pass ");
+    //console.log("generating pass ");
     const rndArray = new Uint32Array(numberOfWords);
     crypto.getRandomValues(rndArray);
     let passPhrase = [];

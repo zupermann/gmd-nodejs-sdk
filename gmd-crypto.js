@@ -77,24 +77,39 @@ GMD.callHttp = (config, pass, doNotSign) => {
 
 handleAPICallResponse = async (data, pass, doNotSign) => {
     if (doNotSign) {
+        console.log('do not sign');
         return data;
     }
     if (GMD.isTransaction(data) && !GMD.isSignedTransactionResponse(data) && pass) {
-        const signature = await GMD.signTransaction(data.unsignedTransactionBytes, pass);
-        console.log('signature ' + signature);
-        GMD.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signature }).then(data => {
-            console.log('Succesfully posted the transaction broadcast. Data: ' + JSON.stringify(data, null, 2));
-        }).catch(err => {
-            console.log('Error posting transaction broadcast: ' + err);
-        });
+        let signedTransaction = await GMD.signTransaction(data.unsignedTransactionBytes, pass);
+        //console.log('signedTransaction ' + signedTransaction);
+        return GMD.broadcastSignedTransaction(signedTransaction);
     }
     return data;
+}
+
+GMD.broadcastSignedTransaction = (signedTransaction) => {
+    return GMD.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransaction }).then(data => {
+        console.log('Succesfully posted the transaction broadcast. Data: ' + JSON.stringify(data, null, 2));
+    }).catch(err => {
+        console.log('Error posting transaction broadcast: ' + err);
+    });
 }
 
 //Helper functions
 
 GMD.getAccountId = (publicKey) => {
     return GMD.apiCall('get', { requestType: 'getAccountId', publicKey: publicKey });
+}
+
+/**
+ *  Getting public key from RS account is not cryptographically possible. 
+ * However, the mapping RS account <-> public key is available on the node if from the account at least one transaction has been made.
+ */
+GMD.getPublicKeyFromRS = (rsAccount) => {
+    return GMD.apiCall('get', { requestType: 'getAccountPublicKey', account: rsAccount }).then(data => {
+        return data.publicKey;
+    })
 }
 
 //generate full GMD account.
@@ -104,6 +119,10 @@ GMD.generateAccount = async (secretPassphrase) => {
         const PassPhraseGenerator = require('./pass-gen');
         secretPassphrase = PassPhraseGenerator.generatePass();
     }
+    return GMD.getWalletDetailsFromPassPhrase(secretPassphrase);
+}
+
+GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
     const publicKey = await cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
 
     return GMD.getAccountId(publicKey).then((data) => {
@@ -128,14 +147,35 @@ GMD.getBalance = async (rsAccount) => {
 }
 
 GMD.sendMoney = (recipient, amountNQT, passPhrase, feeNQT) => {
-    return GMD.apiCall('post', {
+    return sendMoneyAPICall(true, recipient, amountNQT, passPhrase, feeNQT);
+}
+
+GMD.createUnsignedSendMoneyTransactionPubKey = (recipient, amountNQT, senderPublicKey, feeNQT) => {
+    return sendMoneyAPICall(false, recipient, amountNQT, senderPublicKey, feeNQT);
+}
+
+GMD.createUnsignedSendMoneyTransactionRSAccount = (recipient, amountNQT, RSAccount, feeNQT) => {
+    return GMD.getPublicKeyFromRS(RSAccount).then(publicKey => {
+        return sendMoneyAPICall(false, recipient, amountNQT, publicKey, feeNQT);
+    });
+}
+
+const sendMoneyAPICall = (signIt, recipient, amountNQT, from, feeNQT) => {
+    params = {
         requestType: 'sendMoney',
         recipient: recipient,
         amountNQT: amountNQT,
-        secretPhrase: passPhrase,
         feeNQT: feeNQT,
         deadline: '1440'
-    });
+    }
+    if (signIt) {
+        params.secretPhrase = from;
+    } else {
+        params.publicKey = from;
+    }
+    return GMD.apiCall('post', params);
 }
+
+
 
 module.exports = GMD;
