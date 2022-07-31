@@ -5,35 +5,23 @@ GMD.setURL('https://node.thecoopnetwork.io:6877'); //testnet node
 const TestSend = {
     test: () => {
         console.log('TestSend execute...');
-        TestSend.test4();
+        TestSend.test5();
         console.log('TestSend finished.');
     }
 };
 
-// test1 = () => {
-//     //let task = require('node-cron').schedule('0,15,30,45 * * * *', () => {
+// TestSend.test1 = () => {
 //     require('node-cron').schedule('* * * * *', () => {
-//         const dataSendMoney = {
-//             requestType: 'sendMoney',
-//             recipient: 'GMD-43MP-76UW-L69N-ALW39',
-//             amountNQT: '200000000',
-//             secretPhrase: 'screen drawn leave power connect confidence liquid everytime wall either poet shook', //testnet account GMD-N2L2-GZXR-NES8-CJMBC
-//             feeNQT: '100000000',
-//             deadline: '15'
-//         };
-
-//         GMD.apiCall('post', dataSendMoney).then((res) => {
-//             console.log('Data received back on api calls:\n' + JSON.stringify(res, null, 2));
-//         });
+//         GMD.sendMoney('GMD-43MP-76UW-L69N-ALW39', '200000', 'screen drawn leave power connect confidence liquid everytime wall either poet shook', '100000000');
 //     });
 // }
 
-test2 = () => {
+TestSend.test2 = () => {
     const dataSendMoney = {
         requestType: 'sendMoney',
         recipient: 'GMD-43MP-76UW-L69N-ALW39',
-        amountNQT: '200000000',
-        secretPhrase: 'screen drawn leave power connect confidence liquid everytime wall either poet shook', //testnet account GMD-N2L2-GZXR-NES8-CJMBC public key f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e
+        amountNQT: '200000',
+        publicKey: 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e', //testnet account GMD-N2L2-GZXR-NES8-CJMBC public key f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e
         feeNQT: '100000000',
         deadline: '15'
     };
@@ -51,19 +39,7 @@ TestSend.test3 = () => {
 }
 
 TestSend.test4 = () => {
-    // const dataSendMoney = {
-    //     requestType: 'sendMoney',
-    //     recipient: 'GMD-43MP-76UW-L69N-ALW39',
-    //     amountNQT: '200000000',
-    //     //secretPhrase: 'screen drawn leave power connect confidence liquid everytime wall either poet shook', //testnet account GMD-N2L2-GZXR-NES8-CJMBC public key f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e
-    //     publicKey: 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e',
-    //     feeNQT: '100000000',
-    //     deadline: '15'
-    // };
-    // GMD.apiCall('post', dataSendMoney).then((res) => {
-    //     console.log('Data received back on api calls:\n' + JSON.stringify(res, null, 2));
-    // });
-    GMD.createUnsignedSendMoneyTransactionRSAccount('GMD-43MP-76UW-L69N-ALW39', '100000', 'GMD-N2L2-GZXR-NES8-CJMBC', '100000000').then(
+    GMD.createUnsignedSendMoneyTransaction('GMD-43MP-76UW-L69N-ALW39', '100000', 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e', '100000000').then(
         res => {
             let unsignedTransaction = res.unsignedTransactionBytes;
             GMD.signTransaction(unsignedTransaction, 'screen drawn leave power connect confidence liquid everytime wall either poet shook').then(
@@ -73,8 +49,18 @@ TestSend.test4 = () => {
             );
         }
     );
+}
 
-
+TestSend.test5 = () => {
+    const data = {
+        requestType: 'sendMessage',
+        recipient: 'GMD-43MP-76UW-L69N-ALW39',
+        message: 'This is a test message',
+        publicKey: 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e', //testnet account GMD-N2L2-GZXR-NES8-CJMBC public key f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e
+        feeNQT: '100000000',
+        deadline: '1440'
+    };
+    GMD.apiCallAndSign('post', data, 'screen drawn leave power connect confidence liquid everytime wall either poet shook');
 }
 
 module.exports = TestSend;

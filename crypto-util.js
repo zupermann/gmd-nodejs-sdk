@@ -128,7 +128,7 @@ cryptoUtil.signBytes = async (message, passPhrase) => {
 
 cryptoUtil.getPublicKey = async (passHex) => {
     const passBytes = cryptoUtil.hexToBytes(passHex);
-    const digest = await cryptoUtil.SHA256(passBytes);  //TODO also get public key from RS address - request to node?
+    const digest = await cryptoUtil.SHA256(passBytes);
     return cryptoUtil.bytesToHex(curve25519.keygen(digest).p);
 }
 
