@@ -1,5 +1,4 @@
 const axios = require('./get-axios');
-const crypto = require('./crypto-util');
 const cryptoUtil = require('./crypto-util');
 
 const GMD = { baseURL: 'https://node.thecoopnetwork.io' };
@@ -19,7 +18,7 @@ GMD.setURL = (url) => {
  * @returns Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
  */
 GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
-    const signature = await crypto.signBytes(unsignedTransaction, passPhrase);
+    const signature = await cryptoUtil.signBytes(unsignedTransaction, passPhrase);
     return unsignedTransaction.substr(0, 192) + signature + unsignedTransaction.substr(320);
 }
 
@@ -129,7 +128,7 @@ const processParams = (params) => {
  * @returns - public key, hex string format
  */
 GMD.getPublicKey = async (pass) => {
-    return crypto.getPublicKey(crypto.strToHex(pass));
+    return cryptoUtil.getPublicKey(cryptoUtil.strToHex(pass));
 }
 
 // Helper functions
