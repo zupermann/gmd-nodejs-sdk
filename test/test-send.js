@@ -39,15 +39,9 @@ TestSend.test3 = () => {
 }
 
 TestSend.test4 = () => {
-    GMD.createUnsignedSendMoneyTransaction('GMD-43MP-76UW-L69N-ALW39', '100000', 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e', '100000000').then(
-        res => {
-            let unsignedTransaction = res.unsignedTransactionBytes;
-            GMD.signTransaction(unsignedTransaction, 'screen drawn leave power connect confidence liquid everytime wall either poet shook').then(
-                (signedTransaction) => {
-                    GMD.broadcastSignedTransaction(signedTransaction).then(console.log);
-                }
-            );
-        }
+    GMD.createUnsignedSendMoneyTransaction('GMD-43MP-76UW-L69N-ALW39', '100000', 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e', '100000000')
+        .then( res => GMD.signTransaction(res.unsignedTransactionBytes, 'screen drawn leave power connect confidence liquid everytime wall either poet shook')
+        .then( signedTransaction => GMD.broadcastSignedTransaction(signedTransaction).then(console.log))     
     );
 }
 

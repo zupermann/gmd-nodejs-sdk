@@ -121,18 +121,26 @@ cryptoUtil.wordsToBytes = (wordArr) => {
     return bytes;
 }
 
+cryptoUtil.getPrivateKeyFromPassPhrase = async (passPhrase) => {
+    let secretPhraseBytes = cryptoUtil.hexToBytes(cryptoUtil.strToHex(passPhrase));
+    let digest = await cryptoUtil.SHA256(secretPhraseBytes);
+    let privatekey = curve25519.keygen(digest).s;
+    return cryptoUtil.bytesToHex(privatekey);
+}
 
+cryptoUtil.signBytes = async (message, passPhrase)=>{
+    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    return cryptoUtil.signBytesPrivateKey(message, privateKey);
+}
 
-cryptoUtil.signBytes = async (message, passPhrase) => {
-    const messageBytes = cryptoUtil.hexToBytes(message);
-    const secretPhraseBytes = cryptoUtil.hexToBytes(cryptoUtil.strToHex(passPhrase));
-    const digest = await cryptoUtil.SHA256(secretPhraseBytes);
-    const s = curve25519.keygen(digest).s;
-    var m = await cryptoUtil.SHA256(messageBytes);
-    var x = await cryptoUtil.SHA256(m, s);
-    var y = curve25519.keygen(x).p;
-    var h = await cryptoUtil.SHA256(m, y);
-    var v = curve25519.sign(h, x, s);
+cryptoUtil.signBytesPrivateKey = async (message, privateKey) => {
+    let messageBytes = cryptoUtil.hexToBytes(message);
+    let s = cryptoUtil.hexToBytes(privateKey);
+    let m = await cryptoUtil.SHA256(messageBytes);
+    let x = await cryptoUtil.SHA256(m, s);
+    let y = curve25519.keygen(x).p;
+    let h = await cryptoUtil.SHA256(m, y);
+    let v = curve25519.sign(h, x, s);
     return cryptoUtil.bytesToHex(v.concat(h));
 }
 
@@ -1011,7 +1019,6 @@ module.exports = curve25519;
 
 },{}],6:[function(require,module,exports){
 const axios = require('./get-axios');
-const crypto = require('./crypto-util');
 const cryptoUtil = require('./crypto-util');
 
 const GMD = { baseURL: 'https://node.thecoopnetwork.io' };
@@ -1028,10 +1035,21 @@ GMD.setURL = (url) => {
  *
  * @param {String} unsignedTransaction bytes as hex string.
  * @param {String} passPhrase usually 12 word passphrase
- * @returns Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
+ * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
  */
 GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
-    const signature = await crypto.signBytes(unsignedTransaction, passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    return GMD.signTransactionPrivateKey(unsignedTransaction, privateKey);
+}
+
+/**
+ *
+ * @param {String} unsignedTransaction bytes as hex string.
+ * @param {String} privateKey hex string private key
+ * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
+ */
+GMD.signTransactionPrivateKey = async (unsignedTransaction, privateKey) => {
+    const signature = await cryptoUtil.signBytesPrivateKey(unsignedTransaction, privateKey);
     return unsignedTransaction.substr(0, 192) + signature + unsignedTransaction.substr(320);
 }
 
@@ -1141,7 +1159,7 @@ const processParams = (params) => {
  * @returns - public key, hex string format
  */
 GMD.getPublicKey = async (pass) => {
-    return crypto.getPublicKey(crypto.strToHex(pass));
+    return cryptoUtil.getPublicKey(cryptoUtil.strToHex(pass));
 }
 
 // Helper functions
@@ -1196,14 +1214,19 @@ GMD.generateAccount = async (secretPassphrase) => {
 /**
  *
  * @param {*} secretPassphrase is transformed to a public key and that key is sent to a node to get the account id details.
- * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, secret passphrase.
+ * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
     const publicKey = await cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
-        return data;
+        return cryptoUtil.getPrivateKeyFromPassPhrase(secretPassphrase).then(
+            (privateKey)=>{
+                data.privateKey = privateKey;
+                return data;
+            }
+        )
     })
 }
 

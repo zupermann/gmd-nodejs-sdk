@@ -15,10 +15,21 @@ GMD.setURL = (url) => {
  *
  * @param {String} unsignedTransaction bytes as hex string.
  * @param {String} passPhrase usually 12 word passphrase
- * @returns Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
+ * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
  */
 GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
-    const signature = await cryptoUtil.signBytes(unsignedTransaction, passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    return GMD.signTransactionPrivateKey(unsignedTransaction, privateKey);
+}
+
+/**
+ *
+ * @param {String} unsignedTransaction bytes as hex string.
+ * @param {String} privateKey hex string private key
+ * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
+ */
+GMD.signTransactionPrivateKey = async (unsignedTransaction, privateKey) => {
+    const signature = await cryptoUtil.signBytesPrivateKey(unsignedTransaction, privateKey);
     return unsignedTransaction.substr(0, 192) + signature + unsignedTransaction.substr(320);
 }
 
@@ -183,14 +194,19 @@ GMD.generateAccount = async (secretPassphrase) => {
 /**
  *
  * @param {*} secretPassphrase is transformed to a public key and that key is sent to a node to get the account id details.
- * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, secret passphrase.
+ * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
     const publicKey = await cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
-        return data;
+        return cryptoUtil.getPrivateKeyFromPassPhrase(secretPassphrase).then(
+            (privateKey)=>{
+                data.privateKey = privateKey;
+                return data;
+            }
+        )
     })
 }
 
