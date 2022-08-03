@@ -1123,9 +1123,22 @@ GMD.apiCall = async (method, params) => {
  * @returns Promise that will resove to a JSON with the returned details of the broadcasted transaction.
  */
 GMD.apiCallAndSign = async (method, params, passPhrase) => {
+    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    return GMD.apiCallAndSignPrivateKey(method, params, privateKey);
+}
+
+/**
+ * GMD.apiCallAndSignPrivateKey() does same thing as GMD.apiCall(). In addition, if the API call returns an unsigned transaction, this method
+ * will sign it using the passPhrase param and broadcast it to the network. If the response does not contain an unsigned transaction,
+ * or if password is invalid, nothing happens.
+ * @param {String} method - samne as GMD.apiCall()
+ * @param {JSON} params - samne as GMD.apiCall()
+ * @param {String} privateKey - private key string in hex format
+ */
+ GMD.apiCallAndSignPrivateKey = async (method, params, privateKey) => {
     const transaction = await GMD.apiCall(method, params);
-    if (GMD.isTransaction(transaction) && !GMD.isSignedTransactionResponse(transaction) && passPhrase) {
-        const signedTransaction = await GMD.signTransaction(transaction.unsignedTransactionBytes, passPhrase);
+    if (GMD.isTransaction(transaction) && !GMD.isSignedTransactionResponse(transaction) && privateKey) {
+        const signedTransaction = await GMD.signTransactionPrivateKey(transaction.unsignedTransactionBytes, privateKey);
         return GMD.broadcastSignedTransaction(signedTransaction);
     }
 }
