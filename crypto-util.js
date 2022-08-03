@@ -112,18 +112,26 @@ cryptoUtil.wordsToBytes = (wordArr) => {
     return bytes;
 }
 
+cryptoUtil.getPrivateKeyFromPassPhrase = async (passPhrase) => {
+    let secretPhraseBytes = cryptoUtil.hexToBytes(cryptoUtil.strToHex(passPhrase));
+    let digest = await cryptoUtil.SHA256(secretPhraseBytes);
+    let privatekey = curve25519.keygen(digest).s;
+    return cryptoUtil.bytesToHex(privatekey);
+}
 
+cryptoUtil.signBytes = async (message, passPhrase)=>{
+    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    return cryptoUtil.signBytesPrivateKey(message, privateKey);
+}
 
-cryptoUtil.signBytes = async (message, passPhrase) => {
-    const messageBytes = cryptoUtil.hexToBytes(message);
-    const secretPhraseBytes = cryptoUtil.hexToBytes(cryptoUtil.strToHex(passPhrase));
-    const digest = await cryptoUtil.SHA256(secretPhraseBytes);
-    const s = curve25519.keygen(digest).s;
-    var m = await cryptoUtil.SHA256(messageBytes);
-    var x = await cryptoUtil.SHA256(m, s);
-    var y = curve25519.keygen(x).p;
-    var h = await cryptoUtil.SHA256(m, y);
-    var v = curve25519.sign(h, x, s);
+cryptoUtil.signBytesPrivateKey = async (message, privateKey) => {
+    let messageBytes = cryptoUtil.hexToBytes(message);
+    let s = cryptoUtil.hexToBytes(privateKey);
+    let m = await cryptoUtil.SHA256(messageBytes);
+    let x = await cryptoUtil.SHA256(m, s);
+    let y = curve25519.keygen(x).p;
+    let h = await cryptoUtil.SHA256(m, y);
+    let v = curve25519.sign(h, x, s);
     return cryptoUtil.bytesToHex(v.concat(h));
 }
 
