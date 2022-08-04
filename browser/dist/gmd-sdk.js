@@ -11,13 +11,20 @@ const crypto = require('./get-crypto');
 const curve25519 = require('./curve25519');
 const cryptoUtil = {};
 
+//
+// cryptoUtil.strToHex = (str) => {
+//     let result = '';
+//     cryptoUtil.strToBytes(str).forEach(c=> result+=c.toString(16));
+//     return result;
+// }
 
-cryptoUtil.strToHex = (str) => {
-    let result = '';
+cryptoUtil.strToBytes = (str) => {
+    let result = [];
     for (let i = 0; i < str.length; i++) {
-        result += str.charCodeAt(i).toString(16);
+        result.push(str.charCodeAt(i));
     }
     return result;
+    
 }
 
 cryptoUtil.hexToString = (hex) => {
@@ -121,15 +128,10 @@ cryptoUtil.wordsToBytes = (wordArr) => {
     return bytes;
 }
 
-cryptoUtil.getPrivateKeyFromPassPhrase = async (passPhrase) => {
-    let secretPhraseBytes = cryptoUtil.hexToBytes(cryptoUtil.strToHex(passPhrase));
-    let digest = await cryptoUtil.SHA256(secretPhraseBytes);
-    let privatekey = curve25519.keygen(digest).s;
-    return cryptoUtil.bytesToHex(privatekey);
-}
+
 
 cryptoUtil.signBytes = async (message, passPhrase)=>{
-    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
     return cryptoUtil.signBytesPrivateKey(message, privateKey);
 }
 
@@ -144,10 +146,23 @@ cryptoUtil.signBytesPrivateKey = async (message, privateKey) => {
     return cryptoUtil.bytesToHex(v.concat(h));
 }
 
-cryptoUtil.getPublicKey = async (passHex) => {
-    const passBytes = cryptoUtil.hexToBytes(passHex);
+cryptoUtil.getPrivateKey = async (pass) => {
+    let [, privateKey] = await cryptoUtil.getPublicPrivateKeyPair(pass);
+    return privateKey;
+}
+
+cryptoUtil.getPublicKey = async (pass) => {
+    let [publicKey] = await cryptoUtil.getPublicPrivateKeyPair(pass);
+    return publicKey;
+}
+
+cryptoUtil.getPublicPrivateKeyPair = async (pass) => {
+    let passBytes = cryptoUtil.strToBytes(pass);
     const digest = await cryptoUtil.SHA256(passBytes);
-    return cryptoUtil.bytesToHex(curve25519.keygen(digest).p);
+    let {p,s} = curve25519.keygen(digest);
+    let publicKey = cryptoUtil.bytesToHex(p);
+    let privateKey = cryptoUtil.bytesToHex(s);
+    return [publicKey,privateKey];
 }
 
 module.exports = cryptoUtil;
@@ -1038,7 +1053,7 @@ GMD.setURL = (url) => {
  * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
  */
 GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
-    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
     return GMD.signTransactionPrivateKey(unsignedTransaction, privateKey);
 }
 
@@ -1123,7 +1138,7 @@ GMD.apiCall = async (method, params) => {
  * @returns Promise that will resove to a JSON with the returned details of the broadcasted transaction.
  */
 GMD.apiCallAndSign = async (method, params, passPhrase) => {
-    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
     return GMD.apiCallAndSignPrivateKey(method, params, privateKey);
 }
 
@@ -1172,7 +1187,7 @@ const processParams = (params) => {
  * @returns - public key, hex string format
  */
 GMD.getPublicKey = async (pass) => {
-    return cryptoUtil.getPublicKey(cryptoUtil.strToHex(pass));
+    return cryptoUtil.getPublicKey(pass);
 }
 
 // Helper functions
@@ -1230,16 +1245,12 @@ GMD.generateAccount = async (secretPassphrase) => {
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
-    const publicKey = await cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
+    const {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKeyPair(secretPassphrase);
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
-        return cryptoUtil.getPrivateKeyFromPassPhrase(secretPassphrase).then(
-            (privateKey)=>{
-                data.privateKey = privateKey;
-                return data;
-            }
-        )
+        data.privateKey = privateKey;
+        return data;
     })
 }
 
