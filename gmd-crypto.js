@@ -18,7 +18,7 @@ GMD.setURL = (url) => {
  * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
  */
 GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
-    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
     return GMD.signTransactionPrivateKey(unsignedTransaction, privateKey);
 }
 
@@ -103,7 +103,7 @@ GMD.apiCall = async (method, params) => {
  * @returns Promise that will resove to a JSON with the returned details of the broadcasted transaction.
  */
 GMD.apiCallAndSign = async (method, params, passPhrase) => {
-    let privateKey = await cryptoUtil.getPrivateKeyFromPassPhrase(passPhrase);
+    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
     return GMD.apiCallAndSignPrivateKey(method, params, privateKey);
 }
 
@@ -152,7 +152,7 @@ const processParams = (params) => {
  * @returns - public key, hex string format
  */
 GMD.getPublicKey = async (pass) => {
-    return cryptoUtil.getPublicKey(cryptoUtil.strToHex(pass));
+    return cryptoUtil.getPublicKey(pass);
 }
 
 // Helper functions
@@ -210,16 +210,12 @@ GMD.generateAccount = async (secretPassphrase) => {
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
-    const publicKey = await cryptoUtil.getPublicKey((cryptoUtil.strToHex(secretPassphrase)));
+    const {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKeyPair(secretPassphrase);
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
-        return cryptoUtil.getPrivateKeyFromPassPhrase(secretPassphrase).then(
-            (privateKey)=>{
-                data.privateKey = privateKey;
-                return data;
-            }
-        )
+        data.privateKey = privateKey;
+        return data;
     })
 }
 
