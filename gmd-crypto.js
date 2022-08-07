@@ -1,7 +1,9 @@
 const axios = require('./get-axios');
 const cryptoUtil = require('./crypto-util');
 
-const GMD = { baseURL: 'https://node.thecoopnetwork.io' };
+const GMD = { baseURL: 'https://node.thecoopnetwork.io',
+              util: {} 
+            };
 
 /**
  *
@@ -23,14 +25,58 @@ GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
 }
 
 /**
+ * 
+ * @param {string} message arbitrarary message; 
+ * @param {*} privateKey private key in hex string format
+ * @returns signature in hex string format
+ */
+GMD.signHexMessagePrivateKey = async( message, privateKey) => {
+    return await cryptoUtil.signBytesPrivateKey(message,privateKey);
+}
+
+/**
+ * Same as signHexMessagePrivateKey() except passphrase is received as param.
+ * 
+ * @param {string} message arbitrarary message in hex string format; 
+ * @param {*} passPhrase usually 12 words
+ * @returns signature in hex string format
+ */
+ GMD.signMessage = async( message, passPhrase) => {
+    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
+    return GMD.signHexMessagePrivateKey(message, privateKey);
+}
+
+/**
+ * This call verifies a signature against a public key. Returns true if the message was signed by the 
+ * corresponding private key.
+ * 
+ * @param {*} signature Signature in hex string format (same format as returned by GMD.signMessage())
+ * @param {*} unsignedHexMessage Message in hex string format.
+ * @param {*} publicKey Public key to check the signature.
+ * @returns promise that resolves to boolean.
+ */
+GMD.verifySignature = async (signature, unsignedHexMessage, publicKey) => {
+    return cryptoUtil.verifySignature(signature, unsignedHexMessage, publicKey);
+}
+
+/**
  *
- * @param {String} unsignedTransaction bytes as hex string.
+ * @param {String} unsignedTransaction transaction bytes as hex string.
  * @param {String} privateKey hex string private key
  * @returns [async] Signed transaction bytes. Signing is done locally (no passphrase is sent over noetwork)
  */
 GMD.signTransactionPrivateKey = async (unsignedTransaction, privateKey) => {
     const signature = await cryptoUtil.signBytesPrivateKey(unsignedTransaction, privateKey);
     return unsignedTransaction.substr(0, 192) + signature + unsignedTransaction.substr(320);
+}
+
+/**
+ * 
+ * @param {string} str string
+ * @returns hex string
+ */
+GMD.util.strToHex = (str) => {
+    return cryptoUtil.strToHex(str);
 }
 
 /**
@@ -210,7 +256,7 @@ GMD.generateAccount = async (secretPassphrase) => {
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
-    const {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKeyPair(secretPassphrase);
+    let [publicKey, privateKey] = await cryptoUtil.getPublicPrivateKeyPair(secretPassphrase);
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;

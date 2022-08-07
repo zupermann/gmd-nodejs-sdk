@@ -2,12 +2,12 @@ const crypto = require('./get-crypto');
 const curve25519 = require('./curve25519');
 const cryptoUtil = {};
 
-//
-// cryptoUtil.strToHex = (str) => {
-//     let result = '';
-//     cryptoUtil.strToBytes(str).forEach(c=> result+=c.toString(16));
-//     return result;
-// }
+
+cryptoUtil.strToHex = (str) => {
+    let result = '';
+    cryptoUtil.strToBytes(str).forEach(c=> result+=c.toString(16));
+    return result;
+}
 
 cryptoUtil.strToBytes = (str) => {
     let result = [];
@@ -136,6 +136,33 @@ cryptoUtil.signBytesPrivateKey = async (message, privateKey) => {
     let v = curve25519.sign(h, x, s);
     return cryptoUtil.bytesToHex(v.concat(h));
 }
+
+cryptoUtil.verifySignature = async (signature, unsignedMessage, publicKey) => {
+    let signatureBytes = cryptoUtil.hexToBytes(signature);
+    let messageBytes = cryptoUtil.hexToBytes(unsignedMessage);
+    let publicKeyBytes = cryptoUtil.hexToBytes(publicKey)
+    let v = signatureBytes.slice(0,32);
+    let h = signatureBytes.slice(32);
+    let Y = curve25519.verify(v, h, publicKeyBytes);
+
+    let m = await cryptoUtil.SHA256(messageBytes);
+    let h2 = await cryptoUtil.SHA256(m, Y);
+
+    return cryptoUtil.byteArraysEqual(h,h2);
+}
+
+cryptoUtil.byteArraysEqual  = (bytes1, bytes2) => {
+    if (bytes1.length !== bytes2.length) {
+        return false;
+    }
+    for (var i = 0; i < bytes1.length; ++i) {
+        if (bytes1[i] !== bytes2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 
 cryptoUtil.getPrivateKey = async (pass) => {
     let [, privateKey] = await cryptoUtil.getPublicPrivateKeyPair(pass);
