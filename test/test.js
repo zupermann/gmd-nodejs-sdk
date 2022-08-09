@@ -3,6 +3,7 @@ const TestEvents = require('./test-events');
 const TestWalletGen = require('./test-walletgen');
 const TestGet = require('./test-get');
 const TestSignature = require('./test-signature');
+const TestEncryption = require('./test-encryption');
 
 /**
  * These are simple tests to help develop this sdk, not quality assurance unit tests.
@@ -15,6 +16,7 @@ TestWalletGen.test();
 TestGet.test();
 //TestEvents.test();
 TestSignature.test();
+TestEncryption.test();
 
 
 

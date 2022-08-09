@@ -23,8 +23,7 @@ cryptoUtil.strToBytes = (str) => {
     for (let i = 0; i < str.length; i++) {
         result.push(str.charCodeAt(i));
     }
-    return result;
-    
+    return result;   
 }
 
 cryptoUtil.hexToString = (hex) => {
@@ -47,6 +46,24 @@ cryptoUtil.bytesToHex = (byteArray) => {
         return ('0' + (byte & 0xFF).toString(16)).slice(-2);
     }).join('')
 }
+
+cryptoUtil.strToUint8 = str => new Uint8Array(cryptoUtil.strToBytes(str));
+
+cryptoUtil.hexToUint8 = hex => new Uint8Array(cryptoUtil.hexToBytes(hex));
+
+cryptoUtil.Uint8ArrayToStr = (buffer) => {
+    let string = '';
+    for (let i = 0; i < buffer.length; i++) {
+        string += String.fromCharCode(buffer[i]);
+    }
+    return string;
+}
+
+cryptoUtil.Uint8ArrayToHex = (buffer) => {
+    var array = Array.from(buffer);
+    return cryptoUtil.bytesToHex(array);
+}
+
 
 cryptoUtil.bytesToWords = (byteArray) => {
     let i = 0, offset = 0, word = 0;
@@ -190,6 +207,10 @@ cryptoUtil.getPublicPrivateKeyPair = async (pass) => {
     let publicKey = cryptoUtil.bytesToHex(p);
     let privateKey = cryptoUtil.bytesToHex(s);
     return [publicKey,privateKey];
+}
+
+cryptoUtil.encryptKey = async (key, pass) => {
+
 }
 
 module.exports = cryptoUtil;
