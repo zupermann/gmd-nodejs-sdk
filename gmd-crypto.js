@@ -1,9 +1,11 @@
 const axios = require('./get-axios');
 const cryptoUtil = require('./crypto-util');
+const KeyEncryption = require('./key-encryption');
 
-const GMD = { baseURL: 'https://node.thecoopnetwork.io',
-              util: {} 
-            };
+const GMD = {
+    baseURL: 'https://node.thecoopnetwork.io',
+    util: {}
+};
 
 /**
  *
@@ -30,8 +32,8 @@ GMD.signTransaction = async (unsignedTransaction, passPhrase) => {
  * @param {*} privateKey private key in hex string format
  * @returns signature in hex string format
  */
-GMD.signHexMessagePrivateKey = async( message, privateKey) => {
-    return await cryptoUtil.signBytesPrivateKey(message,privateKey);
+GMD.signHexMessagePrivateKey = async (message, privateKey) => {
+    return await cryptoUtil.signBytesPrivateKey(message, privateKey);
 }
 
 /**
@@ -41,7 +43,7 @@ GMD.signHexMessagePrivateKey = async( message, privateKey) => {
  * @param {*} passPhrase usually 12 words
  * @returns signature in hex string format
  */
- GMD.signMessage = async( message, passPhrase) => {
+GMD.signMessage = async (message, passPhrase) => {
     let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
     return GMD.signHexMessagePrivateKey(message, privateKey);
 }
@@ -79,20 +81,26 @@ GMD.util.strToHex = (str) => {
     return cryptoUtil.strToHex(str);
 }
 
+GMD.util.encryptHex = async (messageHex, password) => {
+    return KeyEncryption.encryptHex(messageHex, password);
+}
+
+GMD.util.decryptToHex = async (encryptedJSON, password) => {
+    return KeyEncryption.decryptToHex(encryptedJSON, password);
+}
+
 /**
  *
  * @param {JSON} data Transaction data JSON input.
  * @returns boolean: true if JSON input contains properties "transactionJSON" and "unsignedTransactionBytes", false otherise.
  */
 GMD.isTransaction = (data) => {
-    return data &&
-        hasProperty(data, 'transactionJSON') &&
-        hasProperty(data, 'unsignedTransactionBytes');
+    return data && 'transactionJSON' in data && 'unsignedTransactionBytes' in data;
 }
 
-const hasProperty = (obj, key) => {
-    return Object.prototype.hasOwnProperty.call(obj, key);
-}
+// const hasProperty = (obj, key) => {
+//     return Object.prototype.hasOwnProperty.call(obj, key);
+// }
 
 /**
  *
@@ -100,9 +108,7 @@ const hasProperty = (obj, key) => {
  * @returns boolean: true if json represents transaction and contains "signatureHash" and "fullHash" properties.
  */
 GMD.isSignedTransactionResponse = (data) => {
-    return GMD.isTransaction(data) &&
-        hasProperty(data, 'signatureHash') &&
-        hasProperty(data, 'fullHash');
+    return GMD.isTransaction(data) && 'signatureHash' in data && 'fullHash' in data;
 };
 
 /**
@@ -161,7 +167,7 @@ GMD.apiCallAndSign = async (method, params, passPhrase) => {
  * @param {JSON} params - samne as GMD.apiCall()
  * @param {String} privateKey - private key string in hex format
  */
- GMD.apiCallAndSignPrivateKey = async (method, params, privateKey) => {
+GMD.apiCallAndSignPrivateKey = async (method, params, privateKey) => {
     const transaction = await GMD.apiCall(method, params);
     if (GMD.isTransaction(transaction) && !GMD.isSignedTransactionResponse(transaction) && privateKey) {
         const signedTransaction = await GMD.signTransactionPrivateKey(transaction.unsignedTransactionBytes, privateKey);
@@ -173,15 +179,15 @@ const processParams = (params) => {
     let url;
     let httpTimeout;
     if (params) {
-        if (hasProperty(params, 'secretPhrase')) {
+        if ('secretPhrase' in params) {
             delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
         }
-        if (hasProperty(params, 'httpTimeout')) {
+        if ('httpTimeout' in params) {
             httpTimeout = params.httpTimeout;
             delete params.httpTimeout;
         }
 
-        if (hasProperty(params, 'baseURL')) {
+        if ('baseURL' in params) {
             url = params.baseURL;
             delete params.baseURL;
         } else {
@@ -272,7 +278,7 @@ GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
  */
 GMD.checkRSAddress = async (rsAccount) => {
     return GMD.apiCall('get', { requestType: 'rsConvert', account: rsAccount }).then(data => {
-        return hasProperty(data, 'accountLongId');
+        return 'accountLongId' in data;
     })
 }
 
