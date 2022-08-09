@@ -1,5 +1,6 @@
 const axios = require('./get-axios');
 const cryptoUtil = require('./crypto-util');
+const KeyEncryption = require('./key-encryption');
 
 const GMD = { baseURL: 'https://node.thecoopnetwork.io',
               util: {} 
@@ -77,6 +78,14 @@ GMD.signTransactionPrivateKey = async (unsignedTransaction, privateKey) => {
  */
 GMD.util.strToHex = (str) => {
     return cryptoUtil.strToHex(str);
+}
+
+GMD.util.encryptHex = async (messageHex, password, storage) => {
+    return KeyEncryption.encryptHex(messageHex, password, storage);
+}
+
+GMD.util.decryptToHex = async (cyphertext, password, storage) => {
+    return KeyEncryption.decryptToHex(cyphertext, password, storage);
 }
 
 /**

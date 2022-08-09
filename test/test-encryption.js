@@ -1,4 +1,4 @@
-const KeyEncryption = require("../key-encryption");
+const GMD = require("../gmd-crypto");
 
 const TestEncryption = {};
 
@@ -23,13 +23,13 @@ TestEncryption.test = async () =>
     let cyphertext, decryped;
     console.log("Data to be encrypted: "+data);
     try {
-        cyphertext = await KeyEncryption.encryptHex(data, "Some password Example 123#^&5", storage);
+        cyphertext = await GMD.util.encryptHex(data, "Some password Example 123#^&5", storage);
     } catch (e){
         console.log('cannot encrypt: '+ e)
     }
     console.log("cyphertext:"+cyphertext);
     try {
-        decryped = await KeyEncryption.decryptToHex(cyphertext, "Some password Example 123#^&5", storage);
+        decryped = await GMD.util.decryptToHex(cyphertext, "Some password Example 123#^&5", storage);
     } catch (e){
         console.log('cannot decrypt: '+ e)
     }

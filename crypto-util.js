@@ -200,8 +200,4 @@ cryptoUtil.getPublicPrivateKeyPair = async (pass) => {
     return [publicKey,privateKey];
 }
 
-cryptoUtil.encryptKey = async (key, pass) => {
-
-}
-
 module.exports = cryptoUtil;

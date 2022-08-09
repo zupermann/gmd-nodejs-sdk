@@ -18,7 +18,7 @@ const KeyEncryption = {};
  * @returns a promise that resolves to an encrypted hex string.
  */
  KeyEncryption.encryptHex = async (messageHex, password, storage) => {
-    let {iv, salt} = await encrParams(storage, true);
+    let {iv, salt} = await generateAndStoreIvAndSalt(storage);
     let encryptionKey = await genEncryptionKeyFromPassword(password, salt, iterations);
     let encryptedByteArray = await crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, encryptionKey, new Uint8Array(cryptoUtil.hexToBytes(messageHex)));
     return Buffer.from(encryptedByteArray).toString('hex');
@@ -46,34 +46,27 @@ KeyEncryption.decryptToStr = async (cyphertext, password, storage) => {
 
 let decrypt = async (cyphertext, password, storage) => {
     let data = cryptoUtil.hexToUint8(cyphertext);
-    let {iv, salt} = await encrParams(storage, false);
-    if (iv == null || salt == null) {
-        throw new Error("Salt or key not found in storage. Cannot decrypt");
-    }
+    let {iv, salt} = await getIvAndSalt(storage);
     let encryptionKey = await genEncryptionKeyFromPassword(password, salt, iterations);
     let result = await crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, encryptionKey, data);
     return new Uint8Array(result);
 }
 
+let generateAndStoreIvAndSalt = async (storage) => {
+    let iv = crypto.getRandomValues(new Uint8Array(16));
+    let salt = crypto.getRandomValues(new Uint8Array(16));
+    await storage.setItem('gmd-sdk-enc-iv', cryptoUtil.Uint8ArrayToHex(iv));
+    await storage.setItem('gmd-sdk-enc-salt', cryptoUtil.Uint8ArrayToHex(salt));
+    return {iv: iv, salt: salt};
+}
 
-let encrParams = async (storage, generateIfNotExistent) => {
+let getIvAndSalt = async (storage) => {
     let ivHex = storage.getItem('gmd-sdk-enc-iv');
     let saltHex = storage.getItem('gmd-sdk-enc-salt');
-    let iv,salt;
-    if( ivHex == null || ivHex == null){ //if one is missing regenerate both
-        if(generateIfNotExistent){
-            iv = crypto.getRandomValues(new Uint8Array(16));
-            salt = crypto.getRandomValues(new Uint8Array(16));
-            await storage.setItem('gmd-sdk-enc-iv', cryptoUtil.Uint8ArrayToHex(iv));
-            await storage.setItem('gmd-sdk-enc-salt', cryptoUtil.Uint8ArrayToHex(salt));
-        } else {
-            throw new Error("Initialization vector or salt not found in local storage");
-        }
-    } else {
-        iv = cryptoUtil.hexToUint8(ivHex);
-        salt = cryptoUtil.hexToUint8(saltHex);
-    }
-    return {iv: iv, salt: salt};
+    if( ivHex == null || saltHex == null){
+        throw new Error("Initialization vector or salt not found in local storage");
+    }  
+    return {iv: cryptoUtil.hexToUint8(ivHex), salt: cryptoUtil.hexToUint8(saltHex)};
 };
 
 

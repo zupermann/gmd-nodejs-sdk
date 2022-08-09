@@ -71,6 +71,40 @@
             console.log('TestSignature finished.');
         });
 
+        /**
+         * Example how to encrypt private key, store the encrypted cypher text it in localStorage, retrieve it back from local storage and decrypt it.
+         */
+        (testEncryption = async ()=>{
+            let wallet = await GMD.generateAccount();
+            let encryptionPassword = 'Some password example 123&^%#*()%^@0=-'; //any UTF-8 char is permited in the password
+            console.log('==encr== Generated wallet: '+ JSON.stringify(wallet,null, 2));
+            let cyphertext;
+            try {
+                cyphertext = await GMD.util.encryptHex(wallet.privateKey, encryptionPassword , localStorage); //local storage is needed to 
+            //store salt and cryptographic initalization vector (nounce). The cyphertext cannot be decrypted if any of the 3 is missing: salt, iv, password
+            } catch (e) {
+                console.log('==encr== Cannot encrypt: '+ e);
+            }
+
+            console.log('==encr== Encrypted private key: '+cyphertext);
+            let cyphertext_storage_key = 'gmd-sdk-encrypted-private-key';
+            localStorage.setItem(cyphertext_storage_key, cyphertext);
+
+            let retrievedCypherText = localStorage.getItem(cyphertext_storage_key);
+            localStorage.removeItem('gmd-sdk-enc-salt');
+            let privateKeyDecrypted;
+            try {
+                privateKeyDecrypted = await GMD.util.decryptToHex(retrievedCypherText, encryptionPassword, localStorage );//can de decrypted only if localStorage contains
+                //the iv and salt values used for encryption under the gmd-sdk-enc-iv and gmd-sdk-enc-salt keys. Otherwise an exception is thrown.
+            } catch(e){
+                console.log('==encr== cannot decrypt: '+ e);
+            }
+            
+            console.log('==encr== Private key decrypted: '+ privateKeyDecrypted);
+            
+        })();
+        
+
     </script>
 </body>
 
