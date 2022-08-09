@@ -2,38 +2,24 @@ const GMD = require("../gmd-crypto");
 
 const TestEncryption = {};
 
-let storage = {store : {}}
-
-
-storage.getItem = (keyName) => {
-    if(keyName in storage.store){
-        return storage.store[keyName];
-    } else {
-        return null;
-    }
-},
-storage.setItem = (keyName, keyValue) => {
-    storage.store[keyName] = keyValue;
-}
-
-
-TestEncryption.test = async () =>
-{
-    let data = "0ff345ba23091efeeabc33267510";
-    let cyphertext, decryped;
-    console.log("Data to be encrypted: "+data);
+TestEncryption.test = async () => {
+    let data = "0ff345ba23091efeeabc332675112a";
+    console.log("==encr== Data to be encrypted: " + data);
+    let encryptedJSON;
     try {
-        cyphertext = await GMD.util.encryptHex(data, "Some password Example 123#^&5", storage);
-    } catch (e){
-        console.log('cannot encrypt: '+ e)
+        encryptedJSON = await GMD.util.encryptHex(data, "Some password Example 123#^&5");
+    } catch (e) {
+        console.log('==encr== cannot encrypt: ' + e);
+        return;
     }
-    console.log("cyphertext:"+cyphertext);
+    console.log("==encr== encryptedJSON: " + JSON.stringify(encryptedJSON, null, 2));
     try {
-        decryped = await GMD.util.decryptToHex(cyphertext, "Some password Example 123#^&5", storage);
-    } catch (e){
-        console.log('cannot decrypt: '+ e)
+        decryped = await GMD.util.decryptToHex(encryptedJSON, "Some password Example 123#^&5");
+        console.log("==encr== decryped:" + decryped);
+    } catch (e) {
+        console.log('==encr== cannot decrypt: ' + e)
     }
-    console.log("decryped:"+decryped);
+
 
 }
 
