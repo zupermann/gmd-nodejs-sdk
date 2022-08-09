@@ -3,8 +3,6 @@ const crypto = require("./get-crypto");
 
 const iterations = 223978;
 
-var vector = new Uint8Array([181,6,125,13,208,51,252,170,254,112,197,182,134,53,188,113]);//require("./get-crypto").getRandomValues(new Uint8Array(16));
-
 const KeyEncryption = {};
 
 /**
@@ -20,7 +18,7 @@ const KeyEncryption = {};
  * @returns a promise that resolves to an encrypted hex string.
  */
  KeyEncryption.encryptHex = async (messageHex, password, storage) => {
-    let {iv, salt} = encrParams(storage);
+    let {iv, salt} = await encrParams(storage, true);
     let encryptionKey = await genEncryptionKeyFromPassword(password, salt, iterations);
     let encryptedByteArray = await crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, encryptionKey, new Uint8Array(cryptoUtil.hexToBytes(messageHex)));
     return Buffer.from(encryptedByteArray).toString('hex');
@@ -48,7 +46,7 @@ KeyEncryption.decryptToStr = async (cyphertext, password, storage) => {
 
 let decrypt = async (cyphertext, password, storage) => {
     let data = cryptoUtil.hexToUint8(cyphertext);
-    let {iv, salt} = encrParams(storage);
+    let {iv, salt} = await encrParams(storage, false);
     if (iv == null || salt == null) {
         throw new Error("Salt or key not found in storage. Cannot decrypt");
     }
@@ -57,9 +55,25 @@ let decrypt = async (cyphertext, password, storage) => {
     return new Uint8Array(result);
 }
 
-//TODO: add storage functionality + replace iv and salt with random numbers
-let encrParams = (storage) => {
-    return {iv: vector, salt : cryptoUtil.strToUint8("the salt is this random string2")}
+
+let encrParams = async (storage, generateIfNotExistent) => {
+    let ivHex = storage.getItem('gmd-sdk-enc-iv');
+    let saltHex = storage.getItem('gmd-sdk-enc-salt');
+    let iv,salt;
+    if( ivHex == null || ivHex == null){ //if one is missing regenerate both
+        if(generateIfNotExistent){
+            iv = crypto.getRandomValues(new Uint8Array(16));
+            salt = crypto.getRandomValues(new Uint8Array(16));
+            await storage.setItem('gmd-sdk-enc-iv', cryptoUtil.Uint8ArrayToHex(iv));
+            await storage.setItem('gmd-sdk-enc-salt', cryptoUtil.Uint8ArrayToHex(salt));
+        } else {
+            throw new Error("Initialization vector or salt not found in local storage");
+        }
+    } else {
+        iv = cryptoUtil.hexToUint8(ivHex);
+        salt = cryptoUtil.hexToUint8(saltHex);
+    }
+    return {iv: iv, salt: salt};
 };
 
 
@@ -90,77 +104,3 @@ let genEncryptionKeyFromPassword = async (password, salt, iterations) => {
 
 
 module.exports = KeyEncryption;
-
-
-
-// function encryptThenDecrypt() {
-//     secretmessage = "message to be encrypted";//document.getElementById("secretmessageField").value; // some string to encrypt
-//     var password = "my password";//document.getElementById("passwordField").value; // some user-chosen password
-
-//     var promise_key = crypto.subtle.importKey(
-//         "raw",
-//         cryptoUtil.strToUint8Array(password),
-//         {"name": "PBKDF2"},
-//         false,
-//         ["deriveKey"]
-//     );
-//     promise_key.then(function(importedPassword) {
-//         return crypto.subtle.deriveKey(
-//             {
-//                 "name": "PBKDF2",
-//                 "salt": cryptoUtil.strToUint8Array("the salt is this random string2"),
-//                 "iterations": 123978,
-//                 "hash": "SHA-256"
-//             },
-//             importedPassword,
-//             {
-//                 "name": "AES-GCM",
-//                 "length": 128
-//             },
-//             false,
-//             ["encrypt", "decrypt"]
-//         );
-//     }).then(function(key) {
-//         encrypt_data(vector, key, "some message!!").then(encryptedByteArray=>{
-//             let hex = Buffer.from(encryptedByteArray).toString('hex');
-//             console.log("encryptedByteArray="+hex);
-//             let t2 =  new Uint8Array(crptoUtil.hexToBytes(hex));
-//             decrypt_data(vector, key, t2 );
-//         });
-//     }).catch = function(e) {
-//         console.log("Error while importing key: " + e.message);
-//     }
-// }
-
-// function encrypt_data(iv, key, message) {
-//     var encrypt_promise = crypto.subtle.encrypt({name: "AES-GCM", iv: iv}, key, new Uint8Array(cryptoUtil.hexToBytes(message)));
-//     encrypt_promise.then(result => new Uint8Array(result)).catch(e=> console.log("Error while encrypting data: " + e.message));
-//     return encrypt_promise;
-// }
-
-// function decrypt_data(iv, key, encrypted) {
-//     var decrypt_promise = crypto.subtle.decrypt({name: "AES-GCM", iv: iv}, key, encrypted);
-
-//     decrypt_promise.then(
-//         function(result){
-//             var decrypted_data = new Uint8Array(result);
-//             console.log("Decrypted data: " +  cryptoUtil.Uint8ArrayToStr(decrypted_data));
-//         },
-//         function(e) {
-//             console.log("Error while decrypting data: " + e.message);
-//         }
-//     );
-// }
-
-// test = async ()=>{
-//     try {
-//         let hexCypherText = await KeyEncryption.encryptStr("some message!!","my password");
-//         console.log('='+hexCypherText);
-//         let decryptText = await KeyEncryption.decryptToStr(hexCypherText, "my password");
-//         console.log('= decrypted text='+decryptText);
-//     } catch(e) {
-//         console.log('Encryption/decryption failed: '+e);
-//     }
-// }
-
-// test();
