@@ -182,22 +182,34 @@ cryptoUtil.byteArraysEqual  = (bytes1, bytes2) => {
 
 
 cryptoUtil.getPrivateKey = async (pass) => {
-    let [, privateKey] = await cryptoUtil.getPublicPrivateKeyPair(pass);
+    let {privateKey} = await cryptoUtil.getPublicPrivateKey(pass);
     return privateKey;
 }
 
 cryptoUtil.getPublicKey = async (pass) => {
-    let [publicKey] = await cryptoUtil.getPublicPrivateKeyPair(pass);
+    let {publicKey} = await cryptoUtil.getPublicPrivateKey(pass);
     return publicKey;
 }
 
-cryptoUtil.getPublicPrivateKeyPair = async (pass) => {
-    let passBytes = cryptoUtil.strToBytes(pass);
-    const digest = await cryptoUtil.SHA256(passBytes);
-    let {p,s} = curve25519.keygen(digest);
-    let publicKey = cryptoUtil.bytesToHex(p);
-    let privateKey = cryptoUtil.bytesToHex(s);
-    return [publicKey,privateKey];
+cryptoUtil.getPublicPrivateKey = async (passPhrase) => {
+    let seed = await this.getSeed(passPhrase);
+    return cryptoUtil.getPublicPrivateKeyFromSeed(seed);
 }
+
+
+cryptoUtil.getPublicPrivateKeyFromSeed = (seed) => {
+    let {p,s} = curve25519.keygen(seed);
+    return {publicKey: cryptoUtil.bytesToHex(p), privateKey: cryptoUtil.bytesToHex(s) }
+}
+
+cryptoUtil.getSeed = async (passPhrase) => {
+    return cryptoUtil.SHA256(cryptoUtil.strToBytes(passPhrase));
+}
+
+// cryptoUtil.getEncryptedJSONFromPassPhrase = async (passPhrase) => {
+//     let seed = await this.getSeed(passPhrase);
+//     //KeyEncryption.
+// }
+
 
 module.exports = cryptoUtil;

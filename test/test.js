@@ -4,6 +4,7 @@ const TestWalletGen = require('./test-walletgen');
 const TestGet = require('./test-get');
 const TestSignature = require('./test-signature');
 const TestEncryption = require('./test-encryption');
+const TestWallet = require('./test-wallet');
 
 /**
  * These are simple tests to help develop this sdk, not quality assurance unit tests.
@@ -11,12 +12,13 @@ const TestEncryption = require('./test-encryption');
  */
 
 console.log('executing test');
-TestSend.test();
-TestWalletGen.test();
-TestGet.test();
-//TestEvents.test();
-TestSignature.test();
-TestEncryption.test();
+// TestSend.test();
+// TestWalletGen.test();
+// TestGet.test();
+// //TestEvents.test();
+// TestSignature.test();
+// TestEncryption.test();
+TestWallet.test();
 
 
 

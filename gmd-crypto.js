@@ -1,6 +1,7 @@
 const axios = require('./get-axios');
 const cryptoUtil = require('./crypto-util');
 const KeyEncryption = require('./key-encryption');
+const Wallet = require('./lib/wallet');
 
 const GMD = {
     baseURL: 'https://node.thecoopnetwork.io',
@@ -242,6 +243,27 @@ GMD.getPublicKeyFromRS = (rsAccount) => {
     });
 }
 
+GMD.getWalletFromEncryptedJSON = async (encryptedJSON, encryptionPassword) => {
+    let seed = await KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
+    let {publicKey, privateKey} = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
+    return new Wallet(publicKey, privateKey);
+};
+
+GMD.generateWallet = async () => {
+    let secretPassphrase = require('./pass-gen').generatePass();
+    return GMD.generateWalletFromPassphrase(secretPassphrase);
+}
+
+GMD.generateWalletFromPassphrase = async (secretPassphrase) => {
+    let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
+    return new Wallet(publicKey, privateKey);
+};
+
+GMD.getEncryptedJSONFromPassphrase = async (passPhrase, encryptionPassword) => {
+    let seed = await cryptoUtil.getSeed(passPhrase);
+    return KeyEncryption.encryptBytes(seed, encryptionPassword);
+}
+
 /**
  * Generate full GMD account.
  * @param {String} secretPassphrase [optional ]if not provided, a secret 12 word passphrase will be generated. Generation of passphrase happens locally,
@@ -262,7 +284,7 @@ GMD.generateAccount = async (secretPassphrase) => {
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
-    let [publicKey, privateKey] = await cryptoUtil.getPublicPrivateKeyPair(secretPassphrase);
+    let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
