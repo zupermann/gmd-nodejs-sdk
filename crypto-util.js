@@ -192,7 +192,7 @@ cryptoUtil.getPublicKey = async (pass) => {
 }
 
 cryptoUtil.getPublicPrivateKey = async (passPhrase) => {
-    let seed = await this.getSeed(passPhrase);
+    let seed = await cryptoUtil.getSeed(passPhrase);
     return cryptoUtil.getPublicPrivateKeyFromSeed(seed);
 }
 

@@ -1,20 +1,24 @@
 const cryptoUtil = require('./../crypto-util');
 const Encryption = require('./../key-encryption');
+//TS variant - for future use
 
 class Wallet {
-    constructor(publicKey, privKey, accountRS) {
+    publicKey: string;
+    privKey: string;
+    accountRS: string;
+    constructor(publicKey, privKey, accountRS?) {
         console.log('==Wallet== constructor');
         this.publicKey = publicKey;
         this.privKey = privKey;
         this.accountRS = accountRS;
     }
 
-    static async fromPassphrase(passPhrase){
+    static async fromPassphrase(passPhrase:string){
         let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(passPhrase);
         return new Wallet(publicKey, privateKey);
     }
 
-    static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword){
+    static async encryptedJSONFromPassPhrase(passPhrase :string, encryptionPassword: string){
         let seed = await cryptoUtil.getSeed(passPhrase);
         return Encryption.encryptBytes(seed, encryptionPassword);
     }

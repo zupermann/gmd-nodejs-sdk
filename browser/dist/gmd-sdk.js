@@ -201,7 +201,7 @@ cryptoUtil.getPublicKey = async (pass) => {
 }
 
 cryptoUtil.getPublicPrivateKey = async (passPhrase) => {
-    let seed = await this.getSeed(passPhrase);
+    let seed = await cryptoUtil.getSeed(passPhrase);
     return cryptoUtil.getPublicPrivateKeyFromSeed(seed);
 }
 
@@ -1335,9 +1335,7 @@ GMD.getPublicKeyFromRS = (rsAccount) => {
 }
 
 GMD.getWalletFromEncryptedJSON = async (encryptedJSON, encryptionPassword) => {
-    let seed = await KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
-    let {publicKey, privateKey} = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
-    return new Wallet(publicKey, privateKey);
+    return Wallet.walletFromEncryptedJSON(encryptedJSON, encryptionPassword);
 };
 
 GMD.generateWallet = async () => {
@@ -1346,13 +1344,11 @@ GMD.generateWallet = async () => {
 }
 
 GMD.generateWalletFromPassphrase = async (secretPassphrase) => {
-    let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
-    return new Wallet(publicKey, privateKey);
+    return Wallet.fromPassphrase(secretPassphrase);
 };
 
 GMD.getEncryptedJSONFromPassphrase = async (passPhrase, encryptionPassword) => {
-    let seed = await cryptoUtil.getSeed(passPhrase);
-    return KeyEncryption.encryptBytes(seed, encryptionPassword);
+    Wallet.encryptedJSONFromPassPhrase(passPhrase, encryptionPassword);
 }
 
 /**
@@ -1673,7 +1669,8 @@ let genEncryptionKeyFromPassword = async (password, salt, iterations) => {
 module.exports = KeyEncryption;
 }).call(this)}).call(this,require("buffer").Buffer)
 },{"./crypto-util":4,"./get-crypto":2,"buffer":12}],10:[function(require,module,exports){
-
+const cryptoUtil = require('./../crypto-util');
+const Encryption = require('./../key-encryption');
 
 class Wallet {
     constructor(publicKey, privKey, accountRS) {
@@ -1683,13 +1680,30 @@ class Wallet {
         this.accountRS = accountRS;
     }
 
-    details(){
-        console.log('details: '+this.publicKey);
+    static async fromPassphrase(passPhrase){
+        let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(passPhrase);
+        return new Wallet(publicKey, privateKey);
     }
+
+    static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword){
+        let seed = await cryptoUtil.getSeed(passPhrase);
+        return Encryption.encryptBytes(seed, encryptionPassword);
+    }
+
+    static async walletFromEncryptedJSON(encryptedJSON, encryptionPassword){
+        let seed = await Encryption.decryptToBytes(encryptedJSON, encryptionPassword);
+        let {publicKey, privateKey} = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
+        return new Wallet(publicKey, privateKey);
+    }
+
+    details(){
+        console.log('details '+ JSON.stringify(this,null,2))
+    }
+
 }
 
 module.exports = Wallet;
-},{}],11:[function(require,module,exports){
+},{"./../crypto-util":4,"./../key-encryption":9}],11:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength

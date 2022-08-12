@@ -244,9 +244,7 @@ GMD.getPublicKeyFromRS = (rsAccount) => {
 }
 
 GMD.getWalletFromEncryptedJSON = async (encryptedJSON, encryptionPassword) => {
-    let seed = await KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
-    let {publicKey, privateKey} = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
-    return new Wallet(publicKey, privateKey);
+    return Wallet.walletFromEncryptedJSON(encryptedJSON, encryptionPassword);
 };
 
 GMD.generateWallet = async () => {
@@ -255,13 +253,11 @@ GMD.generateWallet = async () => {
 }
 
 GMD.generateWalletFromPassphrase = async (secretPassphrase) => {
-    let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
-    return new Wallet(publicKey, privateKey);
+    return Wallet.fromPassphrase(secretPassphrase);
 };
 
 GMD.getEncryptedJSONFromPassphrase = async (passPhrase, encryptionPassword) => {
-    let seed = await cryptoUtil.getSeed(passPhrase);
-    return KeyEncryption.encryptBytes(seed, encryptionPassword);
+    Wallet.encryptedJSONFromPassPhrase(passPhrase, encryptionPassword);
 }
 
 /**
