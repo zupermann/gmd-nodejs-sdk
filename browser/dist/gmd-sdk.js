@@ -1096,7 +1096,8 @@ const Wallet = require('./lib/wallet');
 
 const GMD = {
     baseURL: 'https://node.thecoopnetwork.io',
-    util: {}
+    util: {},
+    Wallet: Wallet
 };
 
 /**
@@ -1371,7 +1372,7 @@ GMD.generateAccount = async (secretPassphrase) => {
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
-    let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
+    let { publicKey, privateKey } = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
@@ -1673,31 +1674,26 @@ const cryptoUtil = require('./../crypto-util');
 const Encryption = require('./../key-encryption');
 
 class Wallet {
-    constructor(publicKey, privKey, accountRS) {
-        console.log('==Wallet== constructor');
+    constructor(publicKey, privateKey, accountRS) {
         this.publicKey = publicKey;
-        this.privKey = privKey;
+        this.privateKey = privateKey;
         this.accountRS = accountRS;
     }
 
-    static async fromPassphrase(passPhrase){
-        let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(passPhrase);
+    static async fromPassphrase(passPhrase) {
+        let { publicKey, privateKey } = await cryptoUtil.getPublicPrivateKey(passPhrase);
         return new Wallet(publicKey, privateKey);
     }
 
-    static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword){
+    static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword) {
         let seed = await cryptoUtil.getSeed(passPhrase);
         return Encryption.encryptBytes(seed, encryptionPassword);
     }
 
-    static async walletFromEncryptedJSON(encryptedJSON, encryptionPassword){
+    static async fromEncryptedJSON(encryptedJSON, encryptionPassword) {
         let seed = await Encryption.decryptToBytes(encryptedJSON, encryptionPassword);
-        let {publicKey, privateKey} = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
+        let { publicKey, privateKey } = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
         return new Wallet(publicKey, privateKey);
-    }
-
-    details(){
-        console.log('details '+ JSON.stringify(this,null,2))
     }
 
 }

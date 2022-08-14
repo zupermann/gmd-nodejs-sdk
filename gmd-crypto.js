@@ -5,7 +5,8 @@ const Wallet = require('./lib/wallet');
 
 const GMD = {
     baseURL: 'https://node.thecoopnetwork.io',
-    util: {}
+    util: {},
+    Wallet: Wallet
 };
 
 /**
@@ -280,7 +281,7 @@ GMD.generateAccount = async (secretPassphrase) => {
  * @returns a promise that resolves to a JSON containing: account ID, RS account ID (format GMD-...), public key, private key, secret passphrase.
  */
 GMD.getWalletDetailsFromPassPhrase = async (secretPassphrase) => {
-    let {publicKey, privateKey} = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
+    let { publicKey, privateKey } = await cryptoUtil.getPublicPrivateKey(secretPassphrase);
 
     return GMD.getAccountId(publicKey).then((data) => {
         data.secretPassphrase = secretPassphrase;
