@@ -1,2 +1,3 @@
-var { GMD } = require('../index');
-window.GMD = GMD;
+window.GMD = {
+    Wallet: require('../dist/wallet.js')
+}

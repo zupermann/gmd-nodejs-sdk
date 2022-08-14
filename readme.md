@@ -1,8 +1,10 @@
+# This readme is not up to date. TODO: rewrite it.
+
 ### Intro 
 
 - This is an SDK to interact with Coop Network Node.
 - Main use is for local signing of transactions.
-- Offers helper functions to easily call Coop Networl node API.
+- Offers helper functions to easily call Coop Network node API.
 - This SDK was initially designed for NodeJS. For running it in browser please see browser directory
   - please read browser/readme.md and browser/index.html example
 - For more API details please read comments in gmd-crypto.js file.

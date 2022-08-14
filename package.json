@@ -1,16 +1,17 @@
 {
-  "name": "gmd-nodejs-sdk",
-  "version": "1.3.1",
-  "description": "SDK to interact with Coop Network GMD node using NodeJS",
+  "name": "gmd-sdk",
+  "version": "2.0.0",
+  "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "main": "gmd-crypto.js",
   "scripts": {
     "test": "node ./test/test.js",
     "build-browser": "browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "build": "npx eslint . && tsc && npm run build-browser"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zupermann/gmd-nodejs-sdk.git"
+    "url": "https://github.com/CoopNetwork/GMD-nodejs-sdk.git"
   },
   "browser": {
     "./get-crypto.js": "./browser/get-crypto-window.js",
@@ -21,12 +22,14 @@
     "axios": "^0.26.0"
   },
   "devDependencies": {
+    "@types/node": "^18.7.3",
     "browserify": "^17.0.0",
     "eslint": "^8.20.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
+    "typescript": "^4.7.4",
     "uglify-js": "^3.16.3"
   },
   "engines": {
@@ -40,7 +43,7 @@
   "author": "George A. (https://github.com/zupermann)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zupermann/gmd-nodejs-sdk/issues"
+    "url": "https://github.com/CoopNetwork/gmd-nodejs-sdk/issues"
   },
-  "homepage": "https://github.com/zupermann/gmd-nodejs-sdk#readme"
+  "homepage": "https://github.com/CoopNetwork/gmd-nodejs-sdk#readme"
 }
