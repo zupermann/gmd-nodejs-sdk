@@ -2,9 +2,8 @@
   "name": "gmd-sdk",
   "version": "2.0.0",
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
-  "main": "gmd-crypto.js",
   "scripts": {
-    "test": "node ./test/test.js",
+    "test": "tsc && node ./test/test.js",
     "build-browser": "browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
     "lint": "npx eslint .",
     "build": "npx eslint . && tsc && npm run build-browser"

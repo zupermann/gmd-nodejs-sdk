@@ -3,12 +3,21 @@ import Encryption from './key-encryption';
 
 class Wallet {
     publicKey: string;
-    privKey: string;
+    privateKey: string;
     accountRS: string;
     constructor(publicKey: string, privKey: string, accountRS = '') {
         this.publicKey = publicKey;
-        this.privKey = privKey;
+        this.privateKey = privKey;
         this.accountRS = accountRS;
+    }
+
+    static async newWallet(numberOfWords?: number) {
+        if (!numberOfWords) {
+            numberOfWords = 12;
+        }
+        const PassPhraseGenerator = require('./pass-gen');
+        const passPhrase = PassPhraseGenerator.generatePass(numberOfWords);
+        return this.fromPassphrase(passPhrase);
     }
 
     static async fromPassphrase(passPhrase: string) {
@@ -25,10 +34,6 @@ class Wallet {
         let seed = await Encryption.decryptToBytes(encryptedJSON, encryptionPassword);
         let { publicKey, privateKey } = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
         return new Wallet(publicKey, privateKey);
-    }
-
-    details() {
-        console.log('details ' + JSON.stringify(this, null, 2))
     }
 
 }
