@@ -3,9 +3,9 @@ const { GMD } = require('../index');
 GMD.setURL('https://node.thecoopnetwork.io:6877'); //testnet node
 
 const TestSend = {
-    test: () => {
+    test: async () => {
         console.log('TestSend execute...');
-        TestSend.test5();
+        await TestSend.test5();
         console.log('TestSend finished.');
     }
 };
@@ -16,7 +16,7 @@ const TestSend = {
 //     });
 // }
 
-TestSend.test2 = () => {
+TestSend.test2 = async () => {
     const dataSendMoney = {
         requestType: 'sendMoney',
         recipient: 'GMD-43MP-76UW-L69N-ALW39',
@@ -30,7 +30,7 @@ TestSend.test2 = () => {
     });
 }
 
-TestSend.test3 = () => {
+TestSend.test3 = async () => {
     console.log('sending 1 GMD to ALW39 from CJMBC');
     GMD.sendMoney('GMD-43MP-76UW-L69N-ALW39',
         '100000',
@@ -38,14 +38,14 @@ TestSend.test3 = () => {
         '100000000').then(console.log);
 }
 
-TestSend.test4 = () => {
+TestSend.test4 = async () => {
     GMD.createUnsignedSendMoneyTransaction('GMD-43MP-76UW-L69N-ALW39', '100000', 'f72258e2be98b5047c0cb4ff667b48a100699bf175122027aafd4182835f3c2e', '100000000')
         .then(res => GMD.signTransaction(res.unsignedTransactionBytes, 'screen drawn leave power connect confidence liquid everytime wall either poet shook')
             .then(signedTransaction => GMD.broadcastSignedTransaction(signedTransaction).then(console.log))
         );
 }
 
-TestSend.test5 = () => {
+TestSend.test5 = async () => {
     const data = {
         requestType: 'sendMessage',
         recipient: 'GMD-43MP-76UW-L69N-ALW39',
@@ -54,7 +54,7 @@ TestSend.test5 = () => {
         feeNQT: '100000000',
         deadline: '1440'
     };
-    GMD.apiCallAndSign('post', data, 'screen drawn leave power connect confidence liquid everytime wall either poet shook');
+    return GMD.apiCallAndSign('post', data, 'screen drawn leave power connect confidence liquid everytime wall either poet shook');
 }
 
 module.exports = TestSend;

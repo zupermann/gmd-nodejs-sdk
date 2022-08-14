@@ -20,11 +20,7 @@ KeyEncryption.encryptHex = async (messageHex, password) => {
     if (messageHex && messageHex.length % 2) {
         throw new Error('Hex string to be encrypted cannot have a 0 length or have an even number of hex digits');
     }
-    let { iv, salt } = await generateIvAndSalt();
-    let encryptionKey = await genEncryptionKeyFromPassword(password, salt, iterations);
-    let encryptedByteArray = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(cryptoUtil.hexToBytes(messageHex)));
-    let ciphertext = Buffer.from(encryptedByteArray).toString('hex');
-    return { iv: cryptoUtil.Uint8ArrayToHex(iv), salt: cryptoUtil.Uint8ArrayToHex(salt), ciphertext: ciphertext };
+    return KeyEncryption.encryptBytes(cryptoUtil.hexToBytes(messageHex), password);
 };
 
 /**
@@ -35,6 +31,14 @@ KeyEncryption.encryptHex = async (messageHex, password) => {
  */
 KeyEncryption.encryptStr = async (message, password) => {
     return KeyEncryption.encryptHex(cryptoUtil.strToHex(message), password);
+}
+
+KeyEncryption.encryptBytes = async (bytes, password) => {
+    let { iv, salt } = await generateIvAndSalt();
+    let encryptionKey = await genEncryptionKeyFromPassword(password, salt, iterations);
+    let encryptedByteArray = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(bytes));
+    let ciphertext = Buffer.from(encryptedByteArray).toString('hex');
+    return { iv: cryptoUtil.Uint8ArrayToHex(iv), salt: cryptoUtil.Uint8ArrayToHex(salt), ciphertext: ciphertext };
 }
 
 /**
@@ -59,6 +63,11 @@ KeyEncryption.decryptToHex = async (ciphertext, password) => {
 KeyEncryption.decryptToStr = async (ciphertext, password) => {
     let decryptedData = await decrypt(ciphertext, password);
     return cryptoUtil.Uint8ArrayToStr(decryptedData);
+}
+
+KeyEncryption.decryptToBytes = async (ciphertext, password) => {
+    let result = await decrypt(ciphertext,password);
+    return Array.from(result);
 }
 
 let decrypt = async (encryptedJSON, password) => {
