@@ -5,12 +5,12 @@ const TestEncryption = {};
 TestEncryption.test = async () => {
     let data = "0ff345ba23091efeeabc332675112a";
     console.log("==encr== Data to be encrypted: " + data);
-    let encryptedJSON;
+    let encryptedJSON = '';
     try {
         encryptedJSON = await GMD.util.encryptHex(data, "Some password Example 123#^&5");
     } catch (e) {
         console.log('==encr== cannot encrypt: ' + e);
-        return;
+        return encryptedJSON;
     }
     console.log("==encr== encryptedJSON: " + JSON.stringify(encryptedJSON, null, 2));
     try {
@@ -20,7 +20,7 @@ TestEncryption.test = async () => {
         console.log('==encr== cannot decrypt: ' + e)
     }
 
-
+    return encryptedJSON;
 }
 
 
