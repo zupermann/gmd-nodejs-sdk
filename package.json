@@ -3,9 +3,9 @@
   "version": "2.0.0",
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
-    "test": "tsc && node ./test/test.js",
+    "test": "tsc && node ./__test__/main.test.js",
     "build-browser": "tsc && browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
-    "build-browser-test": "npm run build-browser && browserify ./test/test.js -o ./test/browser/test-bundle.js",
+    "build-browser-test": "npm run build-browser && browserify ./__test__/main.test.js -o ./__test__/browser/test-bundle.js",
     "lint": "npx eslint .",
     "build": "tsc && npx eslint . && npm run build-browser"
   },

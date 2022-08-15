@@ -1,6 +1,92 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const testWallet = require('./wallet.test');
+const testProvider = require('./provider.test');
+
+(async () => {
+    console.log('---Testing wallet...');
+    await testWallet();
+    console.log('---Testing wallet finished.');
+
+    console.log('---Testing provider...');
+    await testProvider();
+    console.log('---Testing provider finished.');
+})();
+
+},{"./provider.test":2,"./wallet.test":3}],2:[function(require,module,exports){
+const Provider = require('../dist/provider');
+
+const testProvider = async () => {
+    let provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
+    console.log(JSON.stringify(provider, null, 2));
+
+    paramsGetTransactions = {
+        requestType: 'getTransactionsBulk',
+        pageSize: 3,
+        page: 0
+    }
+
+    //provider.setLogger(console.log);
+    let data = await provider.apiCall('get', paramsGetTransactions);
+    console.log('==========' + JSON.stringify(data, null, 2));
+}
+
+module.exports = testProvider;
+},{"../dist/provider":11}],3:[function(require,module,exports){
+const Wallet = require('../dist/wallet.js')
+const secretPassphrase = "this is a paasphrase example";
+const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
+const privKey = "39c8834113346ed3ba6ac90eff170a302a9264680f9d5a578931dd2c22d65e05";
+const accountId = '5224136646640665215';
+const accountRS = 'GMD-W2MZ-M9WK-G2LJ-6WYZJ';
+
+const testWallet = async () => {
+    console.log('Testing wallet from passphrase');
+    await test1();
+    console.log('Wallet from passphrase test OK');
+
+    console.log('Testing wallet encryption');
+    await test2();
+    console.log('Wallet encryption test OK');
+
+    console.log('Testing new wallet generation');
+    await test3();
+    console.log('New wallet generation test OK');
+};
+
+const test1 = async () => {
+    let wallet = await Wallet.fromPassphrase(secretPassphrase);
+    console.assert(wallet.publicKey == pubKey, "Wallet.fromPassphrase failed publicKey");
+    console.assert(wallet.privateKey == privKey, "Wallet.fromPassphrase failed privateKey");
+    console.assert(wallet.accountId == accountId, "Wallet.fromPassphrase failed accountId");
+    console.assert(wallet.accountRS == accountRS, "Wallet.fromPassphrase failed accountRS");
+}
+
+const test2 = async () => {
+    let encryptedJSON = await Wallet.encryptedJSONFromPassPhrase(secretPassphrase, "password example 123@@!");
+    let wallet = await Wallet.fromEncryptedJSON(encryptedJSON, "password example 123@@!");
+    console.assert(wallet.publicKey == pubKey, "Wallet.fromEncryptedJSON failed publicKey");
+    console.assert(wallet.privateKey == privKey, "Wallet.fromEncryptedJSON failed privateKey");
+    console.assert(wallet.accountId == accountId, "Wallet.fromEncryptedJSON failed accountId");
+    console.assert(wallet.accountRS == accountRS, "Wallet.fromEncryptedJSON failed accountRS");
+}
+
+const test3 = async () => {
+    let wallet = await Wallet.newWallet();
+    console.log('New wallet generated: ' + JSON.stringify(wallet, null, 2));
+    console.assert(typeof wallet.publicKey === 'string' && wallet.publicKey.length > 0, "New wallet failed. No public key generated.");
+    console.assert(typeof wallet.privateKey === 'string' && wallet.privateKey.length > 0, "New wallet failed. No private key generated.");
+    console.assert(typeof wallet.accountId === 'string' && wallet.accountId.length > 0, "New wallet failed. No accountId key generated.");
+    console.assert(typeof wallet.accountRS === 'string' && wallet.accountRS.length > 0, "New wallet failed. No accountRS key generated.");
+}
+
+
+module.exports = testWallet;
+},{"../dist/wallet.js":13}],4:[function(require,module,exports){
+/* eslint-disable no-undef */
+module.exports = axios;
+},{}],5:[function(require,module,exports){
 module.exports = window.crypto;
-},{}],2:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 "use strict";
 const webcrypto = require('./get-crypto');
 const curve25519 = require('./curve25519');
@@ -203,7 +289,7 @@ cryptoUtil.publicKeyToRSAccount = async (publicKeyHex) => {
 };
 module.exports = cryptoUtil;
 
-},{"./curve25519":3,"./get-crypto":1,"./rs-address":6}],3:[function(require,module,exports){
+},{"./curve25519":7,"./get-crypto":5,"./rs-address":12}],7:[function(require,module,exports){
 "use strict";
 /* Ported to JavaScript from Java 07/01/14.
  *
@@ -948,7 +1034,77 @@ var curve25519 = function () {
 }();
 module.exports = curve25519;
 
-},{}],4:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RemoteAPICaller = void 0;
+const axios = require('./get-axios');
+class RemoteAPICaller {
+    constructor(baseURL) {
+        this.baseURL = baseURL;
+        this.log = null;
+    }
+    setLogger(logger) {
+        this.log = logger;
+    }
+    /**
+    *  API call to a GMD node. This call is done over network.
+    *
+    *
+    * @param {String} method HTTP method (only 'get' or 'post' are used)
+    * @param {JSON} params *  Full set of API methods and parameters can be seen here: https://node.thecoopnetwork.io/test.
+    *  All parameters will be passed as a single json via 'params' parameter. Exception to this is 'secretPhrase' parameter which
+    * should not be included in params, and even if you include it, the SDK will delete it before making the API call to the node.
+    *  In addition to all parameters described above there are the following parameters:
+    *  'requestType': [mandatory] wich is the name of the GMD API method (e.g. 'sendMoney', 'sendMessage', 'getPolls' etc..)
+    *  'baseURL': [optional] URL of the GMD node where this request is performed. By default https://node.thecoopnetwork.io main net is used.
+    *  'httpTimeout' [optional] parameter for HTTP request to specify a timeout when GMD node not reachable. Axios default is used if this param is not specified.
+    *  Example:
+    *  params = {
+            requestType: 'getAccountsBulk',
+            pageSize: 3,
+            page: 0,
+            baseURL: 'https://node.thecoopnetwork.io:6877'
+        }
+    * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
+    */
+    async apiCall(method, params) {
+        const { url, httpTimeout } = this.processParams(params);
+        const config = { method: method, url: url + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
+        if (httpTimeout && httpTimeout > 0) {
+            config.httpTimeout = httpTimeout;
+        }
+        return axios(config).then((res) => {
+            if (this.log)
+                this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
+            return res.data;
+        });
+    }
+    processParams(params) {
+        let url;
+        let httpTimeout;
+        if (params) {
+            if ('secretPhrase' in params) {
+                delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
+            }
+            if ('httpTimeout' in params) {
+                httpTimeout = params.httpTimeout;
+                delete params.httpTimeout;
+            }
+            if ('baseURL' in params) {
+                url = params.baseURL;
+                delete params.baseURL;
+            }
+            else {
+                url = this.baseURL.toString();
+            }
+        }
+        return { url, httpTimeout };
+    }
+}
+exports.RemoteAPICaller = RemoteAPICaller;
+
+},{"./get-axios":4}],9:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const cryptoUtil = require('./crypto-util');
@@ -1047,7 +1203,7 @@ const KeyEncryption = {
 };
 exports.default = KeyEncryption;
 
-},{"./crypto-util":2,"./get-crypto":1}],5:[function(require,module,exports){
+},{"./crypto-util":6,"./get-crypto":5}],10:[function(require,module,exports){
 "use strict";
 const words = ["like", "just", "love", "know", "never", "want", "time", "out", "there", "make", "look", "eye", "down", "only", "think", "heart", "back", "then", "into", "about", "more", "away", "still", "them", "take", "thing", "even", "through", "long", "always", "world", "too", "friend", "tell", "try", "hand", "thought", "over", "here", "other", "need", "smile", "again", "much", "cry", "been", "night", "ever", "little", "said", "end", "some", "those", "around", "mind", "people", "girl", "leave", "dream", "left", "turn", "myself", "give", "nothing", "really", "off", "before", "something", "find", "walk", "wish", "good", "once", "place", "ask", "stop", "keep", "watch", "seem", "everything", "wait", "got", "yet", "made", "remember", "start", "alone", "run", "hope", "maybe", "believe", "body", "hate", "after", "close", "talk", "stand", "own", "each", "hurt", "help", "home", "god", "soul", "new", "many", "two", "inside", "should", "true", "first", "fear", "mean", "better", "play", "another", "gone", "change", "use", "wonder", "someone", "hair", "cold", "open", "best", "any", "behind", "happen", "water", "dark", "laugh", "stay", "forever", "name", "work", "show", "sky", "break", "came", "deep", "door", "put", "black", "together", "upon", "happy", "such", "great", "white", "matter", "fill", "past", "please", "burn", "cause", "enough", "touch", "moment", "soon", "voice", "scream", "anything", "stare", "sound", "red", "everyone", "hide", "kiss", "truth", "death", "beautiful", "mine", "blood", "broken", "very", "pass", "next", "forget", "tree", "wrong", "air", "mother", "understand", "lip", "hit", "wall", "memory", "sleep", "free", "high", "realize", "school", "might", "skin", "sweet", "perfect", "blue", "kill", "breath", "dance", "against", "fly", "between", "grow", "strong", "under", "listen", "bring", "sometimes", "speak", "pull", "person", "become", "family", "begin", "ground", "real", "small", "father", "sure", "feet", "rest", "young", "finally", "land", "across", "today", "different", "guy", "line", "fire", "reason", "reach", "second", "slowly", "write", "eat", "smell", "mouth", "step", "learn", "three", "floor", "promise", "breathe", "darkness", "push", "earth", "guess", "save", "song", "above", "along", "both", "color", "house", "almost", "sorry", "anymore", "brother", "okay", "dear", "game", "fade", "already", "apart", "warm", "beauty", "heard", "notice", "question", "shine", "began", "piece", "whole", "shadow", "secret", "street", "within", "finger", "point", "morning", "whisper", "child", "moon", "green", "story", "glass", "kid", "silence", "since", "soft", "yourself", "empty", "shall", "angel", "answer", "baby", "bright", "dad", "path", "worry", "hour", "drop", "follow", "power", "war", "half", "flow", "heaven", "act", "chance", "fact", "least", "tired", "children", "near", "quite", "afraid", "rise", "sea", "taste", "window", "cover", "nice", "trust", "lot", "sad", "cool", "force", "peace", "return", "blind", "easy", "ready", "roll", "rose", "drive", "held", "music", "beneath", "hang", "mom", "paint", "emotion", "quiet", "clear", "cloud", "few", "pretty", "bird", "outside", "paper", "picture", "front", "rock", "simple", "anyone", "meant", "reality", "road", "sense", "waste", "bit", "leaf", "thank", "happiness", "meet", "men", "smoke", "truly", "decide", "self", "age", "book", "form", "alive", "carry", "escape", "damn", "instead", "able", "ice", "minute", "throw", "catch", "leg", "ring", "course", "goodbye", "lead", "poem", "sick", "corner", "desire", "known", "problem", "remind", "shoulder", "suppose", "toward", "wave", "drink", "jump", "woman", "pretend", "sister", "week", "human", "joy", "crack", "grey", "pray", "surprise", "dry", "knee", "less", "search", "bleed", "caught", "clean", "embrace", "future", "king", "son", "sorrow", "chest", "hug", "remain", "sat", "worth", "blow", "daddy", "final", "parent", "tight", "also", "create", "lonely", "safe", "cross", "dress", "evil", "silent", "bone", "fate", "perhaps", "anger", "class", "scar", "snow", "tiny", "tonight", "continue", "control", "dog", "edge", "mirror", "month", "suddenly", "comfort", "given", "loud", "quickly", "gaze", "plan", "rush", "stone", "town", "battle", "ignore", "spirit", "stood", "stupid", "yours", "brown", "build", "dust", "hey", "kept", "pay", "phone", "twist", "although", "ball", "beyond", "hidden", "nose", "taken", "fail", "float", "pure", "somehow", "wash", "wrap", "angry", "cheek", "creature", "forgotten", "heat", "rip", "single", "space", "special", "weak", "whatever", "yell", "anyway", "blame", "job", "choose", "country", "curse", "drift", "echo", "figure", "grew", "laughter", "neck", "suffer", "worse", "yeah", "disappear", "foot", "forward", "knife", "mess", "somewhere", "stomach", "storm", "beg", "idea", "lift", "offer", "breeze", "field", "five", "often", "simply", "stuck", "win", "allow", "confuse", "enjoy", "except", "flower", "seek", "strength", "calm", "grin", "gun", "heavy", "hill", "large", "ocean", "shoe", "sigh", "straight", "summer", "tongue", "accept", "crazy", "everyday", "exist", "grass", "mistake", "sent", "shut", "surround", "table", "ache", "brain", "destroy", "heal", "nature", "shout", "sign", "stain", "choice", "doubt", "glance", "glow", "mountain", "queen", "stranger", "throat", "tomorrow", "city", "either", "fish", "flame", "rather", "shape", "spin", "spread", "ash", "distance", "finish", "image", "imagine", "important", "nobody", "shatter", "warmth", "became", "feed", "flesh", "funny", "lust", "shirt", "trouble", "yellow", "attention", "bare", "bite", "money", "protect", "amaze", "appear", "born", "choke", "completely", "daughter", "fresh", "friendship", "gentle", "probably", "six", "deserve", "expect", "grab", "middle", "nightmare", "river", "thousand", "weight", "worst", "wound", "barely", "bottle", "cream", "regret", "relationship", "stick", "test", "crush", "endless", "fault", "itself", "rule", "spill", "art", "circle", "join", "kick", "mask", "master", "passion", "quick", "raise", "smooth", "unless", "wander", "actually", "broke", "chair", "deal", "favorite", "gift", "note", "number", "sweat", "box", "chill", "clothes", "lady", "mark", "park", "poor", "sadness", "tie", "animal", "belong", "brush", "consume", "dawn", "forest", "innocent", "pen", "pride", "stream", "thick", "clay", "complete", "count", "draw", "faith", "press", "silver", "struggle", "surface", "taught", "teach", "wet", "bless", "chase", "climb", "enter", "letter", "melt", "metal", "movie", "stretch", "swing", "vision", "wife", "beside", "crash", "forgot", "guide", "haunt", "joke", "knock", "plant", "pour", "prove", "reveal", "steal", "stuff", "trip", "wood", "wrist", "bother", "bottom", "crawl", "crowd", "fix", "forgive", "frown", "grace", "loose", "lucky", "party", "release", "surely", "survive", "teacher", "gently", "grip", "speed", "suicide", "travel", "treat", "vein", "written", "cage", "chain", "conversation", "date", "enemy", "however", "interest", "million", "page", "pink", "proud", "sway", "themselves", "winter", "church", "cruel", "cup", "demon", "experience", "freedom", "pair", "pop", "purpose", "respect", "shoot", "softly", "state", "strange", "bar", "birth", "curl", "dirt", "excuse", "lord", "lovely", "monster", "order", "pack", "pants", "pool", "scene", "seven", "shame", "slide", "ugly", "among", "blade", "blonde", "closet", "creek", "deny", "drug", "eternity", "gain", "grade", "handle", "key", "linger", "pale", "prepare", "swallow", "swim", "tremble", "wheel", "won", "cast", "cigarette", "claim", "college", "direction", "dirty", "gather", "ghost", "hundred", "loss", "lung", "orange", "present", "swear", "swirl", "twice", "wild", "bitter", "blanket", "doctor", "everywhere", "flash", "grown", "knowledge", "numb", "pressure", "radio", "repeat", "ruin", "spend", "unknown", "buy", "clock", "devil", "early", "false", "fantasy", "pound", "precious", "refuse", "sheet", "teeth", "welcome", "add", "ahead", "block", "bury", "caress", "content", "depth", "despite", "distant", "marry", "purple", "threw", "whenever", "bomb", "dull", "easily", "grasp", "hospital", "innocence", "normal", "receive", "reply", "rhyme", "shade", "someday", "sword", "toe", "visit", "asleep", "bought", "center", "consider", "flat", "hero", "history", "ink", "insane", "muscle", "mystery", "pocket", "reflection", "shove", "silently", "smart", "soldier", "spot", "stress", "train", "type", "view", "whether", "bus", "energy", "explain", "holy", "hunger", "inch", "magic", "mix", "noise", "nowhere", "prayer", "presence", "shock", "snap", "spider", "study", "thunder", "trail", "admit", "agree", "bag", "bang", "bound", "butterfly", "cute", "exactly", "explode", "familiar", "fold", "further", "pierce", "reflect", "scent", "selfish", "sharp", "sink", "spring", "stumble", "universe", "weep", "women", "wonderful", "action", "ancient", "attempt", "avoid", "birthday", "branch", "chocolate", "core", "depress", "drunk", "especially", "focus", "fruit", "honest", "match", "palm", "perfectly", "pillow", "pity", "poison", "roar", "shift", "slightly", "thump", "truck", "tune", "twenty", "unable", "wipe", "wrote", "coat", "constant", "dinner", "drove", "egg", "eternal", "flight", "flood", "frame", "freak", "gasp", "glad", "hollow", "motion", "peer", "plastic", "root", "screen", "season", "sting", "strike", "team", "unlike", "victim", "volume", "warn", "weird", "attack", "await", "awake", "built", "charm", "crave", "despair", "fought", "grant", "grief", "horse", "limit", "message", "ripple", "sanity", "scatter", "serve", "split", "string", "trick", "annoy", "blur", "boat", "brave", "clearly", "cling", "connect", "fist", "forth", "imagination", "iron", "jock", "judge", "lesson", "milk", "misery", "nail", "naked", "ourselves", "poet", "possible", "princess", "sail", "size", "snake", "society", "stroke", "torture", "toss", "trace", "wise", "bloom", "bullet", "cell", "check", "cost", "darling", "during", "footstep", "fragile", "hallway", "hardly", "horizon", "invisible", "journey", "midnight", "mud", "nod", "pause", "relax", "shiver", "sudden", "value", "youth", "abuse", "admire", "blink", "breast", "bruise", "constantly", "couple", "creep", "curve", "difference", "dumb", "emptiness", "gotta", "honor", "plain", "planet", "recall", "rub", "ship", "slam", "soar", "somebody", "tightly", "weather", "adore", "approach", "bond", "bread", "burst", "candle", "coffee", "cousin", "crime", "desert", "flutter", "frozen", "grand", "heel", "hello", "language", "level", "movement", "pleasure", "powerful", "random", "rhythm", "settle", "silly", "slap", "sort", "spoken", "steel", "threaten", "tumble", "upset", "aside", "awkward", "bee", "blank", "board", "button", "card", "carefully", "complain", "crap", "deeply", "discover", "drag", "dread", "effort", "entire", "fairy", "giant", "gotten", "greet", "illusion", "jeans", "leap", "liquid", "march", "mend", "nervous", "nine", "replace", "rope", "spine", "stole", "terror", "accident", "apple", "balance", "boom", "childhood", "collect", "demand", "depression", "eventually", "faint", "glare", "goal", "group", "honey", "kitchen", "laid", "limb", "machine", "mere", "mold", "murder", "nerve", "painful", "poetry", "prince", "rabbit", "shelter", "shore", "shower", "soothe", "stair", "steady", "sunlight", "tangle", "tease", "treasure", "uncle", "begun", "bliss", "canvas", "cheer", "claw", "clutch", "commit", "crimson", "crystal", "delight", "doll", "existence", "express", "fog", "football", "gay", "goose", "guard", "hatred", "illuminate", "mass", "math", "mourn", "rich", "rough", "skip", "stir", "student", "style", "support", "thorn", "tough", "yard", "yearn", "yesterday", "advice", "appreciate", "autumn", "bank", "beam", "bowl", "capture", "carve", "collapse", "confusion", "creation", "dove", "feather", "girlfriend", "glory", "government", "harsh", "hop", "inner", "loser", "moonlight", "neighbor", "neither", "peach", "pig", "praise", "screw", "shield", "shimmer", "sneak", "stab", "subject", "throughout", "thrown", "tower", "twirl", "wow", "army", "arrive", "bathroom", "bump", "cease", "cookie", "couch", "courage", "dim", "guilt", "howl", "hum", "husband", "insult", "led", "lunch", "mock", "mostly", "natural", "nearly", "needle", "nerd", "peaceful", "perfection", "pile", "price", "remove", "roam", "sanctuary", "serious", "shiny", "shook", "sob", "stolen", "tap", "vain", "void", "warrior", "wrinkle", "affection", "apologize", "blossom", "bounce", "bridge", "cheap", "crumble", "decision", "descend", "desperately", "dig", "dot", "flip", "frighten", "heartbeat", "huge", "lazy", "lick", "odd", "opinion", "process", "puzzle", "quietly", "retreat", "score", "sentence", "separate", "situation", "skill", "soak", "square", "stray", "taint", "task", "tide", "underneath", "veil", "whistle", "anywhere", "bedroom", "bid", "bloody", "burden", "careful", "compare", "concern", "curtain", "decay", "defeat", "describe", "double", "dreamer", "driver", "dwell", "evening", "flare", "flicker", "grandma", "guitar", "harm", "horrible", "hungry", "indeed", "lace", "melody", "monkey", "nation", "object", "obviously", "rainbow", "salt", "scratch", "shown", "shy", "stage", "stun", "third", "tickle", "useless", "weakness", "worship", "worthless", "afternoon", "beard", "boyfriend", "bubble", "busy", "certain", "chin", "concrete", "desk", "diamond", "doom", "drawn", "due", "felicity", "freeze", "frost", "garden", "glide", "harmony", "hopefully", "hunt", "jealous", "lightning", "mama", "mercy", "peel", "physical", "position", "pulse", "punch", "quit", "rant", "respond", "salty", "sane", "satisfy", "savior", "sheep", "slept", "social", "sport", "tuck", "utter", "valley", "wolf", "aim", "alas", "alter", "arrow", "awaken", "beaten", "belief", "brand", "ceiling", "cheese", "clue", "confidence", "connection", "daily", "disguise", "eager", "erase", "essence", "everytime", "expression", "fan", "flag", "flirt", "foul", "fur", "giggle", "glorious", "ignorance", "law", "lifeless", "measure", "mighty", "muse", "north", "opposite", "paradise", "patience", "patient", "pencil", "petal", "plate", "ponder", "possibly", "practice", "slice", "spell", "stock", "strife", "strip", "suffocate", "suit", "tender", "tool", "trade", "velvet", "verse", "waist", "witch", "aunt", "bench", "bold", "cap", "certainly", "click", "companion", "creator", "dart", "delicate", "determine", "dish", "dragon", "drama", "drum", "dude", "everybody", "feast", "forehead", "former", "fright", "fully", "gas", "hook", "hurl", "invite", "juice", "manage", "moral", "possess", "raw", "rebel", "royal", "scale", "scary", "several", "slight", "stubborn", "swell", "talent", "tea", "terrible", "thread", "torment", "trickle", "usually", "vast", "violence", "weave", "acid", "agony", "ashamed", "awe", "belly", "blend", "blush", "character", "cheat", "common", "company", "coward", "creak", "danger", "deadly", "defense", "define", "depend", "desperate", "destination", "dew", "duck", "dusty", "embarrass", "engine", "example", "explore", "foe", "freely", "frustrate", "generation", "glove", "guilty", "health", "hurry", "idiot", "impossible", "inhale", "jaw", "kingdom", "mention", "mist", "moan", "mumble", "mutter", "observe", "ode", "pathetic", "pattern", "pie", "prefer", "puff", "rape", "rare", "revenge", "rude", "scrape", "spiral", "squeeze", "strain", "sunset", "suspend", "sympathy", "thigh", "throne", "total", "unseen", "weapon", "weary"];
 const PassPhraseGenerator = {
@@ -1069,7 +1225,24 @@ const PassPhraseGenerator = {
 };
 module.exports = PassPhraseGenerator;
 
-},{"./get-crypto":1}],6:[function(require,module,exports){
+},{"./get-crypto":5}],11:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Provider = void 0;
+const gmd_api_caller_1 = require("./gmd-api-caller");
+class Provider extends gmd_api_caller_1.RemoteAPICaller {
+    constructor(baseURL) {
+        super(baseURL);
+    }
+    //Letest block
+    async getBlockNumber() {
+        return 0;
+    }
+}
+exports.Provider = Provider;
+module.exports = Provider;
+
+},{"./gmd-api-caller":8}],12:[function(require,module,exports){
 "use strict";
 /*
     NXT address class, extended version (with error guessing).
@@ -1357,7 +1530,7 @@ function RSAddress() {
 }
 module.exports = RSAddress;
 
-},{}],7:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1399,63 +1572,4 @@ class Wallet {
 }
 module.exports = Wallet;
 
-},{"./crypto-util":2,"./key-encryption":4,"./pass-gen":5}],8:[function(require,module,exports){
-const Wallet = require('../dist/wallet.js')
-const secretPassphrase = "this is a paasphrase example";
-const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
-const privKey = "39c8834113346ed3ba6ac90eff170a302a9264680f9d5a578931dd2c22d65e05";
-const accountId = '5224136646640665215';
-const accountRS = 'GMD-W2MZ-M9WK-G2LJ-6WYZJ';
-
-const testWallet = async () => {
-    console.log('Testing wallet from passphrase');
-    await test1();
-    console.log('Wallet from passphrase test OK');
-
-    console.log('Testing wallet encryption');
-    await test2();
-    console.log('Wallet encryption test OK');
-
-    console.log('Testing new wallet generation');
-    await test3();
-    console.log('New wallet generation test OK');
-};
-
-const test1 = async () => {
-    let wallet = await Wallet.fromPassphrase(secretPassphrase);
-    console.assert(wallet.publicKey == pubKey, "Wallet.fromPassphrase failed publicKey");
-    console.assert(wallet.privateKey == privKey, "Wallet.fromPassphrase failed privateKey");
-    console.assert(wallet.accountId == accountId, "Wallet.fromPassphrase failed accountId");
-    console.assert(wallet.accountRS == accountRS, "Wallet.fromPassphrase failed accountRS");
-}
-
-const test2 = async () => {
-    let encryptedJSON = await Wallet.encryptedJSONFromPassPhrase(secretPassphrase, "password example 123@@!");
-    let wallet = await Wallet.fromEncryptedJSON(encryptedJSON, "password example 123@@!");
-    console.assert(wallet.publicKey == pubKey, "Wallet.fromEncryptedJSON failed publicKey");
-    console.assert(wallet.privateKey == privKey, "Wallet.fromEncryptedJSON failed privateKey");
-    console.assert(wallet.accountId == accountId, "Wallet.fromEncryptedJSON failed accountId");
-    console.assert(wallet.accountRS == accountRS, "Wallet.fromEncryptedJSON failed accountRS");
-}
-
-const test3 = async () => {
-    let wallet = await Wallet.newWallet();
-    console.log('New wallet generated: ' + JSON.stringify(wallet, null, 2));
-    console.assert(typeof wallet.publicKey === 'string' && wallet.publicKey.length > 0, "New wallet failed. No public key generated.");
-    console.assert(typeof wallet.privateKey === 'string' && wallet.privateKey.length > 0, "New wallet failed. No private key generated.");
-    console.assert(typeof wallet.accountId === 'string' && wallet.accountId.length > 0, "New wallet failed. No accountId key generated.");
-    console.assert(typeof wallet.accountRS === 'string' && wallet.accountRS.length > 0, "New wallet failed. No accountRS key generated.");
-}
-
-
-module.exports = testWallet;
-},{"../dist/wallet.js":7}],9:[function(require,module,exports){
-const testWallet = require("./test-wallet");
-
-(async () => {
-    console.log('---Testing wallet...');
-    await testWallet();
-    console.log('---Testing wallet finished.');
-})();
-
-},{"./test-wallet":8}]},{},[9]);
+},{"./crypto-util":6,"./key-encryption":9,"./pass-gen":10}]},{},[1]);
