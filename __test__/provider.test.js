@@ -13,6 +13,9 @@ const testProvider = async () => {
     //provider.setLogger(console.log);
     let data = await provider.apiCall('get', paramsGetTransactions);
     console.log('==========' + JSON.stringify(data, null, 2));
+
+    let blockNo = await provider.getBlockNumber();
+    console.log('blockNo=' + blockNo);
 }
 
 module.exports = testProvider;

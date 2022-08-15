@@ -1,6 +1,7 @@
 import cryptoUtil from './crypto-util';
 import KeyEncryption from './key-encryption';
 import { IEncryptedJSON } from './key-encryption';
+import { Provider } from './provider';
 
 
 class Wallet {
@@ -8,13 +9,28 @@ class Wallet {
     privateKey: string;
     accountId: string;
     accountRS: string;
-    constructor(publicKey: string, privKey: string, accountId: string) {
+    provider: Provider | null;
+    constructor(publicKey: string, privKey: string, accountId: string, provider: Provider | null = null) {
         this.publicKey = publicKey;
         this.privateKey = privKey;
         this.accountId = accountId;
         this.accountRS = cryptoUtil.accountIdToRS(accountId);
+        this.provider = provider;
     }
 
+    connect(provider: Provider) {
+        this.provider = provider;
+    }
+
+
+    async signTransaction(unsignedTransactionHex: string): Promise<string> {
+        const sig = await cryptoUtil.signBytesPrivateKey(unsignedTransactionHex, this.privateKey);
+        return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
+    }
+
+
+
+    //static wallet creation functions
     static async newWallet(numberOfWords?: number) {
         if (!numberOfWords) {
             numberOfWords = 12;

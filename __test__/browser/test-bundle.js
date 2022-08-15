@@ -28,6 +28,9 @@ const testProvider = async () => {
     //provider.setLogger(console.log);
     let data = await provider.apiCall('get', paramsGetTransactions);
     console.log('==========' + JSON.stringify(data, null, 2));
+
+    let blockNo = await provider.getBlockNumber();
+    console.log('blockNo=' + blockNo);
 }
 
 module.exports = testProvider;
@@ -1234,13 +1237,41 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
     constructor(baseURL) {
         super(baseURL);
     }
-    //Letest block
-    async getBlockNumber() {
-        return 0;
+    //Latest block
+    getBlockNumber() {
+        return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height);
+    }
+    getBalance(rsAccount) {
+        return this.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => data.balanceNQT);
+    }
+    //returns unsigned transaction in hex format that a wallet can sign (see Wallet.signTransaction)
+    async createTransaction(data) {
+        let transaction = await this.apiCall('post', data);
+        return transaction.unsignedTransactionBytes;
     }
 }
 exports.Provider = Provider;
 module.exports = Provider;
+// export enum TransactionType {
+//     PAYMENT = 0,
+//     MESSAGING = 1,
+//     COLORED_COINS = 2,
+//     DIGITAL_GOODS = 3,
+//     ACCOUNT_CONTROL = 4,
+//     MONETARY_SYSTEM = 5,
+//     DATA = 6,
+//     SHUFFLING = 7
+// }
+// const TransactionSubtype = [
+//     ["ORDINARY_PAYMENT"],
+//     ["ARBITRARY_MESSAGE", "ALIAS_ASSIGNMENT", "POLL_CREATION", "VOTE_CASTING", "HUB_ANNOUNCEMENT", "ACCOUNT_INFO", "ALIAS_SELL", "ALIAS_BUY", "ALIAS_DELETE", "PHASING_VOTE_CASTING", "ACCOUNT_PROPERTY", "ACCOUNT_PROPERTY_DELETE"],
+//     ["ASSET_ISSUANCE", "ASSET_TRANSFER", "ASK_ORDER_PLACEMENT", "BID_ORDER_PLACEMENT", "ASK_ORDER_CANCELLATION", "BID_ORDER_CANCELLATION", "DIVIDEND_PAYMENT", "ASSET_DELETE", "ASSET_INCREASE", "PROPERTY_SET", "PROPERTY_DELETE"],
+//     ["LISTING", "DELISTING", "PRICE_CHANGE", "QUANTITY_CHANGE", "PURCHASE", "DELIVERY", "FEEDBACK", "REFUND"],
+//     ["EFFECTIVE_BALANCE_LEASING", "PHASING_ONLY"],
+//     ["CURRENCY_ISSUANCE", "RESERVE_INCREASE", "RESERVE_CLAIM", "CURRENCY_TRANSFER", "PUBLISH_EXCHANGE_OFFER", "EXCHANGE_BUY", "EXCHANGE_SELL", "CURRENCY_MINTING", "CURRENCY_DELETION"],
+//     ["UPLOAD", "EXTEND"],
+//     ["CREATION", "REGISTRATION", "PROCESSING", "RECIPIENTS", "VERIFICATION", "CANCELLATION"]
+// ]
 
 },{"./gmd-api-caller":8}],12:[function(require,module,exports){
 "use strict";
@@ -1539,12 +1570,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const crypto_util_1 = __importDefault(require("./crypto-util"));
 const key_encryption_1 = __importDefault(require("./key-encryption"));
 class Wallet {
-    constructor(publicKey, privKey, accountId) {
+    constructor(publicKey, privKey, accountId, provider = null) {
         this.publicKey = publicKey;
         this.privateKey = privKey;
         this.accountId = accountId;
         this.accountRS = crypto_util_1.default.accountIdToRS(accountId);
+        this.provider = provider;
     }
+    connect(provider) {
+        this.provider = provider;
+    }
+    async signTransaction(unsignedTransactionHex) {
+        const sig = await crypto_util_1.default.signBytesPrivateKey(unsignedTransactionHex, this.privateKey);
+        return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
+    }
+    //static wallet creation functions
     static async newWallet(numberOfWords) {
         if (!numberOfWords) {
             numberOfWords = 12;
