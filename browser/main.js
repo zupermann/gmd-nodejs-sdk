@@ -1,3 +1,3 @@
 window.GMD = {
-    Wallet: require('../dist/wallet.js')
+    Wallet: require('../dist/wallet')
 }

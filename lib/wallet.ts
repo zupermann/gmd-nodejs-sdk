@@ -4,11 +4,13 @@ import Encryption from './key-encryption';
 class Wallet {
     publicKey: string;
     privateKey: string;
+    accountId: string;
     accountRS: string;
-    constructor(publicKey: string, privKey: string, accountRS = '') {
+    constructor(publicKey: string, privKey: string, accountId: string) {
         this.publicKey = publicKey;
         this.privateKey = privKey;
-        this.accountRS = accountRS;
+        this.accountId = accountId;
+        this.accountRS = cryptoUtil.accountIdToRS(accountId);
     }
 
     static async newWallet(numberOfWords?: number) {
@@ -21,8 +23,8 @@ class Wallet {
     }
 
     static async fromPassphrase(passPhrase: string) {
-        let { publicKey, privateKey } = await cryptoUtil.getPublicPrivateKey(passPhrase);
-        return new Wallet(publicKey, privateKey);
+        let { publicKey, privateKey, accountId } = await cryptoUtil.getWalletDetails(passPhrase);
+        return new Wallet(publicKey, privateKey, accountId);
     }
 
     static async encryptedJSONFromPassPhrase(passPhrase: string, encryptionPassword: string) {
@@ -32,8 +34,12 @@ class Wallet {
 
     static async fromEncryptedJSON(encryptedJSON: string, encryptionPassword: string): Promise<Wallet> {
         let seed = await Encryption.decryptToBytes(encryptedJSON, encryptionPassword);
-        let { publicKey, privateKey } = cryptoUtil.getPublicPrivateKeyFromSeed(seed);
-        return new Wallet(publicKey, privateKey);
+        let { publicKey, privateKey, accountId } = await cryptoUtil.getWalletDetailsFromSeed(seed);
+        return new Wallet(publicKey, privateKey, accountId);
+    }
+
+    static async accountIdFromPublicKey(publicKeyHex: string): Promise<string> {
+        return cryptoUtil.publicKeyToAccountId(publicKeyHex);
     }
 
 }
