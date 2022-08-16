@@ -1,4 +1,5 @@
 import { RemoteAPICaller } from "./gmd-api-caller";
+import { Transaction } from "./transactions/transaction";
 
 
 
@@ -21,11 +22,31 @@ export class Provider extends RemoteAPICaller implements IProvider {
     }
 
 
-    //returns unsigned transaction in hex format that a wallet can sign (see Wallet.signTransaction)
-    async createTransaction(data: Record<string, any>): Promise<string> {
-        const transaction = await this.apiCall('post', data);
-        return transaction.unsignedTransactionBytes;
+
+    async createUnsignedTransaction(transaction: Transaction) {
+        if (transaction.canProcessRequest()) {
+            const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
+            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes, unsignedTransaction.transactionJSON);
+        } else {
+            throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
+        }
     }
+
+    broadCastTransactionFromHex(signedTransactionHex: string): Promise<Record<string, any>> {
+        return this.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
+    }
+
+    async broadcastTransaction(transaction: Transaction): Promise<Record<string, any>> {
+        if (transaction.canBroadcast() && transaction.signedTransactionBytes) {
+            const result = await this.broadCastTransactionFromHex(transaction.signedTransactionBytes)
+            transaction.onBroadcasted(result);
+            return result;
+        } else {
+            throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
+        }
+    }
+
+
 }
 
 

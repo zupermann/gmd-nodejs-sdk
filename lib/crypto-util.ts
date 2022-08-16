@@ -85,10 +85,11 @@ export namespace CryptoUtil {
             return true;
         }
 
-
-
+        export function isHex(str: string | null): boolean {
+            let re = /^[0-9a-fA-F]+$/;
+            return str != null && str.length > 0 && re.test(str);
+        }
     }
-
 
 
     export namespace Crypto {
@@ -120,10 +121,10 @@ export namespace CryptoUtil {
 
         export async function signBytes(message: string, passPhrase: string): Promise<string> {
             const privateKey = await getPrivateKey(passPhrase);
-            return signBytesPrivateKey(message, privateKey);
+            return signHex(message, privateKey);
         }
 
-        export async function signBytesPrivateKey(message: string, privateKey: string): Promise<string> {
+        export async function signHex(message: string, privateKey: string): Promise<string> {
             const messageBytes = Converters.hexToBytes(message);
             const s = Converters.hexToBytes(privateKey);
             const m = await SHA256(messageBytes);

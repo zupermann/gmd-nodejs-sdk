@@ -16,7 +16,7 @@ interface ISaltIV {
     salt: Uint8Array;
 }
 
-const KeyEncryption = {
+export const KeyEncryption = {
     /**
      * Encrypts message in hex format. Most common use is to encrypt private keys.
      *

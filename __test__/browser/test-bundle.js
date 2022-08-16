@@ -1,18 +1,24 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 const testWallet = require('./wallet.test');
 const testProvider = require('./provider.test');
+const testSendMoney = require('./send-money.test');
 
 (async () => {
-    console.log('---Testing wallet...');
-    await testWallet();
-    console.log('---Testing wallet finished.');
+    // console.log('---Testing wallet...');
+    // await testWallet();
+    // console.log('---Testing wallet finished.');
 
-    console.log('---Testing provider...');
-    await testProvider();
-    console.log('---Testing provider finished.');
+    // console.log('---Testing provider...');
+    // await testProvider();
+    // console.log('---Testing provider finished.');
+
+
+    console.log('---Testing send money...');
+    await testSendMoney();
+    console.log('---Testing send money finished.');
 })();
 
-},{"./provider.test":2,"./wallet.test":3}],2:[function(require,module,exports){
+},{"./provider.test":2,"./send-money.test":3,"./wallet.test":4}],2:[function(require,module,exports){
 const Provider = require('../dist/provider');
 
 const testProvider = async () => {
@@ -34,7 +40,25 @@ const testProvider = async () => {
 }
 
 module.exports = testProvider;
-},{"../dist/provider":11}],3:[function(require,module,exports){
+},{"../dist/provider":12}],3:[function(require,module,exports){
+SendMoney = require('../dist/transactions/send-money');
+Provider = require('../dist/provider');
+Wallet = require('../dist/wallet');
+
+
+const testSendMoney = async () => {
+    provider = new Provider(new URL('https://ccone.asiminei.com:6877'));
+    wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
+
+    transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
+    await provider.createUnsignedTransaction(transaction);
+    await wallet.signTransaction(transaction);
+    await provider.broadcastTransaction(transaction);
+
+}
+
+module.exports = testSendMoney;
+},{"../dist/provider":12,"../dist/transactions/send-money":15,"../dist/wallet":17}],4:[function(require,module,exports){
 const Wallet = require('../dist/wallet.js')
 const secretPassphrase = "this is a paasphrase example";
 const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
@@ -86,12 +110,12 @@ const test3 = async () => {
 
 
 module.exports = testWallet;
-},{"../dist/wallet.js":14}],4:[function(require,module,exports){
+},{"../dist/wallet.js":17}],5:[function(require,module,exports){
 /* eslint-disable no-undef */
 module.exports = axios;
-},{}],5:[function(require,module,exports){
-module.exports = window.crypto;
 },{}],6:[function(require,module,exports){
+module.exports = window.crypto;
+},{}],7:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -184,6 +208,11 @@ var CryptoUtil;
             return true;
         }
         Converters.byteArraysEqual = byteArraysEqual;
+        function isHex(str) {
+            let re = /^[0-9a-fA-F]+$/;
+            return str != null && str.length > 0 && re.test(str);
+        }
+        Converters.isHex = isHex;
     })(Converters = CryptoUtil.Converters || (CryptoUtil.Converters = {}));
     let Crypto;
     (function (Crypto) {
@@ -209,10 +238,10 @@ var CryptoUtil;
         Crypto.SHA256 = SHA256;
         async function signBytes(message, passPhrase) {
             const privateKey = await getPrivateKey(passPhrase);
-            return signBytesPrivateKey(message, privateKey);
+            return signHex(message, privateKey);
         }
         Crypto.signBytes = signBytes;
-        async function signBytesPrivateKey(message, privateKey) {
+        async function signHex(message, privateKey) {
             const messageBytes = Converters.hexToBytes(message);
             const s = Converters.hexToBytes(privateKey);
             const m = await SHA256(messageBytes);
@@ -222,7 +251,7 @@ var CryptoUtil;
             const v = curve25519_1.default.sign(h, x, s);
             return Converters.bytesToHex(v ? v.concat(h) : []);
         }
-        Crypto.signBytesPrivateKey = signBytesPrivateKey;
+        Crypto.signHex = signHex;
         async function getPrivateKey(pass) {
             const { privateKey } = await getWalletDetails(pass);
             return privateKey;
@@ -283,7 +312,7 @@ var CryptoUtil;
     })(Crypto = CryptoUtil.Crypto || (CryptoUtil.Crypto = {}));
 })(CryptoUtil = exports.CryptoUtil || (exports.CryptoUtil = {}));
 
-},{"./curve25519":7,"./get-crypto":5,"./rs-address":12}],7:[function(require,module,exports){
+},{"./curve25519":8,"./get-crypto":6,"./rs-address":13}],8:[function(require,module,exports){
 "use strict";
 /* Ported to JavaScript from Java 07/01/14.
  *
@@ -1028,7 +1057,7 @@ var curve25519 = function () {
 }();
 module.exports = curve25519;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1101,17 +1130,18 @@ class RemoteAPICaller {
 }
 exports.RemoteAPICaller = RemoteAPICaller;
 
-},{"./get-axios":4}],9:[function(require,module,exports){
+},{"./get-axios":5}],10:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KeyEncryption = void 0;
 const crypto_util_1 = require("./crypto-util");
 var Converters = crypto_util_1.CryptoUtil.Converters;
 const get_crypto_1 = __importDefault(require("./get-crypto"));
 const iterations = 223978;
-const KeyEncryption = {
+exports.KeyEncryption = {
     /**
      * Encrypts message in hex format. Most common use is to encrypt private keys.
      *
@@ -1202,9 +1232,9 @@ const KeyEncryption = {
         }, false, ["encrypt", "decrypt"]);
     }
 };
-exports.default = KeyEncryption;
+exports.default = exports.KeyEncryption;
 
-},{"./crypto-util":6,"./get-crypto":5}],10:[function(require,module,exports){
+},{"./crypto-util":7,"./get-crypto":6}],11:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1230,7 +1260,7 @@ const PassPhraseGenerator = {
 };
 exports.default = PassPhraseGenerator;
 
-},{"./get-crypto":5}],11:[function(require,module,exports){
+},{"./get-crypto":6}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Provider = void 0;
@@ -1246,10 +1276,27 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
     getBalance(rsAccount) {
         return this.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => data.balanceNQT);
     }
-    //returns unsigned transaction in hex format that a wallet can sign (see Wallet.signTransaction)
-    async createTransaction(data) {
-        const transaction = await this.apiCall('post', data);
-        return transaction.unsignedTransactionBytes;
+    async createUnsignedTransaction(transaction) {
+        if (transaction.canProcessRequest()) {
+            const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
+            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes, unsignedTransaction.transactionJSON);
+        }
+        else {
+            throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
+        }
+    }
+    broadCastTransactionFromHex(signedTransactionHex) {
+        return this.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
+    }
+    async broadcastTransaction(transaction) {
+        if (transaction.canBroadcast() && transaction.signedTransactionBytes) {
+            const result = await this.broadCastTransactionFromHex(transaction.signedTransactionBytes);
+            transaction.onBroadcasted(result);
+            return result;
+        }
+        else {
+            throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
+        }
     }
 }
 exports.Provider = Provider;
@@ -1275,7 +1322,7 @@ module.exports = Provider;
 //     ["CREATION", "REGISTRATION", "PROCESSING", "RECIPIENTS", "VERIFICATION", "CANCELLATION"]
 // ]
 
-},{"./gmd-api-caller":8}],12:[function(require,module,exports){
+},{"./gmd-api-caller":9}],13:[function(require,module,exports){
 "use strict";
 /*
     NXT address class, extended version (with error guessing).
@@ -1569,31 +1616,160 @@ class RSAddress {
 exports.RSAddress = RSAddress;
 exports.default = RSAddress;
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Signer = void 0;
 const crypto_util_1 = require("./crypto-util");
+const transaction_1 = require("./transactions/transaction");
+var Converters = crypto_util_1.CryptoUtil.Converters;
 class Signer {
     constructor(publicKey, privKey) {
         this.publicKey = publicKey;
         this.privateKey = privKey;
     }
-    async signTransaction(unsignedTransactionHex) {
-        const sig = await crypto_util_1.CryptoUtil.Crypto.signBytesPrivateKey(unsignedTransactionHex, this.privateKey);
+    async signTransactionBytes(unsignedTransactionHex) {
+        const sig = await crypto_util_1.CryptoUtil.Crypto.signHex(unsignedTransactionHex, this.privateKey);
         return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
+    }
+    async signTransaction(transaction) {
+        if (transaction.state === transaction_1.TransactionState.UNSIGNED && transaction.unsignedTransactionBytes && Converters.isHex(transaction.unsignedTransactionBytes)) {
+            const signedTransactionBytes = await this.signTransactionBytes(transaction.unsignedTransactionBytes);
+            transaction.onSigned(signedTransactionBytes);
+        }
+    }
+    signHex(hexMessage) {
+        return crypto_util_1.CryptoUtil.Crypto.signHex(hexMessage, this.privateKey);
+    }
+    signStr(message) {
+        return this.signHex(Converters.strToHex(message));
+    }
+    static verifySignatureHex(signature, unsignedHexMessage, publicKey) {
+        return crypto_util_1.CryptoUtil.Crypto.verifySignature(signature, unsignedHexMessage, publicKey);
+    }
+    static verifySignatureStr(signature, unsignedStrMessage, publicKey) {
+        return this.verifySignatureHex(signature, Converters.strToHex(unsignedStrMessage), publicKey);
     }
 }
 exports.Signer = Signer;
 
-},{"./crypto-util":6}],14:[function(require,module,exports){
+},{"./crypto-util":7,"./transactions/transaction":16}],15:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SendMoney = void 0;
+const transaction_1 = require("./transaction");
+class SendMoney extends transaction_1.Transaction {
+    getRequestType() {
+        return "sendMoney";
+    }
+    constructor(requestJSON) {
+        super(requestJSON);
+    }
+    static createTransaction(recipient, amountNQT, senderPublicKey, feeNQT = '100000000', deadline = 1440, message = "") {
+        const reqJSON = {
+            recipient: recipient,
+            amountNQT: amountNQT,
+            publicKey: senderPublicKey,
+            feeNQT: feeNQT,
+            deadline: deadline,
+            message: message
+        };
+        return new SendMoney(reqJSON);
+    }
+}
+exports.SendMoney = SendMoney;
+module.exports = SendMoney;
+
+},{"./transaction":16}],16:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Transaction = exports.TransactionState = void 0;
+const crypto_util_1 = require("../crypto-util");
+var Converters = crypto_util_1.CryptoUtil.Converters;
+var TransactionState;
+(function (TransactionState) {
+    TransactionState[TransactionState["ERROR"] = 0] = "ERROR";
+    TransactionState[TransactionState["REQUEST_CREATED"] = 1] = "REQUEST_CREATED";
+    TransactionState[TransactionState["UNSIGNED"] = 2] = "UNSIGNED";
+    TransactionState[TransactionState["SIGNED"] = 3] = "SIGNED";
+    TransactionState[TransactionState["BROADCASTED"] = 4] = "BROADCASTED";
+    TransactionState[TransactionState["CONFIRMED"] = 5] = "CONFIRMED";
+    TransactionState[TransactionState["REJECTED"] = 6] = "REJECTED";
+})(TransactionState = exports.TransactionState || (exports.TransactionState = {}));
+/**
+ * Any transaction has 5 steps:
+ * 1. Create request JSON
+ * 2. Process request JSON to an unsigned transaction (remote API call to a node is necessary)
+ * 3. Sign the unsigned transaction
+ * 4. Broadcast the signed transaction (remote API call to a node is necessary)
+ * 5. [Optional] Transaction is confirmed after the trasaction is written to the blockchain and at leat
+ *    one block is written on top of the transaction block (remote API call to a node is necessary).
+ *
+ * The state of the transaction can only go through each step in the specified order.
+ */
+class Transaction {
+    constructor(requestJSON) {
+        this._unsignedTransactionBytes = null;
+        this._signedTransactionBytes = null;
+        this._transactionJSON = null;
+        requestJSON.requestType = this.getRequestType();
+        this._requestJSON = requestJSON;
+        this._state = TransactionState.REQUEST_CREATED;
+    }
+    canProcessRequest() {
+        return this._state === TransactionState.REQUEST_CREATED;
+    }
+    onTransactionRequestProcessed(unsignedTransactionBytes, transactionJSON) {
+        if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
+            this._unsignedTransactionBytes = unsignedTransactionBytes;
+            this._transactionJSON = transactionJSON;
+            this._state = TransactionState.UNSIGNED;
+        }
+        else {
+            throw new Error('onTransactionRequestProcessed: Transaction cannot be processed');
+        }
+    }
+    canBeSigned() {
+        return this._state === TransactionState.UNSIGNED && Converters.isHex(this._unsignedTransactionBytes);
+    }
+    onSigned(signedTransactionBytes) {
+        if (this.canBeSigned() && Converters.isHex(signedTransactionBytes)) {
+            this._signedTransactionBytes = signedTransactionBytes;
+            this._state = TransactionState.SIGNED;
+        }
+    }
+    canBroadcast() {
+        return Converters.isHex(this.signedTransactionBytes) && this.state === TransactionState.SIGNED;
+    }
+    onBroadcasted(result) {
+        if (this.canBroadcast()) {
+            this._state == TransactionState.BROADCASTED;
+        }
+    }
+    get requestJSON() {
+        return this._requestJSON;
+    }
+    get state() {
+        return this._state;
+    }
+    get unsignedTransactionBytes() {
+        return this._unsignedTransactionBytes;
+    }
+    get signedTransactionBytes() {
+        return this._signedTransactionBytes;
+    }
+}
+exports.Transaction = Transaction;
+
+},{"../crypto-util":7}],17:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Wallet = void 0;
 const crypto_util_1 = require("./crypto-util");
-const key_encryption_1 = __importDefault(require("./key-encryption"));
+const key_encryption_1 = require("./key-encryption");
 const pass_gen_1 = __importDefault(require("./pass-gen"));
 const signer_1 = require("./signer");
 class Wallet extends signer_1.Signer {
@@ -1613,10 +1789,10 @@ class Wallet extends signer_1.Signer {
     }
     static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword) {
         const seed = await crypto_util_1.CryptoUtil.Crypto.getSeed(passPhrase);
-        return key_encryption_1.default.encryptBytes(seed, encryptionPassword);
+        return key_encryption_1.KeyEncryption.encryptBytes(seed, encryptionPassword);
     }
     static async fromEncryptedJSON(encryptedJSON, encryptionPassword) {
-        const seed = await key_encryption_1.default.decryptToBytes(encryptedJSON, encryptionPassword);
+        const seed = await key_encryption_1.KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
         const { publicKey, privateKey, accountId } = await crypto_util_1.CryptoUtil.Crypto.getWalletDetailsFromSeed(seed);
         return new Wallet(publicKey, privateKey, accountId);
     }
@@ -1627,6 +1803,7 @@ class Wallet extends signer_1.Signer {
         return pass_gen_1.default.generatePass(numberOfWords);
     }
 }
+exports.Wallet = Wallet;
 module.exports = Wallet;
 
-},{"./crypto-util":6,"./key-encryption":9,"./pass-gen":10,"./signer":13}]},{},[1]);
+},{"./crypto-util":7,"./key-encryption":10,"./pass-gen":11,"./signer":14}]},{},[1]);

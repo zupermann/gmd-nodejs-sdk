@@ -1,12 +1,11 @@
 import { CryptoUtil } from './crypto-util';
-import KeyEncryption from './key-encryption';
+import { KeyEncryption, IEncryptedJSON } from './key-encryption';
 import PassPhraseGenerator from './pass-gen'
-import { IEncryptedJSON } from './key-encryption';
 import { Provider } from './provider';
 import { Signer } from './signer';
 
 
-class Wallet extends Signer {
+export class Wallet extends Signer {
     accountId: string;
     accountRS: string;
     provider: Provider | null;
