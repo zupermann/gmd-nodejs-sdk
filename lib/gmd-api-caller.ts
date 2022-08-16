@@ -1,4 +1,4 @@
-const axios = require('./get-axios');
+import axios from './get-axios';
 export type Logger = (msg: string) => void;
 
 export class RemoteAPICaller {
@@ -34,7 +34,7 @@ export class RemoteAPICaller {
         }
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
-    async apiCall(method: string, params: any): Promise<any> {
+    async apiCall(method: string, params: Record<string, any>): Promise<Record<string, any>> {
         const { url, httpTimeout } = this.processParams(params);
         const config = { method: method, url: url + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
         if (httpTimeout && httpTimeout > 0) {

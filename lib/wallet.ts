@@ -1,5 +1,6 @@
 import { CryptoUtil } from './crypto-util';
 import KeyEncryption from './key-encryption';
+import PassPhraseGenerator from './pass-gen'
 import { IEncryptedJSON } from './key-encryption';
 import { Provider } from './provider';
 import { Signer } from './signer';
@@ -22,18 +23,18 @@ class Wallet extends Signer {
 
     //static wallet creation functions
     static async fromPassphrase(passPhrase: string) {
-        let { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetails(passPhrase);
+        const { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetails(passPhrase);
         return new Wallet(publicKey, privateKey, accountId);
     }
 
     static async encryptedJSONFromPassPhrase(passPhrase: string, encryptionPassword: string) {
-        let seed = await CryptoUtil.Crypto.getSeed(passPhrase);
+        const seed = await CryptoUtil.Crypto.getSeed(passPhrase);
         return KeyEncryption.encryptBytes(seed, encryptionPassword);
     }
 
     static async fromEncryptedJSON(encryptedJSON: IEncryptedJSON, encryptionPassword: string): Promise<Wallet> {
-        let seed = await KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
-        let { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetailsFromSeed(seed);
+        const seed = await KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
+        const { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetailsFromSeed(seed);
         return new Wallet(publicKey, privateKey, accountId);
     }
 
@@ -42,9 +43,8 @@ class Wallet extends Signer {
     }
 
     static generatePassphrase(numberOfWords?: number): string {
-        return require('./pass-gen').generatePass(numberOfWords);
+        return PassPhraseGenerator.generatePass(numberOfWords);
     }
-
 }
 
 module.exports = Wallet;

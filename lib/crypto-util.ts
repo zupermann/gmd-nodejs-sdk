@@ -1,5 +1,5 @@
-const webcrypto = require('./get-crypto');
-const curve25519 = require('./curve25519');
+import webcrypto from './get-crypto';
+import curve25519 from './curve25519';
 
 import { RSAddress } from './rs-address'
 
@@ -13,7 +13,7 @@ export namespace CryptoUtil {
         }
 
         export function strToBytes(str: string): number[] {
-            let result = [];
+            const result = [];
             for (let i = 0; i < str.length; i++) {
                 result.push(str.charCodeAt(i));
             }
@@ -29,7 +29,8 @@ export namespace CryptoUtil {
         }
 
         export function hexToBytes(hex: string): number[] {
-            for (var bytes = [], c = 0; c < hex.length; c += 2) {
+            const bytes = [];
+            for (let c = 0; c < hex.length; c += 2) {
                 bytes.push(parseInt(hex.substr(c, 2), 16));
             }
             return bytes;
@@ -58,11 +59,10 @@ export namespace CryptoUtil {
         }
 
         export function Uint8ArrayToHex(buffer: Uint8Array): string {
-            var array = Array.from(buffer);
-            return bytesToHex(array);
+            return bytesToHex(Array.from(buffer));
         }
 
-        function bytesToString(bytesArray: number[]): string {
+        export function bytesToString(bytesArray: number[]): string {
             return String.fromCharCode.apply(null, bytesArray);
         }
 
@@ -77,7 +77,7 @@ export namespace CryptoUtil {
             if (bytes1.length !== bytes2.length) {
                 return false;
             }
-            for (var i = 0; i < bytes1.length; ++i) {
+            for (let i = 0; i < bytes1.length; ++i) {
                 if (bytes1[i] !== bytes2[i]) {
                     return false;
                 }
@@ -92,7 +92,14 @@ export namespace CryptoUtil {
 
 
     export namespace Crypto {
-        async function SHA256(in1: number[], in2?: number[]): Promise<number[]> {
+        export interface IMinWalletDetails {
+            publicKey: string,
+            privateKey: string,
+            accountId: string
+        }
+
+
+        export async function SHA256(in1: number[], in2?: number[]): Promise<number[]> {
             let input: number[] = [];
             if (in1) {
                 if (in2) {
@@ -106,40 +113,40 @@ export namespace CryptoUtil {
                 }
             }
 
-            let arrayBufferInput = Uint8Array.from(input);
-            let output = await webcrypto.subtle.digest('SHA-256', arrayBufferInput);
+            const arrayBufferInput = Uint8Array.from(input);
+            const output = await webcrypto.subtle.digest('SHA-256', arrayBufferInput);
             return Array.from(new Uint8Array(output));
         }
 
-        async function signBytes(message: string, passPhrase: string): Promise<string> {
-            let privateKey = await getPrivateKey(passPhrase);
+        export async function signBytes(message: string, passPhrase: string): Promise<string> {
+            const privateKey = await getPrivateKey(passPhrase);
             return signBytesPrivateKey(message, privateKey);
         }
 
         export async function signBytesPrivateKey(message: string, privateKey: string): Promise<string> {
-            let messageBytes = Converters.hexToBytes(message);
-            let s = Converters.hexToBytes(privateKey);
-            let m = await SHA256(messageBytes);
-            let x = await SHA256(m, s);
-            let y = curve25519.keygen(x).p;
-            let h = await SHA256(m, y);
-            let v = curve25519.sign(h, x, s);
-            return Converters.bytesToHex(v.concat(h));
+            const messageBytes = Converters.hexToBytes(message);
+            const s = Converters.hexToBytes(privateKey);
+            const m = await SHA256(messageBytes);
+            const x = await SHA256(m, s);
+            const y = curve25519.keygen(x).p;
+            const h = await SHA256(m, y);
+            const v = curve25519.sign(h, x, s);
+            return Converters.bytesToHex(v ? v.concat(h) : []);
         }
 
-        async function getPrivateKey(pass: string): Promise<string> {
-            let { privateKey } = await getWalletDetails(pass);
+        export async function getPrivateKey(pass: string): Promise<string> {
+            const { privateKey } = await getWalletDetails(pass);
             return privateKey;
         }
 
-        async function getPublicKey(pass: string): Promise<string> {
-            let { publicKey } = await getWalletDetails(pass);
+        export async function getPublicKey(pass: string): Promise<string> {
+            const { publicKey } = await getWalletDetails(pass);
             return publicKey;
         }
 
 
-        export async function getWalletDetails(passPhrase: string): Promise<any> {
-            let seed = await getSeed(passPhrase);
+        export async function getWalletDetails(passPhrase: string): Promise<IMinWalletDetails> {
+            const seed = await getSeed(passPhrase);
             return getWalletDetailsFromSeed(seed);
         }
 
@@ -147,42 +154,42 @@ export namespace CryptoUtil {
             return SHA256(Converters.strToBytes(passPhrase));
         }
 
-        export async function getWalletDetailsFromSeed(seed: number[]): Promise<any> {
-            let { p, s } = curve25519.keygen(seed);
-            let publicKey = Converters.bytesToHex(p);
-            let privateKey = Converters.bytesToHex(s);
-            let accountId = await publicKeyToAccountId(publicKey);
+        export async function getWalletDetailsFromSeed(seed: number[]): Promise<IMinWalletDetails> {
+            const { p, s } = curve25519.keygen(seed);
+            const publicKey = Converters.bytesToHex(p);
+            const privateKey = Converters.bytesToHex(s);
+            const accountId = await publicKeyToAccountId(publicKey);
             return { publicKey: publicKey, privateKey: privateKey, accountId: accountId }
         }
 
         export async function publicKeyToAccountId(publicKeyHex: string): Promise<string> {
-            let sha256digest = await SHA256(Converters.hexToBytes(publicKeyHex));
-            let accountIdBytes = sha256digest.slice(0, 8).reverse(); // Most siginificant byte is on the right.
-            let accountId = Converters.hexToDec(Converters.bytesToHex(accountIdBytes));
+            const sha256digest = await SHA256(Converters.hexToBytes(publicKeyHex));
+            const accountIdBytes = sha256digest.slice(0, 8).reverse(); // Most siginificant byte is on the right.
+            const accountId = Converters.hexToDec(Converters.bytesToHex(accountIdBytes));
             return accountId;
         }
 
         export async function verifySignature(signature: string, unsignedMessage: string, publicKey: string): Promise<boolean> {
-            let signatureBytes = Converters.hexToBytes(signature);
-            let messageBytes = Converters.hexToBytes(unsignedMessage);
-            let publicKeyBytes = Converters.hexToBytes(publicKey);
-            let v = signatureBytes.slice(0, 32);
-            let h = signatureBytes.slice(32);
-            let Y = curve25519.verify(v, h, publicKeyBytes);
+            const signatureBytes = Converters.hexToBytes(signature);
+            const messageBytes = Converters.hexToBytes(unsignedMessage);
+            const publicKeyBytes = Converters.hexToBytes(publicKey);
+            const v = signatureBytes.slice(0, 32);
+            const h = signatureBytes.slice(32);
+            const Y = curve25519.verify(v, h, publicKeyBytes);
 
-            let m = await SHA256(messageBytes);
-            let h2 = await SHA256(m, Y);
+            const m = await SHA256(messageBytes);
+            const h2 = await SHA256(m, Y);
 
             return Converters.byteArraysEqual(h, h2);
         }
 
-        async function publicKeyToRSAccount(publicKeyHex: string): Promise<string> {
-            let accountId = await publicKeyToAccountId(publicKeyHex);
+        export async function publicKeyToRSAccount(publicKeyHex: string): Promise<string> {
+            const accountId = await publicKeyToAccountId(publicKeyHex);
             return accountIdToRS(accountId);
         }
 
         export function accountIdToRS(accountId: string): string {
-            let rsaddr = new RSAddress();
+            const rsaddr = new RSAddress();
             rsaddr.set(accountId);
             return rsaddr.toString();
         }

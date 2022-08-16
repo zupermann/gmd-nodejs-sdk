@@ -22,8 +22,8 @@ export class Provider extends RemoteAPICaller implements IProvider {
 
 
     //returns unsigned transaction in hex format that a wallet can sign (see Wallet.signTransaction)
-    async createTransaction(data: any): Promise<string> {
-        let transaction = await this.apiCall('post', data);
+    async createTransaction(data: Record<string, any>): Promise<string> {
+        const transaction = await this.apiCall('post', data);
         return transaction.unsignedTransactionBytes;
     }
 }
