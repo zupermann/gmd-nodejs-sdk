@@ -4,50 +4,50 @@
     Version: 1.0, license: Public Domain, coder: NxtChg (admin@nxtchg.com).
 */
 
-function RSAddress() {
-    var codeword = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var syndrome = [0, 0, 0, 0, 0];
+export class RSAddress {
+    codeword = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    syndrome = [0, 0, 0, 0, 0];
 
-    var gexp = [1, 2, 4, 8, 16, 5, 10, 20, 13, 26, 17, 7, 14, 28, 29, 31, 27, 19, 3, 6, 12, 24, 21, 15, 30, 25, 23, 11, 22, 9, 18, 1];
-    var glog = [0, 0, 1, 18, 2, 5, 19, 11, 3, 29, 6, 27, 20, 8, 12, 23, 4, 10, 30, 17, 7, 22, 28, 26, 21, 25, 9, 16, 13, 14, 24, 15];
+    gexp = [1, 2, 4, 8, 16, 5, 10, 20, 13, 26, 17, 7, 14, 28, 29, 31, 27, 19, 3, 6, 12, 24, 21, 15, 30, 25, 23, 11, 22, 9, 18, 1];
+    glog = [0, 0, 1, 18, 2, 5, 19, 11, 3, 29, 6, 27, 20, 8, 12, 23, 4, 10, 30, 17, 7, 22, 28, 26, 21, 25, 9, 16, 13, 14, 24, 15];
 
-    var cwmap = [3, 2, 1, 0, 7, 6, 5, 4, 13, 14, 15, 16, 12, 8, 9, 10, 11];
+    cwmap = [3, 2, 1, 0, 7, 6, 5, 4, 13, 14, 15, 16, 12, 8, 9, 10, 11];
 
-    var alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     //var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ345679';
 
-    this.guess = [];
+    guess: string[] = [];
 
-    function ginv(a) {
-        return gexp[31 - glog[a]];
+    ginv(a: any) {
+        return this.gexp[31 - this.glog[a]];
     }
 
-    function gmult(a, b) {
+    gmult(a: any, b: any) {
         if (a == 0 || b == 0) return 0;
 
-        var idx = (glog[a] + glog[b]) % 31;
+        var idx = (this.glog[a] + this.glog[b]) % 31;
 
-        return gexp[idx];
+        return this.gexp[idx];
     } //__________________________
 
-    function calc_discrepancy(lambda, r) {
+    calc_discrepancy(lambda: any, r: any) {
         var discr = 0;
 
         for (var i = 0; i < r; i++) {
-            discr ^= gmult(lambda[i], syndrome[r - i]);
+            discr ^= this.gmult(lambda[i], this.syndrome[r - i]);
         }
 
         return discr;
     } //__________________________
 
-    function find_errors(lambda) {
+    find_errors(lambda: any) {
         var errloc = [];
 
         for (var i = 1; i <= 31; i++) {
             var sum = 0;
 
             for (var j = 0; j < 5; j++) {
-                sum ^= gmult(gexp[(j * i) % 31], lambda[j]);
+                sum ^= this.gmult(this.gexp[(j * i) % 31], lambda[j]);
             }
 
             if (sum == 0) {
@@ -61,7 +61,7 @@ function RSAddress() {
         return errloc;
     } //__________________________
 
-    function guess_errors() {
+    guess_errors() {
         var el = 0,
             b = [0, 0, 0, 0, 0],
             t = [];
@@ -72,13 +72,13 @@ function RSAddress() {
         // Berlekamp-Massey algorithm to determine error+erasure locator polynomial
 
         for (var r = 0; r < 4; r++) {
-            var discr = calc_discrepancy(lambda, r + 1); // Compute discrepancy at the r-th step in poly-form
+            var discr = this.calc_discrepancy(lambda, r + 1); // Compute discrepancy at the r-th step in poly-form
 
             if (discr != 0) {
                 deg_lambda = 0;
 
                 for (var i = 0; i < 5; i++) {
-                    t[i] = lambda[i] ^ gmult(discr, b[i]);
+                    t[i] = lambda[i] ^ this.gmult(discr, b[i]);
 
                     if (t[i]) deg_lambda = i;
                 }
@@ -87,7 +87,7 @@ function RSAddress() {
                     el = r + 1 - el;
 
                     for (i = 0; i < 5; i++) {
-                        b[i] = gmult(lambda[i], ginv(discr));
+                        b[i] = this.gmult(lambda[i], this.ginv(discr));
                     }
                 }
 
@@ -99,7 +99,7 @@ function RSAddress() {
 
         // Find roots of the locator polynomial.
 
-        var errloc = find_errors(lambda);
+        var errloc = this.find_errors(lambda);
 
         var errors = errloc.length;
 
@@ -115,7 +115,7 @@ function RSAddress() {
             let t = 0;
 
             for (var j = 0; j < i; j++) {
-                t ^= gmult(syndrome[i + 1 - j], lambda[j]);
+                t ^= this.gmult(this.syndrome[i + 1 - j], lambda[j]);
             }
 
             omega[i] = t;
@@ -130,56 +130,56 @@ function RSAddress() {
 
             for (i = 0; i < 4; i++) // evaluate Omega at alpha^(-i)
             {
-                t ^= gmult(omega[i], gexp[(root * i) % 31]);
+                t ^= this.gmult(omega[i], this.gexp[(root * i) % 31]);
             }
 
             if (t) // evaluate Lambda' (derivative) at alpha^(-i); all odd powers disappear
             {
-                var denom = gmult(lambda[1], 1) ^ gmult(lambda[3], gexp[(root * 2) % 31]);
+                var denom = this.gmult(lambda[1], 1) ^ this.gmult(lambda[3], this.gexp[(root * 2) % 31]);
 
                 if (denom == 0) return false;
 
                 if (pos > 12) pos -= 14;
 
-                codeword[pos] ^= gmult(t, ginv(denom));
+                this.codeword[pos] ^= this.gmult(t, this.ginv(denom));
             }
         }
 
         return true;
     } //__________________________
 
-    function encode() {
+    encode() {
         var p = [0, 0, 0, 0];
 
         for (var i = 12; i >= 0; i--) {
-            var fb = codeword[i] ^ p[3];
+            var fb = this.codeword[i] ^ p[3];
 
-            p[3] = p[2] ^ gmult(30, fb);
-            p[2] = p[1] ^ gmult(6, fb);
-            p[1] = p[0] ^ gmult(9, fb);
-            p[0] = gmult(17, fb);
+            p[3] = p[2] ^ this.gmult(30, fb);
+            p[2] = p[1] ^ this.gmult(6, fb);
+            p[1] = p[0] ^ this.gmult(9, fb);
+            p[0] = this.gmult(17, fb);
         }
 
-        codeword[13] = p[0];
-        codeword[14] = p[1];
-        codeword[15] = p[2];
-        codeword[16] = p[3];
+        this.codeword[13] = p[0];
+        this.codeword[14] = p[1];
+        this.codeword[15] = p[2];
+        this.codeword[16] = p[3];
     } //__________________________
 
-    function reset() {
-        for (var i = 0; i < 17; i++) codeword[i] = 1;
+    reset() {
+        for (var i = 0; i < 17; i++) this.codeword[i] = 1;
     } //__________________________
 
-    function set_codeword(cw, len, skip) {
+    set_codeword(cw: any, len?: any, skip?: any) {
         if (typeof len === 'undefined') len = 17;
         if (typeof skip === 'undefined') skip = -1;
 
         for (var i = 0, j = 0; i < len; i++) {
-            if (i != skip) codeword[cwmap[j++]] = cw[i];
+            if (i != skip) this.codeword[this.cwmap[j++]] = cw[i];
         }
     } //__________________________
 
-    this.add_guess = function () {
+    add_guess() {
         var s = this.toString(),
             len = this.guess.length;
 
@@ -192,7 +192,7 @@ function RSAddress() {
         this.guess[len] = s;
     } //__________________________
 
-    this.ok = function () {
+    ok() {
         var sum = 0;
 
         for (var i = 1; i < 5; i++) {
@@ -202,17 +202,17 @@ function RSAddress() {
                 var pos = j;
                 if (j > 26) pos -= 14;
 
-                t ^= gmult(codeword[pos], gexp[(i * j) % 31]);
+                t ^= this.gmult(this.codeword[pos], this.gexp[(i * j) % 31]);
             }
 
             sum |= t;
-            syndrome[i] = t;
+            this.syndrome[i] = t;
         }
 
         return (sum == 0);
     } //__________________________
 
-    function from_acc(acc) {
+    from_acc(acc: any) {
         var inp = [],
             out = [],
             pos = 0,
@@ -247,19 +247,19 @@ function RSAddress() {
 
         for (i = 0; i < 13; i++) // copy to codeword in reverse, pad with 0's
         {
-            codeword[i] = (--pos >= 0 ? out[i] : 0);
+            this.codeword[i] = (--pos >= 0 ? out[i] : 0);
         }
 
-        encode();
+        this.encode();
 
         return true;
     } //__________________________
 
-    this.toString = function () {
+    toString() {
         var out = "GMD-";
 
         for (var i = 0; i < 17; i++) {
-            out += alphabet[codeword[cwmap[i]]];
+            out += this.alphabet[this.codeword[this.cwmap[i]]];
 
             if ((i & 3) == 3 && i < 13) out += '-';
         }
@@ -267,13 +267,13 @@ function RSAddress() {
         return out;
     } //__________________________
 
-    this.account_id = function () {
+    account_id() {
         var out = '',
             inp = [],
             len = 13;
 
         for (var i = 0; i < 13; i++) {
-            inp[i] = codeword[12 - i];
+            inp[i] = this.codeword[12 - i];
         }
 
         do // base 32 to base 10 conversion
@@ -300,12 +300,12 @@ function RSAddress() {
         return out.split("").reverse().join("");
     } //__________________________
 
-    this.set = function (adr, allow_accounts) {
+    set(adr: string, allow_accounts?: any) {
         if (typeof allow_accounts === 'undefined') allow_accounts = true;
 
         var len = 0;
         this.guess = [];
-        reset();
+        this.reset();
 
         adr = String(adr);
 
@@ -315,13 +315,13 @@ function RSAddress() {
 
         if (adr.match(/^\d{1,20}$/g)) // account id
         {
-            if (allow_accounts) return from_acc(adr);
+            if (allow_accounts) return this.from_acc(adr);
         } else // address
         {
-            var clean = [];
+            let clean = [];
 
             for (var i = 0; i < adr.length; i++) {
-                var pos = alphabet.indexOf(adr[i]);
+                var pos = this.alphabet.indexOf(adr[i]);
 
                 if (pos >= 0) {
                     clean[len++] = pos;
@@ -329,20 +329,20 @@ function RSAddress() {
                 }
             }
         }
-
+        let clean: any[] = [];
         if (len == 16) // guess deletion
         {
             for (let i = 16; i >= 0; i--) {
                 for (var j = 0; j < 32; j++) {
                     clean[i] = j;
 
-                    set_codeword(clean);
+                    this.set_codeword(clean);
 
                     if (this.ok()) this.add_guess();
                 }
 
                 if (i > 0) {
-                    var t = clean[i - 1];
+                    let t = clean[i - 1];
                     clean[i - 1] = clean[i];
                     clean[i] = t;
                 }
@@ -352,24 +352,24 @@ function RSAddress() {
         if (len == 18) // guess insertion
         {
             for (let i = 0; i < 18; i++) {
-                set_codeword(clean, 18, i);
+                this.set_codeword(clean, 18, i);
 
                 if (this.ok()) this.add_guess();
             }
         }
 
         if (len == 17) {
-            set_codeword(clean);
+            this.set_codeword(clean);
 
             if (this.ok()) return true;
 
-            if (guess_errors() && this.ok()) this.add_guess();
+            if (this.guess_errors() && this.ok()) this.add_guess();
         }
 
-        reset();
+        this.reset();
 
         return false;
     }
 }
 
-module.exports = RSAddress;
+export default RSAddress;

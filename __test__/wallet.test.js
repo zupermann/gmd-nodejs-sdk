@@ -37,7 +37,9 @@ const test2 = async () => {
 }
 
 const test3 = async () => {
-    let wallet = await Wallet.newWallet();
+    let passPhrase = Wallet.generatePassphrase();
+    console.log('new passphrase generated:' + passPhrase);
+    let wallet = await Wallet.fromPassphrase(passPhrase);
     console.log('New wallet generated: ' + JSON.stringify(wallet, null, 2));
     console.assert(typeof wallet.publicKey === 'string' && wallet.publicKey.length > 0, "New wallet failed. No public key generated.");
     console.assert(typeof wallet.privateKey === 'string' && wallet.privateKey.length > 0, "New wallet failed. No private key generated.");

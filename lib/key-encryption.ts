@@ -1,4 +1,6 @@
-const cryptoUtil = require('./crypto-util');
+import { CryptoUtil } from "./crypto-util";
+import Converters = CryptoUtil.Converters;
+
 const webcrypto = require("./get-crypto");
 
 const iterations = 223978;
@@ -30,7 +32,7 @@ const KeyEncryption = {
         if (messageHex && messageHex.length % 2) {
             throw new Error('Hex string to be encrypted cannot have a 0 length or have an even number of hex digits');
         }
-        return this.encryptBytes(cryptoUtil.hexToBytes(messageHex), password);
+        return this.encryptBytes(Converters.hexToBytes(messageHex), password);
     },
 
     /**
@@ -40,15 +42,15 @@ const KeyEncryption = {
      * @returns a promise that resolves to an encrypted JSON. JSON contains: iv, salt, ciphertext.
      */
     async encryptStr(message: string, password: string): Promise<IEncryptedJSON> {
-        return this.encryptHex(cryptoUtil.strToHex(message), password);
+        return this.encryptHex(Converters.strToHex(message), password);
     },
 
     async encryptBytes(bytes: number[], password: string): Promise<IEncryptedJSON> {
         let { iv, salt } = await this.generateIvAndSalt();
         let encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
         let encryptedByteArray = await webcrypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(bytes));
-        let ciphertext = cryptoUtil.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
-        return { iv: cryptoUtil.Uint8ArrayToHex(iv), salt: cryptoUtil.Uint8ArrayToHex(salt), ciphertext: ciphertext };
+        let ciphertext = Converters.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
+        return { iv: Converters.Uint8ArrayToHex(iv), salt: Converters.Uint8ArrayToHex(salt), ciphertext: ciphertext };
     },
 
     /**
@@ -60,7 +62,7 @@ const KeyEncryption = {
      */
     async decryptToHex(encryptedJSON: IEncryptedJSON, password: string): Promise<string> {
         let decryptedData = await this.decrypt(encryptedJSON, password);
-        return cryptoUtil.Uint8ArrayToHex(decryptedData);
+        return Converters.Uint8ArrayToHex(decryptedData);
     },
 
     /**
@@ -72,7 +74,7 @@ const KeyEncryption = {
      */
     async decryptToStr(encryptedJSON: IEncryptedJSON, password: string): Promise<string> {
         let decryptedData = await this.decrypt(encryptedJSON, password);
-        return cryptoUtil.Uint8ArrayToStr(decryptedData);
+        return Converters.Uint8ArrayToStr(decryptedData);
     },
 
     async decryptToBytes(encryptedJSON: IEncryptedJSON, password: string): Promise<number[]> {
@@ -82,9 +84,9 @@ const KeyEncryption = {
 
     async decrypt(encryptedJSON: IEncryptedJSON, password: string): Promise<Uint8Array> {
         if (encryptedJSON && 'iv' in encryptedJSON && 'salt' in encryptedJSON && 'ciphertext' in encryptedJSON) {
-            let ciphertext = cryptoUtil.hexToUint8(encryptedJSON.ciphertext);
-            let iv = cryptoUtil.hexToUint8(encryptedJSON.iv);
-            let salt = cryptoUtil.hexToUint8(encryptedJSON.salt);
+            let ciphertext = Converters.hexToUint8(encryptedJSON.ciphertext);
+            let iv = Converters.hexToUint8(encryptedJSON.iv);
+            let salt = Converters.hexToUint8(encryptedJSON.salt);
 
             let encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
             let result = await webcrypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, encryptionKey, ciphertext);
@@ -103,7 +105,7 @@ const KeyEncryption = {
     async genEncryptionKeyFromPassword(password: string, salt: Uint8Array, iterations: number): Promise<any> {
         let importedPassword = await webcrypto.subtle.importKey(
             "raw",
-            cryptoUtil.strToUint8(password),
+            Converters.strToUint8(password),
             { "name": "PBKDF2" },
             false,
             ["deriveKey"]

@@ -10,208 +10,188 @@ window.GMD = {
     Provider: require('../dist/provider')
 }
 
-},{"../dist/provider":9,"../dist/wallet":11}],4:[function(require,module,exports){
+},{"../dist/provider":9,"../dist/wallet":12}],4:[function(require,module,exports){
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CryptoUtil = void 0;
 const webcrypto = require('./get-crypto');
 const curve25519 = require('./curve25519');
-const RSAddress = require('./rs-address');
-const cryptoUtil = {};
-cryptoUtil.strToHex = (str) => {
-    let result = '';
-    cryptoUtil.strToBytes(str).forEach(c => result += c.toString(16));
-    return result;
-};
-cryptoUtil.strToBytes = (str) => {
-    let result = [];
-    for (let i = 0; i < str.length; i++) {
-        result.push(str.charCodeAt(i));
-    }
-    return result;
-};
-cryptoUtil.hexToString = (hex) => {
-    let string = '';
-    for (let i = 0; i < hex.length; i += 2) {
-        string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-    }
-    return string;
-};
-cryptoUtil.hexToBytes = (hex) => {
-    for (var bytes = [], c = 0; c < hex.length; c += 2) {
-        bytes.push(parseInt(hex.substr(c, 2), 16));
-    }
-    return bytes;
-};
-cryptoUtil.bytesToHex = (byteArray) => {
-    return Array.from(byteArray, (byte) => {
-        return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-    }).join('');
-};
-cryptoUtil.strToUint8 = str => new Uint8Array(cryptoUtil.strToBytes(str));
-cryptoUtil.hexToUint8 = hex => new Uint8Array(cryptoUtil.hexToBytes(hex));
-cryptoUtil.Uint8ArrayToStr = (buffer) => {
-    let string = '';
-    for (let i = 0; i < buffer.length; i++) {
-        string += String.fromCharCode(buffer[i]);
-    }
-    return string;
-};
-cryptoUtil.Uint8ArrayToHex = (buffer) => {
-    var array = Array.from(buffer);
-    return cryptoUtil.bytesToHex(array);
-};
-cryptoUtil.bytesToWords = (byteArray) => {
-    let i = 0, offset = 0, word = 0;
-    const len = byteArray.length;
-    var words = new Uint32Array(((len / 4) | 0) + (len % 4 == 0 ? 0 : 1));
-    while (i < (len - (len % 4))) {
-        words[offset++] = (byteArray[i++] << 24) | (byteArray[i++] << 16) | (byteArray[i++] << 8) | (byteArray[i++]);
-    }
-    if (len % 4 != 0) {
-        word = byteArray[i++] << 24;
-        if (len % 4 > 1) {
-            word = word | byteArray[i++] << 16;
+const rs_address_1 = require("./rs-address");
+var CryptoUtil;
+(function (CryptoUtil) {
+    let Converters;
+    (function (Converters) {
+        function strToHex(str) {
+            let result = '';
+            strToBytes(str).forEach(c => result += c.toString(16));
+            return result;
         }
-        if (len % 4 > 2) {
-            word = word | byteArray[i++] << 8;
+        Converters.strToHex = strToHex;
+        function strToBytes(str) {
+            let result = [];
+            for (let i = 0; i < str.length; i++) {
+                result.push(str.charCodeAt(i));
+            }
+            return result;
         }
-        words[offset] = word;
-    }
-    var wordArr = new Object();
-    wordArr.sigBytes = len;
-    wordArr.words = words;
-    return wordArr;
-};
-cryptoUtil.bytesToString = (bytesArray) => {
-    return String.fromCharCode.apply(null, bytesArray);
-};
-cryptoUtil.SHA256 = async (in1, in2) => {
-    let input;
-    if (in1) {
-        if (in2) {
-            input = in1.concat(in2);
+        Converters.strToBytes = strToBytes;
+        function hexToString(hex) {
+            let string = '';
+            for (let i = 0; i < hex.length; i += 2) {
+                string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }
+            return string;
         }
-        else {
-            input = in1;
+        Converters.hexToString = hexToString;
+        function hexToBytes(hex) {
+            for (var bytes = [], c = 0; c < hex.length; c += 2) {
+                bytes.push(parseInt(hex.substr(c, 2), 16));
+            }
+            return bytes;
         }
-    }
-    else {
-        if (in2) {
-            input = in2;
+        Converters.hexToBytes = hexToBytes;
+        function bytesToHex(byteArray) {
+            return Array.from(byteArray, (byte) => {
+                return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+            }).join('');
         }
-    }
-    let arrayBufferInput = Uint8Array.from(input);
-    let output = await webcrypto.subtle.digest('SHA-256', arrayBufferInput);
-    return Array.from(new Uint8Array(output));
-};
-cryptoUtil.wordsToBytes = (wordArr) => {
-    const len = wordArr.words.length;
-    if (len == 0) {
-        return new Array(0);
-    }
-    const bytes = new Array(wordArr.sigBytes);
-    let offset = 0;
-    for (let i = 0; i < len - 1; i++) {
-        let word = wordArr.words[i];
-        bytes[offset++] = (word >> 24) & 0xff;
-        bytes[offset++] = (word >> 16) & 0xff;
-        bytes[offset++] = (word >> 8) & 0xff;
-        bytes[offset++] = word & 0xff;
-    }
-    let word = wordArr.words[len - 1];
-    bytes[offset++] = (word >> 24) & 0xff;
-    if (wordArr.sigBytes % 4 == 0) {
-        bytes[offset++] = (word >> 16) & 0xff;
-        bytes[offset++] = (word >> 8) & 0xff;
-        bytes[offset++] = word & 0xff;
-    }
-    if (wordArr.sigBytes % 4 > 1) {
-        bytes[offset++] = (word >> 16) & 0xff;
-    }
-    if (wordArr.sigBytes % 4 > 2) {
-        bytes[offset++] = (word >> 8) & 0xff;
-    }
-    return bytes;
-};
-cryptoUtil.signBytes = async (message, passPhrase) => {
-    let privateKey = await cryptoUtil.getPrivateKey(passPhrase);
-    return cryptoUtil.signBytesPrivateKey(message, privateKey);
-};
-cryptoUtil.signBytesPrivateKey = async (message, privateKey) => {
-    let messageBytes = cryptoUtil.hexToBytes(message);
-    let s = cryptoUtil.hexToBytes(privateKey);
-    let m = await cryptoUtil.SHA256(messageBytes);
-    let x = await cryptoUtil.SHA256(m, s);
-    let y = curve25519.keygen(x).p;
-    let h = await cryptoUtil.SHA256(m, y);
-    let v = curve25519.sign(h, x, s);
-    return cryptoUtil.bytesToHex(v.concat(h));
-};
-cryptoUtil.verifySignature = async (signature, unsignedMessage, publicKey) => {
-    let signatureBytes = cryptoUtil.hexToBytes(signature);
-    let messageBytes = cryptoUtil.hexToBytes(unsignedMessage);
-    let publicKeyBytes = cryptoUtil.hexToBytes(publicKey);
-    let v = signatureBytes.slice(0, 32);
-    let h = signatureBytes.slice(32);
-    let Y = curve25519.verify(v, h, publicKeyBytes);
-    let m = await cryptoUtil.SHA256(messageBytes);
-    let h2 = await cryptoUtil.SHA256(m, Y);
-    return cryptoUtil.byteArraysEqual(h, h2);
-};
-cryptoUtil.byteArraysEqual = (bytes1, bytes2) => {
-    if (bytes1.length !== bytes2.length) {
-        return false;
-    }
-    for (var i = 0; i < bytes1.length; ++i) {
-        if (bytes1[i] !== bytes2[i]) {
-            return false;
+        Converters.bytesToHex = bytesToHex;
+        function strToUint8(str) {
+            return new Uint8Array(strToBytes(str));
         }
-    }
-    return true;
-};
-cryptoUtil.getPrivateKey = async (pass) => {
-    let { privateKey } = await cryptoUtil.getWalletDetails(pass);
-    return privateKey;
-};
-cryptoUtil.getPublicKey = async (pass) => {
-    let { publicKey } = await cryptoUtil.getWalletDetails(pass);
-    return publicKey;
-};
-cryptoUtil.getWalletDetails = async (passPhrase) => {
-    let seed = await cryptoUtil.getSeed(passPhrase);
-    return cryptoUtil.getWalletDetailsFromSeed(seed);
-};
-cryptoUtil.getWalletDetailsFromSeed = async (seed) => {
-    let { p, s } = curve25519.keygen(seed);
-    let publicKey = cryptoUtil.bytesToHex(p);
-    let privateKey = cryptoUtil.bytesToHex(s);
-    let accountId = await cryptoUtil.publicKeyToAccountId(publicKey);
-    return { publicKey: publicKey, privateKey: privateKey, accountId: accountId };
-};
-cryptoUtil.getSeed = async (passPhrase) => {
-    return cryptoUtil.SHA256(cryptoUtil.strToBytes(passPhrase));
-};
-cryptoUtil.hexToDec = (hex) => {
-    if (hex.length % 2) {
-        hex = '0' + hex;
-    }
-    return BigInt('0x' + hex).toString(10);
-};
-cryptoUtil.publicKeyToAccountId = async (publicKeyHex) => {
-    let sha256digest = await cryptoUtil.SHA256(cryptoUtil.hexToBytes(publicKeyHex));
-    let accountIdBytes = sha256digest.slice(0, 8).reverse(); // Most siginificant byte is on the right.
-    let accountId = cryptoUtil.hexToDec(cryptoUtil.bytesToHex(accountIdBytes));
-    return accountId;
-};
-cryptoUtil.accountIdToRS = (accountId) => {
-    let rsaddr = new RSAddress();
-    rsaddr.set(accountId);
-    return rsaddr.toString();
-};
-cryptoUtil.publicKeyToRSAccount = async (publicKeyHex) => {
-    let accountId = await cryptoUtil.publicKeyToAccountId(publicKeyHex);
-    return cryptoUtil.accountIdToRS(accountId);
-};
-module.exports = cryptoUtil;
+        Converters.strToUint8 = strToUint8;
+        function hexToUint8(hex) {
+            return new Uint8Array(hexToBytes(hex));
+        }
+        Converters.hexToUint8 = hexToUint8;
+        function Uint8ArrayToStr(buffer) {
+            let s = '';
+            for (let i = 0; i < buffer.length; i++) {
+                s += String.fromCharCode(buffer[i]);
+            }
+            return s;
+        }
+        Converters.Uint8ArrayToStr = Uint8ArrayToStr;
+        function Uint8ArrayToHex(buffer) {
+            var array = Array.from(buffer);
+            return bytesToHex(array);
+        }
+        Converters.Uint8ArrayToHex = Uint8ArrayToHex;
+        function bytesToString(bytesArray) {
+            return String.fromCharCode.apply(null, bytesArray);
+        }
+        function hexToDec(hex) {
+            if (hex.length % 2) {
+                hex = '0' + hex;
+            }
+            return BigInt('0x' + hex).toString(10);
+        }
+        Converters.hexToDec = hexToDec;
+        function byteArraysEqual(bytes1, bytes2) {
+            if (bytes1.length !== bytes2.length) {
+                return false;
+            }
+            for (var i = 0; i < bytes1.length; ++i) {
+                if (bytes1[i] !== bytes2[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        Converters.byteArraysEqual = byteArraysEqual;
+    })(Converters = CryptoUtil.Converters || (CryptoUtil.Converters = {}));
+    let Crypto;
+    (function (Crypto) {
+        async function SHA256(in1, in2) {
+            let input = [];
+            if (in1) {
+                if (in2) {
+                    input = in1.concat(in2);
+                }
+                else {
+                    input = in1;
+                }
+            }
+            else {
+                if (in2) {
+                    input = in2;
+                }
+            }
+            let arrayBufferInput = Uint8Array.from(input);
+            let output = await webcrypto.subtle.digest('SHA-256', arrayBufferInput);
+            return Array.from(new Uint8Array(output));
+        }
+        async function signBytes(message, passPhrase) {
+            let privateKey = await getPrivateKey(passPhrase);
+            return signBytesPrivateKey(message, privateKey);
+        }
+        async function signBytesPrivateKey(message, privateKey) {
+            let messageBytes = Converters.hexToBytes(message);
+            let s = Converters.hexToBytes(privateKey);
+            let m = await SHA256(messageBytes);
+            let x = await SHA256(m, s);
+            let y = curve25519.keygen(x).p;
+            let h = await SHA256(m, y);
+            let v = curve25519.sign(h, x, s);
+            return Converters.bytesToHex(v.concat(h));
+        }
+        Crypto.signBytesPrivateKey = signBytesPrivateKey;
+        async function getPrivateKey(pass) {
+            let { privateKey } = await getWalletDetails(pass);
+            return privateKey;
+        }
+        async function getPublicKey(pass) {
+            let { publicKey } = await getWalletDetails(pass);
+            return publicKey;
+        }
+        async function getWalletDetails(passPhrase) {
+            let seed = await getSeed(passPhrase);
+            return getWalletDetailsFromSeed(seed);
+        }
+        Crypto.getWalletDetails = getWalletDetails;
+        async function getSeed(passPhrase) {
+            return SHA256(Converters.strToBytes(passPhrase));
+        }
+        Crypto.getSeed = getSeed;
+        async function getWalletDetailsFromSeed(seed) {
+            let { p, s } = curve25519.keygen(seed);
+            let publicKey = Converters.bytesToHex(p);
+            let privateKey = Converters.bytesToHex(s);
+            let accountId = await publicKeyToAccountId(publicKey);
+            return { publicKey: publicKey, privateKey: privateKey, accountId: accountId };
+        }
+        Crypto.getWalletDetailsFromSeed = getWalletDetailsFromSeed;
+        async function publicKeyToAccountId(publicKeyHex) {
+            let sha256digest = await SHA256(Converters.hexToBytes(publicKeyHex));
+            let accountIdBytes = sha256digest.slice(0, 8).reverse(); // Most siginificant byte is on the right.
+            let accountId = Converters.hexToDec(Converters.bytesToHex(accountIdBytes));
+            return accountId;
+        }
+        Crypto.publicKeyToAccountId = publicKeyToAccountId;
+        async function verifySignature(signature, unsignedMessage, publicKey) {
+            let signatureBytes = Converters.hexToBytes(signature);
+            let messageBytes = Converters.hexToBytes(unsignedMessage);
+            let publicKeyBytes = Converters.hexToBytes(publicKey);
+            let v = signatureBytes.slice(0, 32);
+            let h = signatureBytes.slice(32);
+            let Y = curve25519.verify(v, h, publicKeyBytes);
+            let m = await SHA256(messageBytes);
+            let h2 = await SHA256(m, Y);
+            return Converters.byteArraysEqual(h, h2);
+        }
+        Crypto.verifySignature = verifySignature;
+        async function publicKeyToRSAccount(publicKeyHex) {
+            let accountId = await publicKeyToAccountId(publicKeyHex);
+            return accountIdToRS(accountId);
+        }
+        function accountIdToRS(accountId) {
+            let rsaddr = new rs_address_1.RSAddress();
+            rsaddr.set(accountId);
+            return rsaddr.toString();
+        }
+        Crypto.accountIdToRS = accountIdToRS;
+    })(Crypto = CryptoUtil.Crypto || (CryptoUtil.Crypto = {}));
+})(CryptoUtil = exports.CryptoUtil || (exports.CryptoUtil = {}));
 
 },{"./curve25519":5,"./get-crypto":2,"./rs-address":10}],5:[function(require,module,exports){
 "use strict";
@@ -1031,7 +1011,8 @@ exports.RemoteAPICaller = RemoteAPICaller;
 },{"./get-axios":1}],7:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const cryptoUtil = require('./crypto-util');
+const crypto_util_1 = require("./crypto-util");
+var Converters = crypto_util_1.CryptoUtil.Converters;
 const webcrypto = require("./get-crypto");
 const iterations = 223978;
 const KeyEncryption = {
@@ -1050,7 +1031,7 @@ const KeyEncryption = {
         if (messageHex && messageHex.length % 2) {
             throw new Error('Hex string to be encrypted cannot have a 0 length or have an even number of hex digits');
         }
-        return this.encryptBytes(cryptoUtil.hexToBytes(messageHex), password);
+        return this.encryptBytes(Converters.hexToBytes(messageHex), password);
     },
     /**
      * Same as  KeyEncryption.encryptHex() but it encrypts any string,
@@ -1059,14 +1040,14 @@ const KeyEncryption = {
      * @returns a promise that resolves to an encrypted JSON. JSON contains: iv, salt, ciphertext.
      */
     async encryptStr(message, password) {
-        return this.encryptHex(cryptoUtil.strToHex(message), password);
+        return this.encryptHex(Converters.strToHex(message), password);
     },
     async encryptBytes(bytes, password) {
         let { iv, salt } = await this.generateIvAndSalt();
         let encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
         let encryptedByteArray = await webcrypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(bytes));
-        let ciphertext = cryptoUtil.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
-        return { iv: cryptoUtil.Uint8ArrayToHex(iv), salt: cryptoUtil.Uint8ArrayToHex(salt), ciphertext: ciphertext };
+        let ciphertext = Converters.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
+        return { iv: Converters.Uint8ArrayToHex(iv), salt: Converters.Uint8ArrayToHex(salt), ciphertext: ciphertext };
     },
     /**
      * Helper function used to decrypt to hex. Used in pair with KeyEncryption.encryptHex() most common use case is to encrypt/decrypt private key.
@@ -1077,7 +1058,7 @@ const KeyEncryption = {
      */
     async decryptToHex(encryptedJSON, password) {
         let decryptedData = await this.decrypt(encryptedJSON, password);
-        return cryptoUtil.Uint8ArrayToHex(decryptedData);
+        return Converters.Uint8ArrayToHex(decryptedData);
     },
     /**
      * Decrypt to a string.  Used in pair with KeyEncryption.encryptStr().
@@ -1088,7 +1069,7 @@ const KeyEncryption = {
      */
     async decryptToStr(encryptedJSON, password) {
         let decryptedData = await this.decrypt(encryptedJSON, password);
-        return cryptoUtil.Uint8ArrayToStr(decryptedData);
+        return Converters.Uint8ArrayToStr(decryptedData);
     },
     async decryptToBytes(encryptedJSON, password) {
         let result = await this.decrypt(encryptedJSON, password);
@@ -1096,9 +1077,9 @@ const KeyEncryption = {
     },
     async decrypt(encryptedJSON, password) {
         if (encryptedJSON && 'iv' in encryptedJSON && 'salt' in encryptedJSON && 'ciphertext' in encryptedJSON) {
-            let ciphertext = cryptoUtil.hexToUint8(encryptedJSON.ciphertext);
-            let iv = cryptoUtil.hexToUint8(encryptedJSON.iv);
-            let salt = cryptoUtil.hexToUint8(encryptedJSON.salt);
+            let ciphertext = Converters.hexToUint8(encryptedJSON.ciphertext);
+            let iv = Converters.hexToUint8(encryptedJSON.iv);
+            let salt = Converters.hexToUint8(encryptedJSON.salt);
             let encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
             let result = await webcrypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, encryptionKey, ciphertext);
             return new Uint8Array(result);
@@ -1113,7 +1094,7 @@ const KeyEncryption = {
         return { iv: iv, salt: salt };
     },
     async genEncryptionKeyFromPassword(password, salt, iterations) {
-        let importedPassword = await webcrypto.subtle.importKey("raw", cryptoUtil.strToUint8(password), { "name": "PBKDF2" }, false, ["deriveKey"]);
+        let importedPassword = await webcrypto.subtle.importKey("raw", Converters.strToUint8(password), { "name": "PBKDF2" }, false, ["deriveKey"]);
         return webcrypto.subtle.deriveKey({
             "name": "PBKDF2",
             "salt": salt,
@@ -1201,37 +1182,41 @@ module.exports = Provider;
 
     Version: 1.0, license: Public Domain, coder: NxtChg (admin@nxtchg.com).
 */
-function RSAddress() {
-    var codeword = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var syndrome = [0, 0, 0, 0, 0];
-    var gexp = [1, 2, 4, 8, 16, 5, 10, 20, 13, 26, 17, 7, 14, 28, 29, 31, 27, 19, 3, 6, 12, 24, 21, 15, 30, 25, 23, 11, 22, 9, 18, 1];
-    var glog = [0, 0, 1, 18, 2, 5, 19, 11, 3, 29, 6, 27, 20, 8, 12, 23, 4, 10, 30, 17, 7, 22, 28, 26, 21, 25, 9, 16, 13, 14, 24, 15];
-    var cwmap = [3, 2, 1, 0, 7, 6, 5, 4, 13, 14, 15, 16, 12, 8, 9, 10, 11];
-    var alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-    //var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ345679';
-    this.guess = [];
-    function ginv(a) {
-        return gexp[31 - glog[a]];
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.RSAddress = void 0;
+class RSAddress {
+    constructor() {
+        this.codeword = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        this.syndrome = [0, 0, 0, 0, 0];
+        this.gexp = [1, 2, 4, 8, 16, 5, 10, 20, 13, 26, 17, 7, 14, 28, 29, 31, 27, 19, 3, 6, 12, 24, 21, 15, 30, 25, 23, 11, 22, 9, 18, 1];
+        this.glog = [0, 0, 1, 18, 2, 5, 19, 11, 3, 29, 6, 27, 20, 8, 12, 23, 4, 10, 30, 17, 7, 22, 28, 26, 21, 25, 9, 16, 13, 14, 24, 15];
+        this.cwmap = [3, 2, 1, 0, 7, 6, 5, 4, 13, 14, 15, 16, 12, 8, 9, 10, 11];
+        this.alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        //var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ345679';
+        this.guess = [];
     }
-    function gmult(a, b) {
+    ginv(a) {
+        return this.gexp[31 - this.glog[a]];
+    }
+    gmult(a, b) {
         if (a == 0 || b == 0)
             return 0;
-        var idx = (glog[a] + glog[b]) % 31;
-        return gexp[idx];
+        var idx = (this.glog[a] + this.glog[b]) % 31;
+        return this.gexp[idx];
     } //__________________________
-    function calc_discrepancy(lambda, r) {
+    calc_discrepancy(lambda, r) {
         var discr = 0;
         for (var i = 0; i < r; i++) {
-            discr ^= gmult(lambda[i], syndrome[r - i]);
+            discr ^= this.gmult(lambda[i], this.syndrome[r - i]);
         }
         return discr;
     } //__________________________
-    function find_errors(lambda) {
+    find_errors(lambda) {
         var errloc = [];
         for (var i = 1; i <= 31; i++) {
             var sum = 0;
             for (var j = 0; j < 5; j++) {
-                sum ^= gmult(gexp[(j * i) % 31], lambda[j]);
+                sum ^= this.gmult(this.gexp[(j * i) % 31], lambda[j]);
             }
             if (sum == 0) {
                 var pos = 31 - i;
@@ -1242,23 +1227,23 @@ function RSAddress() {
         }
         return errloc;
     } //__________________________
-    function guess_errors() {
+    guess_errors() {
         var el = 0, b = [0, 0, 0, 0, 0], t = [];
         var deg_lambda = 0, lambda = [1, 0, 0, 0, 0]; // error+erasure locator poly
         // Berlekamp-Massey algorithm to determine error+erasure locator polynomial
         for (var r = 0; r < 4; r++) {
-            var discr = calc_discrepancy(lambda, r + 1); // Compute discrepancy at the r-th step in poly-form
+            var discr = this.calc_discrepancy(lambda, r + 1); // Compute discrepancy at the r-th step in poly-form
             if (discr != 0) {
                 deg_lambda = 0;
                 for (var i = 0; i < 5; i++) {
-                    t[i] = lambda[i] ^ gmult(discr, b[i]);
+                    t[i] = lambda[i] ^ this.gmult(discr, b[i]);
                     if (t[i])
                         deg_lambda = i;
                 }
                 if (2 * el <= r) {
                     el = r + 1 - el;
                     for (i = 0; i < 5; i++) {
-                        b[i] = gmult(lambda[i], ginv(discr));
+                        b[i] = this.gmult(lambda[i], this.ginv(discr));
                     }
                 }
                 lambda = t.slice(); // copy
@@ -1266,7 +1251,7 @@ function RSAddress() {
             b.unshift(0); // shift => mul by x
         }
         // Find roots of the locator polynomial.
-        var errloc = find_errors(lambda);
+        var errloc = this.find_errors(lambda);
         var errors = errloc.length;
         if (errors < 1 || errors > 2)
             return false;
@@ -1277,7 +1262,7 @@ function RSAddress() {
         for (let i = 0; i < 4; i++) {
             let t = 0;
             for (var j = 0; j < i; j++) {
-                t ^= gmult(syndrome[i + 1 - j], lambda[j]);
+                t ^= this.gmult(this.syndrome[i + 1 - j], lambda[j]);
             }
             omega[i] = t;
         }
@@ -1288,49 +1273,49 @@ function RSAddress() {
             var root = 31 - pos;
             for (i = 0; i < 4; i++) // evaluate Omega at alpha^(-i)
              {
-                t ^= gmult(omega[i], gexp[(root * i) % 31]);
+                t ^= this.gmult(omega[i], this.gexp[(root * i) % 31]);
             }
             if (t) // evaluate Lambda' (derivative) at alpha^(-i); all odd powers disappear
              {
-                var denom = gmult(lambda[1], 1) ^ gmult(lambda[3], gexp[(root * 2) % 31]);
+                var denom = this.gmult(lambda[1], 1) ^ this.gmult(lambda[3], this.gexp[(root * 2) % 31]);
                 if (denom == 0)
                     return false;
                 if (pos > 12)
                     pos -= 14;
-                codeword[pos] ^= gmult(t, ginv(denom));
+                this.codeword[pos] ^= this.gmult(t, this.ginv(denom));
             }
         }
         return true;
     } //__________________________
-    function encode() {
+    encode() {
         var p = [0, 0, 0, 0];
         for (var i = 12; i >= 0; i--) {
-            var fb = codeword[i] ^ p[3];
-            p[3] = p[2] ^ gmult(30, fb);
-            p[2] = p[1] ^ gmult(6, fb);
-            p[1] = p[0] ^ gmult(9, fb);
-            p[0] = gmult(17, fb);
+            var fb = this.codeword[i] ^ p[3];
+            p[3] = p[2] ^ this.gmult(30, fb);
+            p[2] = p[1] ^ this.gmult(6, fb);
+            p[1] = p[0] ^ this.gmult(9, fb);
+            p[0] = this.gmult(17, fb);
         }
-        codeword[13] = p[0];
-        codeword[14] = p[1];
-        codeword[15] = p[2];
-        codeword[16] = p[3];
+        this.codeword[13] = p[0];
+        this.codeword[14] = p[1];
+        this.codeword[15] = p[2];
+        this.codeword[16] = p[3];
     } //__________________________
-    function reset() {
+    reset() {
         for (var i = 0; i < 17; i++)
-            codeword[i] = 1;
+            this.codeword[i] = 1;
     } //__________________________
-    function set_codeword(cw, len, skip) {
+    set_codeword(cw, len, skip) {
         if (typeof len === 'undefined')
             len = 17;
         if (typeof skip === 'undefined')
             skip = -1;
         for (var i = 0, j = 0; i < len; i++) {
             if (i != skip)
-                codeword[cwmap[j++]] = cw[i];
+                this.codeword[this.cwmap[j++]] = cw[i];
         }
     } //__________________________
-    this.add_guess = function () {
+    add_guess() {
         var s = this.toString(), len = this.guess.length;
         if (len > 2)
             return;
@@ -1339,8 +1324,8 @@ function RSAddress() {
                 return;
         }
         this.guess[len] = s;
-    }; //__________________________
-    this.ok = function () {
+    } //__________________________
+    ok() {
         var sum = 0;
         for (var i = 1; i < 5; i++) {
             for (var j = 0, t = 0; j < 31; j++) {
@@ -1349,14 +1334,14 @@ function RSAddress() {
                 var pos = j;
                 if (j > 26)
                     pos -= 14;
-                t ^= gmult(codeword[pos], gexp[(i * j) % 31]);
+                t ^= this.gmult(this.codeword[pos], this.gexp[(i * j) % 31]);
             }
             sum |= t;
-            syndrome[i] = t;
+            this.syndrome[i] = t;
         }
         return (sum == 0);
-    }; //__________________________
-    function from_acc(acc) {
+    } //__________________________
+    from_acc(acc) {
         var inp = [], out = [], pos = 0, len = acc.length;
         if (len == 20 && acc.charAt(0) != '1')
             return false;
@@ -1381,24 +1366,24 @@ function RSAddress() {
         } while (newlen);
         for (i = 0; i < 13; i++) // copy to codeword in reverse, pad with 0's
          {
-            codeword[i] = (--pos >= 0 ? out[i] : 0);
+            this.codeword[i] = (--pos >= 0 ? out[i] : 0);
         }
-        encode();
+        this.encode();
         return true;
     } //__________________________
-    this.toString = function () {
+    toString() {
         var out = "GMD-";
         for (var i = 0; i < 17; i++) {
-            out += alphabet[codeword[cwmap[i]]];
+            out += this.alphabet[this.codeword[this.cwmap[i]]];
             if ((i & 3) == 3 && i < 13)
                 out += '-';
         }
         return out;
-    }; //__________________________
-    this.account_id = function () {
+    } //__________________________
+    account_id() {
         var out = '', inp = [], len = 13;
         for (var i = 0; i < 13; i++) {
-            inp[i] = codeword[12 - i];
+            inp[i] = this.codeword[12 - i];
         }
         do // base 32 to base 10 conversion
          {
@@ -1417,13 +1402,13 @@ function RSAddress() {
             out += String.fromCharCode(divide + '0'.charCodeAt(0));
         } while (newlen);
         return out.split("").reverse().join("");
-    }; //__________________________
-    this.set = function (adr, allow_accounts) {
+    } //__________________________
+    set(adr, allow_accounts) {
         if (typeof allow_accounts === 'undefined')
             allow_accounts = true;
         var len = 0;
         this.guess = [];
-        reset();
+        this.reset();
         adr = String(adr);
         adr = adr.replace(/(^\s+)|(\s+$)/g, '').toUpperCase();
         if (adr.indexOf("GMD-") == 0)
@@ -1431,13 +1416,13 @@ function RSAddress() {
         if (adr.match(/^\d{1,20}$/g)) // account id
          {
             if (allow_accounts)
-                return from_acc(adr);
+                return this.from_acc(adr);
         }
         else // address
          {
-            var clean = [];
+            let clean = [];
             for (var i = 0; i < adr.length; i++) {
-                var pos = alphabet.indexOf(adr[i]);
+                var pos = this.alphabet.indexOf(adr[i]);
                 if (pos >= 0) {
                     clean[len++] = pos;
                     if (len > 18)
@@ -1445,17 +1430,18 @@ function RSAddress() {
                 }
             }
         }
+        let clean = [];
         if (len == 16) // guess deletion
          {
             for (let i = 16; i >= 0; i--) {
                 for (var j = 0; j < 32; j++) {
                     clean[i] = j;
-                    set_codeword(clean);
+                    this.set_codeword(clean);
                     if (this.ok())
                         this.add_guess();
                 }
                 if (i > 0) {
-                    var t = clean[i - 1];
+                    let t = clean[i - 1];
                     clean[i - 1] = clean[i];
                     clean[i] = t;
                 }
@@ -1464,73 +1450,82 @@ function RSAddress() {
         if (len == 18) // guess insertion
          {
             for (let i = 0; i < 18; i++) {
-                set_codeword(clean, 18, i);
+                this.set_codeword(clean, 18, i);
                 if (this.ok())
                     this.add_guess();
             }
         }
         if (len == 17) {
-            set_codeword(clean);
+            this.set_codeword(clean);
             if (this.ok())
                 return true;
-            if (guess_errors() && this.ok())
+            if (this.guess_errors() && this.ok())
                 this.add_guess();
         }
-        reset();
+        this.reset();
         return false;
-    };
+    }
 }
-module.exports = RSAddress;
+exports.RSAddress = RSAddress;
+exports.default = RSAddress;
 
 },{}],11:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Signer = void 0;
+const crypto_util_1 = require("./crypto-util");
+class Signer {
+    constructor(publicKey, privKey) {
+        this.publicKey = publicKey;
+        this.privateKey = privKey;
+    }
+    async signTransaction(unsignedTransactionHex) {
+        const sig = await crypto_util_1.CryptoUtil.Crypto.signBytesPrivateKey(unsignedTransactionHex, this.privateKey);
+        return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
+    }
+}
+exports.Signer = Signer;
+
+},{"./crypto-util":4}],12:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const crypto_util_1 = __importDefault(require("./crypto-util"));
+const crypto_util_1 = require("./crypto-util");
 const key_encryption_1 = __importDefault(require("./key-encryption"));
-class Wallet {
+const signer_1 = require("./signer");
+class Wallet extends signer_1.Signer {
     constructor(publicKey, privKey, accountId, provider = null) {
-        this.publicKey = publicKey;
-        this.privateKey = privKey;
+        super(publicKey, privKey);
         this.accountId = accountId;
-        this.accountRS = crypto_util_1.default.accountIdToRS(accountId);
+        this.accountRS = crypto_util_1.CryptoUtil.Crypto.accountIdToRS(accountId);
         this.provider = provider;
     }
     connect(provider) {
         this.provider = provider;
     }
-    async signTransaction(unsignedTransactionHex) {
-        const sig = await crypto_util_1.default.signBytesPrivateKey(unsignedTransactionHex, this.privateKey);
-        return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
-    }
     //static wallet creation functions
-    static async newWallet(numberOfWords) {
-        if (!numberOfWords) {
-            numberOfWords = 12;
-        }
-        const PassPhraseGenerator = require('./pass-gen');
-        const passPhrase = PassPhraseGenerator.generatePass(numberOfWords);
-        return this.fromPassphrase(passPhrase);
-    }
     static async fromPassphrase(passPhrase) {
-        let { publicKey, privateKey, accountId } = await crypto_util_1.default.getWalletDetails(passPhrase);
+        let { publicKey, privateKey, accountId } = await crypto_util_1.CryptoUtil.Crypto.getWalletDetails(passPhrase);
         return new Wallet(publicKey, privateKey, accountId);
     }
     static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword) {
-        let seed = await crypto_util_1.default.getSeed(passPhrase);
+        let seed = await crypto_util_1.CryptoUtil.Crypto.getSeed(passPhrase);
         return key_encryption_1.default.encryptBytes(seed, encryptionPassword);
     }
     static async fromEncryptedJSON(encryptedJSON, encryptionPassword) {
         let seed = await key_encryption_1.default.decryptToBytes(encryptedJSON, encryptionPassword);
-        let { publicKey, privateKey, accountId } = await crypto_util_1.default.getWalletDetailsFromSeed(seed);
+        let { publicKey, privateKey, accountId } = await crypto_util_1.CryptoUtil.Crypto.getWalletDetailsFromSeed(seed);
         return new Wallet(publicKey, privateKey, accountId);
     }
     static async accountIdFromPublicKey(publicKeyHex) {
-        return crypto_util_1.default.publicKeyToAccountId(publicKeyHex);
+        return crypto_util_1.CryptoUtil.Crypto.publicKeyToAccountId(publicKeyHex);
+    }
+    static generatePassphrase(numberOfWords) {
+        return require('./pass-gen').generatePass(numberOfWords);
     }
 }
 module.exports = Wallet;
 
-},{"./crypto-util":4,"./key-encryption":7,"./pass-gen":8}]},{},[3]);
+},{"./crypto-util":4,"./key-encryption":7,"./pass-gen":8,"./signer":11}]},{},[3]);
