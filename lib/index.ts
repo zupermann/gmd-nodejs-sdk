@@ -1,5 +1,9 @@
-export * from "./wallet";
-export * from "./provider";
-export * from "./signer";
-export * from "./transactions/transaction";
-export * from "./transactions/send-money";
+import { Wallet } from "./wallet";
+import { Provider } from "./provider";
+import { Signer } from "./signer";
+import { Transaction } from "./transactions/transaction";
+import { SendMoney } from "./transactions/send-money";
+
+export {
+    Wallet, Provider, Signer, Transaction, SendMoney
+}
