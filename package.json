@@ -1,32 +1,37 @@
 {
-  "name": "gmd-nodejs-sdk",
-  "version": "1.3.1",
-  "description": "SDK to interact with Coop Network GMD node using NodeJS",
-  "main": "gmd-crypto.js",
+  "name": "gmd-sdk",
+  "version": "2.0.0",
+  "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
-    "test": "node ./test/test.js",
-    "build-browser": "browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
-    "lint": "npx eslint ."
+    "test": "tsc && node ./__test__/main.test.js",
+    "build-browser": "tsc && browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
+    "build-browser-test": "npm run build-browser && browserify ./__test__/main.test.js -o ./__test__/browser/test-bundle.js",
+    "lint": "npx eslint .",
+    "build": "tsc && npx eslint . && npm run build-browser"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zupermann/gmd-nodejs-sdk.git"
+    "url": "https://github.com/CoopNetwork/GMD-nodejs-sdk.git"
   },
   "browser": {
-    "./get-crypto.js": "./browser/get-crypto-window.js",
+    "./dist/get-crypto.js": "./browser/get-crypto-window.js",
     "axios": false,
-    "./get-axios.js": "./browser/get-axios-browser.js"
+    "./dist/get-axios.js": "./browser/get-axios-browser.js"
   },
   "dependencies": {
     "axios": "^0.26.0"
   },
   "devDependencies": {
+    "@types/node": "^18.7.3",
+    "@typescript-eslint/eslint-plugin": "^5.33.1",
+    "@typescript-eslint/parser": "^5.33.1",
     "browserify": "^17.0.0",
-    "eslint": "^8.20.0",
+    "eslint": "^8.22.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
+    "typescript": "^4.7.4",
     "uglify-js": "^3.16.3"
   },
   "engines": {
@@ -40,7 +45,7 @@
   "author": "George A. (https://github.com/zupermann)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zupermann/gmd-nodejs-sdk/issues"
+    "url": "https://github.com/CoopNetwork/gmd-nodejs-sdk/issues"
   },
-  "homepage": "https://github.com/zupermann/gmd-nodejs-sdk#readme"
+  "homepage": "https://github.com/CoopNetwork/gmd-nodejs-sdk#readme"
 }

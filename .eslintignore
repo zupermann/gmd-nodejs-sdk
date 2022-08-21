@@ -1,2 +1,4 @@
 browser/dist
-test/
+/__test__/
+/dist/
+/lib/rs-address.ts

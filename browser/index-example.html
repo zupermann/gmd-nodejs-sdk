@@ -1,0 +1,32 @@
+<html>
+
+<body>
+    <p1>Example to use GMD SDK in browser.</p1>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="./dist/gmd-sdk.js"></script>
+    <script>
+        (async () => {
+
+
+            let Wallet = GMD.Wallet;
+            wallet = await Wallet.fromPassphrase('this is a passphrase example');
+            console.log('====2' + JSON.stringify(wallet, null, 2));
+
+            let provider = new GMD.Provider(new URL('https://ccone.asiminei.com:6877'));
+            paramsGetTransactions = {
+                requestType: 'getTransactionsBulk',
+                pageSize: 3,
+                page: 0
+            }
+
+            //provider.setLogger(console.log);
+            let data = await provider.apiCall('get', paramsGetTransactions);
+            console.log('====2' + JSON.stringify(data, null, 2));
+
+
+
+        })();
+    </script>
+</body>
+
+</html>

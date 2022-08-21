@@ -1,16 +1,121 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-/* eslint-disable no-undef */
-module.exports = axios;
-},{}],2:[function(require,module,exports){
-module.exports = window.crypto;
-},{}],3:[function(require,module,exports){
+const testWallet = require('./wallet.test');
+const testProvider = require('./provider.test');
+const testSendMoney = require('./send-money.test');
 
-window.GMD = {
-    Wallet: require('../dist/wallet'),
-    Provider: require('../dist/provider')
+(async () => {
+    // console.log('---Testing wallet...');
+    // await testWallet();
+    // console.log('---Testing wallet finished.');
+
+    // console.log('---Testing provider...');
+    // await testProvider();
+    // console.log('---Testing provider finished.');
+
+
+    console.log('---Testing send money...');
+    await testSendMoney();
+    console.log('---Testing send money finished.');
+})();
+
+},{"./provider.test":2,"./send-money.test":3,"./wallet.test":4}],2:[function(require,module,exports){
+const Provider = require('../dist/provider');
+
+const testProvider = async () => {
+    let provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
+    console.log(JSON.stringify(provider, null, 2));
+
+    paramsGetTransactions = {
+        requestType: 'getTransactionsBulk',
+        pageSize: 3,
+        page: 0
+    }
+
+    //provider.setLogger(console.log);
+    let data = await provider.apiCall('get', paramsGetTransactions);
+    console.log('==========' + JSON.stringify(data, null, 2));
+
+    let blockNo = await provider.getBlockNumber();
+    console.log('blockNo=' + blockNo);
 }
 
-},{"../dist/provider":9,"../dist/wallet":13}],4:[function(require,module,exports){
+module.exports = testProvider;
+},{"../dist/provider":12}],3:[function(require,module,exports){
+SendMoney = require('../dist/transactions/send-money');
+Provider = require('../dist/provider');
+Wallet = require('../dist/wallet');
+
+
+const testSendMoney = async () => {
+    provider = new Provider(new URL('https://ccone.asiminei.com:6877'));
+    wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
+
+    transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
+    await provider.createUnsignedTransaction(transaction);
+    await wallet.signTransaction(transaction);
+    await provider.broadcastTransaction(transaction);
+
+}
+
+module.exports = testSendMoney;
+},{"../dist/provider":12,"../dist/transactions/send-money":15,"../dist/wallet":17}],4:[function(require,module,exports){
+const Wallet = require('../dist/wallet.js')
+const secretPassphrase = "this is a paasphrase example";
+const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
+const privKey = "39c8834113346ed3ba6ac90eff170a302a9264680f9d5a578931dd2c22d65e05";
+const accountId = '5224136646640665215';
+const accountRS = 'GMD-W2MZ-M9WK-G2LJ-6WYZJ';
+
+const testWallet = async () => {
+    console.log('Testing wallet from passphrase');
+    await test1();
+    console.log('Wallet from passphrase test OK');
+
+    console.log('Testing wallet encryption');
+    await test2();
+    console.log('Wallet encryption test OK');
+
+    console.log('Testing new wallet generation');
+    await test3();
+    console.log('New wallet generation test OK');
+};
+
+const test1 = async () => {
+    let wallet = await Wallet.fromPassphrase(secretPassphrase);
+    console.assert(wallet.publicKey == pubKey, "Wallet.fromPassphrase failed publicKey");
+    console.assert(wallet.privateKey == privKey, "Wallet.fromPassphrase failed privateKey");
+    console.assert(wallet.accountId == accountId, "Wallet.fromPassphrase failed accountId");
+    console.assert(wallet.accountRS == accountRS, "Wallet.fromPassphrase failed accountRS");
+}
+
+const test2 = async () => {
+    let encryptedJSON = await Wallet.encryptedJSONFromPassPhrase(secretPassphrase, "password example 123@@!");
+    let wallet = await Wallet.fromEncryptedJSON(encryptedJSON, "password example 123@@!");
+    console.assert(wallet.publicKey == pubKey, "Wallet.fromEncryptedJSON failed publicKey");
+    console.assert(wallet.privateKey == privKey, "Wallet.fromEncryptedJSON failed privateKey");
+    console.assert(wallet.accountId == accountId, "Wallet.fromEncryptedJSON failed accountId");
+    console.assert(wallet.accountRS == accountRS, "Wallet.fromEncryptedJSON failed accountRS");
+}
+
+const test3 = async () => {
+    let passPhrase = Wallet.generatePassphrase();
+    console.log('new passphrase generated:' + passPhrase);
+    let wallet = await Wallet.fromPassphrase(passPhrase);
+    console.log('New wallet generated: ' + JSON.stringify(wallet, null, 2));
+    console.assert(typeof wallet.publicKey === 'string' && wallet.publicKey.length > 0, "New wallet failed. No public key generated.");
+    console.assert(typeof wallet.privateKey === 'string' && wallet.privateKey.length > 0, "New wallet failed. No private key generated.");
+    console.assert(typeof wallet.accountId === 'string' && wallet.accountId.length > 0, "New wallet failed. No accountId key generated.");
+    console.assert(typeof wallet.accountRS === 'string' && wallet.accountRS.length > 0, "New wallet failed. No accountRS key generated.");
+}
+
+
+module.exports = testWallet;
+},{"../dist/wallet.js":17}],5:[function(require,module,exports){
+/* eslint-disable no-undef */
+module.exports = axios;
+},{}],6:[function(require,module,exports){
+module.exports = window.crypto;
+},{}],7:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -104,7 +209,7 @@ var CryptoUtil;
         }
         Converters.byteArraysEqual = byteArraysEqual;
         function isHex(str) {
-            const re = /^[0-9a-fA-F]+$/;
+            let re = /^[0-9a-fA-F]+$/;
             return str != null && str.length > 0 && re.test(str);
         }
         Converters.isHex = isHex;
@@ -207,7 +312,7 @@ var CryptoUtil;
     })(Crypto = CryptoUtil.Crypto || (CryptoUtil.Crypto = {}));
 })(CryptoUtil = exports.CryptoUtil || (exports.CryptoUtil = {}));
 
-},{"./curve25519":5,"./get-crypto":2,"./rs-address":10}],5:[function(require,module,exports){
+},{"./curve25519":8,"./get-crypto":6,"./rs-address":13}],8:[function(require,module,exports){
 "use strict";
 /* Ported to JavaScript from Java 07/01/14.
  *
@@ -952,7 +1057,7 @@ var curve25519 = function () {
 }();
 module.exports = curve25519;
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -990,17 +1095,42 @@ class RemoteAPICaller {
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
     async apiCall(method, params) {
-        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
+        const { url, httpTimeout } = this.processParams(params);
+        const config = { method: method, url: url + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
+        if (httpTimeout && httpTimeout > 0) {
+            config.httpTimeout = httpTimeout;
+        }
         return (0, get_axios_1.default)(config).then((res) => {
             if (this.log)
                 this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
             return res.data;
         });
     }
+    processParams(params) {
+        let url;
+        let httpTimeout;
+        if (params) {
+            if ('secretPhrase' in params) {
+                delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
+            }
+            if ('httpTimeout' in params) {
+                httpTimeout = params.httpTimeout;
+                delete params.httpTimeout;
+            }
+            if ('baseURL' in params) {
+                url = params.baseURL;
+                delete params.baseURL;
+            }
+            else {
+                url = this.baseURL.toString();
+            }
+        }
+        return { url, httpTimeout };
+    }
 }
 exports.RemoteAPICaller = RemoteAPICaller;
 
-},{"./get-axios":1}],7:[function(require,module,exports){
+},{"./get-axios":5}],10:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1104,7 +1234,7 @@ exports.KeyEncryption = {
 };
 exports.default = exports.KeyEncryption;
 
-},{"./crypto-util":4,"./get-crypto":2}],8:[function(require,module,exports){
+},{"./crypto-util":7,"./get-crypto":6}],11:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1130,7 +1260,7 @@ const PassPhraseGenerator = {
 };
 exports.default = PassPhraseGenerator;
 
-},{"./get-crypto":2}],9:[function(require,module,exports){
+},{"./get-crypto":6}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Provider = void 0;
@@ -1143,14 +1273,13 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
     getBlockNumber() {
         return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height);
     }
-    async getBalance(rsAccount) {
-        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
-        return data.balanceNQT;
+    getBalance(rsAccount) {
+        return this.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => data.balanceNQT);
     }
     async createUnsignedTransaction(transaction) {
         if (transaction.canProcessRequest()) {
             const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
-            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes);
+            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes, unsignedTransaction.transactionJSON);
         }
         else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
@@ -1172,8 +1301,28 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
 }
 exports.Provider = Provider;
 module.exports = Provider;
+// export enum TransactionType {
+//     PAYMENT = 0,
+//     MESSAGING = 1,
+//     COLORED_COINS = 2,
+//     DIGITAL_GOODS = 3,
+//     ACCOUNT_CONTROL = 4,
+//     MONETARY_SYSTEM = 5,
+//     DATA = 6,
+//     SHUFFLING = 7
+// }
+// const TransactionSubtype = [
+//     ["ORDINARY_PAYMENT"],
+//     ["ARBITRARY_MESSAGE", "ALIAS_ASSIGNMENT", "POLL_CREATION", "VOTE_CASTING", "HUB_ANNOUNCEMENT", "ACCOUNT_INFO", "ALIAS_SELL", "ALIAS_BUY", "ALIAS_DELETE", "PHASING_VOTE_CASTING", "ACCOUNT_PROPERTY", "ACCOUNT_PROPERTY_DELETE"],
+//     ["ASSET_ISSUANCE", "ASSET_TRANSFER", "ASK_ORDER_PLACEMENT", "BID_ORDER_PLACEMENT", "ASK_ORDER_CANCELLATION", "BID_ORDER_CANCELLATION", "DIVIDEND_PAYMENT", "ASSET_DELETE", "ASSET_INCREASE", "PROPERTY_SET", "PROPERTY_DELETE"],
+//     ["LISTING", "DELISTING", "PRICE_CHANGE", "QUANTITY_CHANGE", "PURCHASE", "DELIVERY", "FEEDBACK", "REFUND"],
+//     ["EFFECTIVE_BALANCE_LEASING", "PHASING_ONLY"],
+//     ["CURRENCY_ISSUANCE", "RESERVE_INCREASE", "RESERVE_CLAIM", "CURRENCY_TRANSFER", "PUBLISH_EXCHANGE_OFFER", "EXCHANGE_BUY", "EXCHANGE_SELL", "CURRENCY_MINTING", "CURRENCY_DELETION"],
+//     ["UPLOAD", "EXTEND"],
+//     ["CREATION", "REGISTRATION", "PROCESSING", "RECIPIENTS", "VERIFICATION", "CANCELLATION"]
+// ]
 
-},{"./gmd-api-caller":6}],10:[function(require,module,exports){
+},{"./gmd-api-caller":9}],13:[function(require,module,exports){
 "use strict";
 /*
     NXT address class, extended version (with error guessing).
@@ -1467,7 +1616,7 @@ class RSAddress {
 exports.RSAddress = RSAddress;
 exports.default = RSAddress;
 
-},{}],11:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Signer = void 0;
@@ -1504,7 +1653,34 @@ class Signer {
 }
 exports.Signer = Signer;
 
-},{"./crypto-util":4,"./transactions/transaction":12}],12:[function(require,module,exports){
+},{"./crypto-util":7,"./transactions/transaction":16}],15:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SendMoney = void 0;
+const transaction_1 = require("./transaction");
+class SendMoney extends transaction_1.Transaction {
+    getRequestType() {
+        return "sendMoney";
+    }
+    constructor(requestJSON) {
+        super(requestJSON);
+    }
+    static createTransaction(recipient, amountNQT, senderPublicKey, feeNQT = '100000000', deadline = 1440, message = "") {
+        const reqJSON = {
+            recipient: recipient,
+            amountNQT: amountNQT,
+            publicKey: senderPublicKey,
+            feeNQT: feeNQT,
+            deadline: deadline,
+            message: message
+        };
+        return new SendMoney(reqJSON);
+    }
+}
+exports.SendMoney = SendMoney;
+module.exports = SendMoney;
+
+},{"./transaction":16}],16:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transaction = exports.TransactionState = void 0;
@@ -1535,17 +1711,18 @@ class Transaction {
     constructor(requestJSON) {
         this._unsignedTransactionBytes = null;
         this._signedTransactionBytes = null;
-        this._transactionID = null;
-        this._fullHash = null;
+        this._transactionJSON = null;
+        requestJSON.requestType = this.getRequestType();
         this._requestJSON = requestJSON;
         this._state = TransactionState.REQUEST_CREATED;
     }
     canProcessRequest() {
         return this._state === TransactionState.REQUEST_CREATED;
     }
-    onTransactionRequestProcessed(unsignedTransactionBytes) {
+    onTransactionRequestProcessed(unsignedTransactionBytes, transactionJSON) {
         if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
+            this._transactionJSON = transactionJSON;
             this._state = TransactionState.UNSIGNED;
         }
         else {
@@ -1566,12 +1743,7 @@ class Transaction {
     }
     onBroadcasted(result) {
         if (this.canBroadcast()) {
-            this._transactionID = result.transaction;
-            this._fullHash = result.fullHash;
             this._state == TransactionState.BROADCASTED;
-        }
-        else {
-            throw new Error('Something went wrong on transaction broadcast');
         }
     }
     get requestJSON() {
@@ -1589,7 +1761,7 @@ class Transaction {
 }
 exports.Transaction = Transaction;
 
-},{"../crypto-util":4}],13:[function(require,module,exports){
+},{"../crypto-util":7}],17:[function(require,module,exports){
 "use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
@@ -1634,4 +1806,4 @@ class Wallet extends signer_1.Signer {
 exports.Wallet = Wallet;
 module.exports = Wallet;
 
-},{"./crypto-util":4,"./key-encryption":7,"./pass-gen":8,"./signer":11}]},{},[3]);
+},{"./crypto-util":7,"./key-encryption":10,"./pass-gen":11,"./signer":14}]},{},[1]);
