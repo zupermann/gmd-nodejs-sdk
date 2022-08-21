@@ -1,6 +1,6 @@
 {
   "name": "gmd-nodejs-sdk",
-  "version": "2.0.4-1",
+  "version": "2.0.4-2",
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
     "test": "tsc && node ./__test__/main.test.js",
