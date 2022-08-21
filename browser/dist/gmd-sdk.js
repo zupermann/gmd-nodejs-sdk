@@ -1541,6 +1541,9 @@ class Transaction {
         this._state = TransactionState.REQUEST_CREATED;
     }
     canProcessRequest() {
+        if ('secretPhrase' in this._requestJSON) {
+            throw new Error('Do not send secret password to node!');
+        }
         return this._state === TransactionState.REQUEST_CREATED;
     }
     onTransactionRequestProcessed(unsignedTransactionBytes) {

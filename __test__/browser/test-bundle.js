@@ -4,13 +4,13 @@ const testProvider = require('./provider.test');
 const testSendMoney = require('./send-money.test');
 
 (async () => {
-    // console.log('---Testing wallet...');
-    // await testWallet();
-    // console.log('---Testing wallet finished.');
+    console.log('---Testing wallet...');
+    await testWallet();
+    console.log('---Testing wallet finished.');
 
-    // console.log('---Testing provider...');
-    // await testProvider();
-    // console.log('---Testing provider finished.');
+    console.log('---Testing provider...');
+    await testProvider();
+    console.log('---Testing provider finished.');
 
 
     console.log('---Testing send money...');
@@ -47,13 +47,18 @@ Wallet = require('../dist/wallet');
 
 
 const testSendMoney = async () => {
-    provider = new Provider(new URL('https://ccone.asiminei.com:6877'));
-    wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
+    try {
+        provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
+        wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
 
-    transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
-    await provider.createUnsignedTransaction(transaction);
-    await wallet.signTransaction(transaction);
-    await provider.broadcastTransaction(transaction);
+        transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
+        await provider.createUnsignedTransaction(transaction);
+        await wallet.signTransaction(transaction);
+        await provider.broadcastTransaction(transaction);
+    }
+    catch (error) {
+        console.log('Error on send money :' + error);
+    }
 
 }
 
@@ -209,7 +214,7 @@ var CryptoUtil;
         }
         Converters.byteArraysEqual = byteArraysEqual;
         function isHex(str) {
-            let re = /^[0-9a-fA-F]+$/;
+            const re = /^[0-9a-fA-F]+$/;
             return str != null && str.length > 0 && re.test(str);
         }
         Converters.isHex = isHex;
@@ -1095,37 +1100,12 @@ class RemoteAPICaller {
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
     async apiCall(method, params) {
-        const { url, httpTimeout } = this.processParams(params);
-        const config = { method: method, url: url + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
-        if (httpTimeout && httpTimeout > 0) {
-            config.httpTimeout = httpTimeout;
-        }
+        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
         return (0, get_axios_1.default)(config).then((res) => {
             if (this.log)
                 this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
             return res.data;
         });
-    }
-    processParams(params) {
-        let url;
-        let httpTimeout;
-        if (params) {
-            if ('secretPhrase' in params) {
-                delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
-            }
-            if ('httpTimeout' in params) {
-                httpTimeout = params.httpTimeout;
-                delete params.httpTimeout;
-            }
-            if ('baseURL' in params) {
-                url = params.baseURL;
-                delete params.baseURL;
-            }
-            else {
-                url = this.baseURL.toString();
-            }
-        }
-        return { url, httpTimeout };
     }
 }
 exports.RemoteAPICaller = RemoteAPICaller;
@@ -1273,13 +1253,14 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
     getBlockNumber() {
         return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height);
     }
-    getBalance(rsAccount) {
-        return this.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => data.balanceNQT);
+    async getBalance(rsAccount) {
+        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
+        return data.balanceNQT;
     }
     async createUnsignedTransaction(transaction) {
         if (transaction.canProcessRequest()) {
             const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
-            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes, unsignedTransaction.transactionJSON);
+            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes);
         }
         else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
@@ -1301,26 +1282,6 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
 }
 exports.Provider = Provider;
 module.exports = Provider;
-// export enum TransactionType {
-//     PAYMENT = 0,
-//     MESSAGING = 1,
-//     COLORED_COINS = 2,
-//     DIGITAL_GOODS = 3,
-//     ACCOUNT_CONTROL = 4,
-//     MONETARY_SYSTEM = 5,
-//     DATA = 6,
-//     SHUFFLING = 7
-// }
-// const TransactionSubtype = [
-//     ["ORDINARY_PAYMENT"],
-//     ["ARBITRARY_MESSAGE", "ALIAS_ASSIGNMENT", "POLL_CREATION", "VOTE_CASTING", "HUB_ANNOUNCEMENT", "ACCOUNT_INFO", "ALIAS_SELL", "ALIAS_BUY", "ALIAS_DELETE", "PHASING_VOTE_CASTING", "ACCOUNT_PROPERTY", "ACCOUNT_PROPERTY_DELETE"],
-//     ["ASSET_ISSUANCE", "ASSET_TRANSFER", "ASK_ORDER_PLACEMENT", "BID_ORDER_PLACEMENT", "ASK_ORDER_CANCELLATION", "BID_ORDER_CANCELLATION", "DIVIDEND_PAYMENT", "ASSET_DELETE", "ASSET_INCREASE", "PROPERTY_SET", "PROPERTY_DELETE"],
-//     ["LISTING", "DELISTING", "PRICE_CHANGE", "QUANTITY_CHANGE", "PURCHASE", "DELIVERY", "FEEDBACK", "REFUND"],
-//     ["EFFECTIVE_BALANCE_LEASING", "PHASING_ONLY"],
-//     ["CURRENCY_ISSUANCE", "RESERVE_INCREASE", "RESERVE_CLAIM", "CURRENCY_TRANSFER", "PUBLISH_EXCHANGE_OFFER", "EXCHANGE_BUY", "EXCHANGE_SELL", "CURRENCY_MINTING", "CURRENCY_DELETION"],
-//     ["UPLOAD", "EXTEND"],
-//     ["CREATION", "REGISTRATION", "PROCESSING", "RECIPIENTS", "VERIFICATION", "CANCELLATION"]
-// ]
 
 },{"./gmd-api-caller":9}],13:[function(require,module,exports){
 "use strict";
@@ -1659,14 +1620,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SendMoney = void 0;
 const transaction_1 = require("./transaction");
 class SendMoney extends transaction_1.Transaction {
-    getRequestType() {
-        return "sendMoney";
-    }
     constructor(requestJSON) {
         super(requestJSON);
     }
+    getRequestType() {
+        return SendMoney.endpointName;
+    }
     static createTransaction(recipient, amountNQT, senderPublicKey, feeNQT = '100000000', deadline = 1440, message = "") {
         const reqJSON = {
+            requestType: SendMoney.endpointName,
             recipient: recipient,
             amountNQT: amountNQT,
             publicKey: senderPublicKey,
@@ -1678,6 +1640,7 @@ class SendMoney extends transaction_1.Transaction {
     }
 }
 exports.SendMoney = SendMoney;
+SendMoney.endpointName = "sendMoney";
 module.exports = SendMoney;
 
 },{"./transaction":16}],16:[function(require,module,exports){
@@ -1711,18 +1674,20 @@ class Transaction {
     constructor(requestJSON) {
         this._unsignedTransactionBytes = null;
         this._signedTransactionBytes = null;
-        this._transactionJSON = null;
-        requestJSON.requestType = this.getRequestType();
+        this._transactionID = null;
+        this._fullHash = null;
         this._requestJSON = requestJSON;
         this._state = TransactionState.REQUEST_CREATED;
     }
     canProcessRequest() {
+        if ('secretPhrase' in this._requestJSON) {
+            throw new Error('Do not send secret password to node!');
+        }
         return this._state === TransactionState.REQUEST_CREATED;
     }
-    onTransactionRequestProcessed(unsignedTransactionBytes, transactionJSON) {
+    onTransactionRequestProcessed(unsignedTransactionBytes) {
         if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
-            this._transactionJSON = transactionJSON;
             this._state = TransactionState.UNSIGNED;
         }
         else {
@@ -1743,7 +1708,12 @@ class Transaction {
     }
     onBroadcasted(result) {
         if (this.canBroadcast()) {
+            this._transactionID = result.transaction;
+            this._fullHash = result.fullHash;
             this._state == TransactionState.BROADCASTED;
+        }
+        else {
+            throw new Error('Something went wrong on transaction broadcast');
         }
     }
     get requestJSON() {
