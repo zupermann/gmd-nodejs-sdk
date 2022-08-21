@@ -1,5 +1,5 @@
 import webcrypto from './get-crypto';
-import curve25519 from './curve25519';
+import { curve25519 } from './curve25519';
 
 import { RSAddress } from './rs-address'
 

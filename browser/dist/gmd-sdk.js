@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CryptoUtil = void 0;
 const get_crypto_1 = __importDefault(require("./get-crypto"));
-const curve25519_1 = __importDefault(require("./curve25519"));
+const curve25519_1 = require("./curve25519");
 const rs_address_1 = require("./rs-address");
 var CryptoUtil;
 (function (CryptoUtil) {
@@ -141,9 +141,9 @@ var CryptoUtil;
             const s = Converters.hexToBytes(privateKey);
             const m = await SHA256(messageBytes);
             const x = await SHA256(m, s);
-            const y = curve25519_1.default.keygen(x).p;
+            const y = curve25519_1.curve25519.keygen(x).p;
             const h = await SHA256(m, y);
-            const v = curve25519_1.default.sign(h, x, s);
+            const v = curve25519_1.curve25519.sign(h, x, s);
             return Converters.bytesToHex(v ? v.concat(h) : []);
         }
         Crypto.signHex = signHex;
@@ -167,7 +167,7 @@ var CryptoUtil;
         }
         Crypto.getSeed = getSeed;
         async function getWalletDetailsFromSeed(seed) {
-            const { p, s } = curve25519_1.default.keygen(seed);
+            const { p, s } = curve25519_1.curve25519.keygen(seed);
             const publicKey = Converters.bytesToHex(p);
             const privateKey = Converters.bytesToHex(s);
             const accountId = await publicKeyToAccountId(publicKey);
@@ -187,7 +187,7 @@ var CryptoUtil;
             const publicKeyBytes = Converters.hexToBytes(publicKey);
             const v = signatureBytes.slice(0, 32);
             const h = signatureBytes.slice(32);
-            const Y = curve25519_1.default.verify(v, h, publicKeyBytes);
+            const Y = curve25519_1.curve25519.verify(v, h, publicKeyBytes);
             const m = await SHA256(messageBytes);
             const h2 = await SHA256(m, Y);
             return Converters.byteArraysEqual(h, h2);
@@ -220,7 +220,9 @@ var CryptoUtil;
  *
  * Based on work by Daniel J Bernstein, http://cr.yp.to/ecdh.html
  */
-var curve25519 = function () {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.curve25519 = void 0;
+exports.curve25519 = function () {
     //region Constants
     var KEY_SIZE = 32;
     /* array length */
@@ -950,7 +952,7 @@ var curve25519 = function () {
         keygen: keygen
     };
 }();
-module.exports = curve25519;
+//module.exports = curve25519;
 
 },{}],6:[function(require,module,exports){
 "use strict";
