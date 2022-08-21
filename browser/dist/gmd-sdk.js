@@ -12,50 +12,86 @@ window.GMD = {
 
 },{"../dist/provider":9,"../dist/wallet":13}],4:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CryptoUtil = void 0;
-const get_crypto_1 = __importDefault(require("./get-crypto"));
-const curve25519_1 = require("./curve25519");
-const rs_address_1 = require("./rs-address");
+var get_crypto_1 = __importDefault(require("./get-crypto"));
+var curve25519_1 = require("./curve25519");
+var rs_address_1 = require("./rs-address");
 var CryptoUtil;
 (function (CryptoUtil) {
-    let Converters;
+    var Converters;
     (function (Converters) {
         function strToHex(str) {
-            let result = '';
-            strToBytes(str).forEach(c => result += c.toString(16));
+            var result = '';
+            strToBytes(str).forEach(function (c) { return result += c.toString(16); });
             return result;
         }
         Converters.strToHex = strToHex;
         function strToBytes(str) {
-            const result = [];
-            for (let i = 0; i < str.length; i++) {
+            var result = [];
+            for (var i = 0; i < str.length; i++) {
                 result.push(str.charCodeAt(i));
             }
             return result;
         }
         Converters.strToBytes = strToBytes;
         function hexToString(hex) {
-            let string = '';
-            for (let i = 0; i < hex.length; i += 2) {
+            var string = '';
+            for (var i = 0; i < hex.length; i += 2) {
                 string += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
             }
             return string;
         }
         Converters.hexToString = hexToString;
         function hexToBytes(hex) {
-            const bytes = [];
-            for (let c = 0; c < hex.length; c += 2) {
+            var bytes = [];
+            for (var c = 0; c < hex.length; c += 2) {
                 bytes.push(parseInt(hex.substr(c, 2), 16));
             }
             return bytes;
         }
         Converters.hexToBytes = hexToBytes;
         function bytesToHex(byteArray) {
-            return Array.from(byteArray, (byte) => {
+            return Array.from(byteArray, function (byte) {
                 return ('0' + (byte & 0xFF).toString(16)).slice(-2);
             }).join('');
         }
@@ -69,8 +105,8 @@ var CryptoUtil;
         }
         Converters.hexToUint8 = hexToUint8;
         function Uint8ArrayToStr(buffer) {
-            let s = '';
-            for (let i = 0; i < buffer.length; i++) {
+            var s = '';
+            for (var i = 0; i < buffer.length; i++) {
                 s += String.fromCharCode(buffer[i]);
             }
             return s;
@@ -95,7 +131,7 @@ var CryptoUtil;
             if (bytes1.length !== bytes2.length) {
                 return false;
             }
-            for (let i = 0; i < bytes1.length; ++i) {
+            for (var i = 0; i < bytes1.length; ++i) {
                 if (bytes1[i] !== bytes2[i]) {
                     return false;
                 }
@@ -104,102 +140,206 @@ var CryptoUtil;
         }
         Converters.byteArraysEqual = byteArraysEqual;
         function isHex(str) {
-            const re = /^[0-9a-fA-F]+$/;
+            var re = /^[0-9a-fA-F]+$/;
             return str != null && str.length > 0 && re.test(str);
         }
         Converters.isHex = isHex;
     })(Converters = CryptoUtil.Converters || (CryptoUtil.Converters = {}));
-    let Crypto;
+    var Crypto;
     (function (Crypto) {
-        async function SHA256(in1, in2) {
-            let input = [];
-            if (in1) {
-                if (in2) {
-                    input = in1.concat(in2);
-                }
-                else {
-                    input = in1;
-                }
-            }
-            else {
-                if (in2) {
-                    input = in2;
-                }
-            }
-            const arrayBufferInput = Uint8Array.from(input);
-            const output = await get_crypto_1.default.subtle.digest('SHA-256', arrayBufferInput);
-            return Array.from(new Uint8Array(output));
+        function SHA256(in1, in2) {
+            return __awaiter(this, void 0, void 0, function () {
+                var input, arrayBufferInput, output;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            input = [];
+                            if (in1) {
+                                if (in2) {
+                                    input = in1.concat(in2);
+                                }
+                                else {
+                                    input = in1;
+                                }
+                            }
+                            else {
+                                if (in2) {
+                                    input = in2;
+                                }
+                            }
+                            arrayBufferInput = Uint8Array.from(input);
+                            return [4 /*yield*/, get_crypto_1.default.subtle.digest('SHA-256', arrayBufferInput)];
+                        case 1:
+                            output = _a.sent();
+                            return [2 /*return*/, Array.from(new Uint8Array(output))];
+                    }
+                });
+            });
         }
         Crypto.SHA256 = SHA256;
-        async function signBytes(message, passPhrase) {
-            const privateKey = await getPrivateKey(passPhrase);
-            return signHex(message, privateKey);
+        function signBytes(message, passPhrase) {
+            return __awaiter(this, void 0, void 0, function () {
+                var privateKey;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, getPrivateKey(passPhrase)];
+                        case 1:
+                            privateKey = _a.sent();
+                            return [2 /*return*/, signHex(message, privateKey)];
+                    }
+                });
+            });
         }
         Crypto.signBytes = signBytes;
-        async function signHex(message, privateKey) {
-            const messageBytes = Converters.hexToBytes(message);
-            const s = Converters.hexToBytes(privateKey);
-            const m = await SHA256(messageBytes);
-            const x = await SHA256(m, s);
-            const y = curve25519_1.curve25519.keygen(x).p;
-            const h = await SHA256(m, y);
-            const v = curve25519_1.curve25519.sign(h, x, s);
-            return Converters.bytesToHex(v ? v.concat(h) : []);
+        function signHex(message, privateKey) {
+            return __awaiter(this, void 0, void 0, function () {
+                var messageBytes, s, m, x, y, h, v;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            messageBytes = Converters.hexToBytes(message);
+                            s = Converters.hexToBytes(privateKey);
+                            return [4 /*yield*/, SHA256(messageBytes)];
+                        case 1:
+                            m = _a.sent();
+                            return [4 /*yield*/, SHA256(m, s)];
+                        case 2:
+                            x = _a.sent();
+                            y = curve25519_1.curve25519.keygen(x).p;
+                            return [4 /*yield*/, SHA256(m, y)];
+                        case 3:
+                            h = _a.sent();
+                            v = curve25519_1.curve25519.sign(h, x, s);
+                            return [2 /*return*/, Converters.bytesToHex(v ? v.concat(h) : [])];
+                    }
+                });
+            });
         }
         Crypto.signHex = signHex;
-        async function getPrivateKey(pass) {
-            const { privateKey } = await getWalletDetails(pass);
-            return privateKey;
+        function getPrivateKey(pass) {
+            return __awaiter(this, void 0, void 0, function () {
+                var privateKey;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, getWalletDetails(pass)];
+                        case 1:
+                            privateKey = (_a.sent()).privateKey;
+                            return [2 /*return*/, privateKey];
+                    }
+                });
+            });
         }
         Crypto.getPrivateKey = getPrivateKey;
-        async function getPublicKey(pass) {
-            const { publicKey } = await getWalletDetails(pass);
-            return publicKey;
+        function getPublicKey(pass) {
+            return __awaiter(this, void 0, void 0, function () {
+                var publicKey;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, getWalletDetails(pass)];
+                        case 1:
+                            publicKey = (_a.sent()).publicKey;
+                            return [2 /*return*/, publicKey];
+                    }
+                });
+            });
         }
         Crypto.getPublicKey = getPublicKey;
-        async function getWalletDetails(passPhrase) {
-            const seed = await getSeed(passPhrase);
-            return getWalletDetailsFromSeed(seed);
+        function getWalletDetails(passPhrase) {
+            return __awaiter(this, void 0, void 0, function () {
+                var seed;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, getSeed(passPhrase)];
+                        case 1:
+                            seed = _a.sent();
+                            return [2 /*return*/, getWalletDetailsFromSeed(seed)];
+                    }
+                });
+            });
         }
         Crypto.getWalletDetails = getWalletDetails;
-        async function getSeed(passPhrase) {
-            return SHA256(Converters.strToBytes(passPhrase));
+        function getSeed(passPhrase) {
+            return __awaiter(this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    return [2 /*return*/, SHA256(Converters.strToBytes(passPhrase))];
+                });
+            });
         }
         Crypto.getSeed = getSeed;
-        async function getWalletDetailsFromSeed(seed) {
-            const { p, s } = curve25519_1.curve25519.keygen(seed);
-            const publicKey = Converters.bytesToHex(p);
-            const privateKey = Converters.bytesToHex(s);
-            const accountId = await publicKeyToAccountId(publicKey);
-            return { publicKey: publicKey, privateKey: privateKey, accountId: accountId };
+        function getWalletDetailsFromSeed(seed) {
+            return __awaiter(this, void 0, void 0, function () {
+                var _a, p, s, publicKey, privateKey, accountId;
+                return __generator(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = curve25519_1.curve25519.keygen(seed), p = _a.p, s = _a.s;
+                            publicKey = Converters.bytesToHex(p);
+                            privateKey = Converters.bytesToHex(s);
+                            return [4 /*yield*/, publicKeyToAccountId(publicKey)];
+                        case 1:
+                            accountId = _b.sent();
+                            return [2 /*return*/, { publicKey: publicKey, privateKey: privateKey, accountId: accountId }];
+                    }
+                });
+            });
         }
         Crypto.getWalletDetailsFromSeed = getWalletDetailsFromSeed;
-        async function publicKeyToAccountId(publicKeyHex) {
-            const sha256digest = await SHA256(Converters.hexToBytes(publicKeyHex));
-            const accountIdBytes = sha256digest.slice(0, 8).reverse(); // Most siginificant byte is on the right.
-            const accountId = Converters.hexToDec(Converters.bytesToHex(accountIdBytes));
-            return accountId;
+        function publicKeyToAccountId(publicKeyHex) {
+            return __awaiter(this, void 0, void 0, function () {
+                var sha256digest, accountIdBytes, accountId;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, SHA256(Converters.hexToBytes(publicKeyHex))];
+                        case 1:
+                            sha256digest = _a.sent();
+                            accountIdBytes = sha256digest.slice(0, 8).reverse();
+                            accountId = Converters.hexToDec(Converters.bytesToHex(accountIdBytes));
+                            return [2 /*return*/, accountId];
+                    }
+                });
+            });
         }
         Crypto.publicKeyToAccountId = publicKeyToAccountId;
-        async function verifySignature(signature, unsignedMessage, publicKey) {
-            const signatureBytes = Converters.hexToBytes(signature);
-            const messageBytes = Converters.hexToBytes(unsignedMessage);
-            const publicKeyBytes = Converters.hexToBytes(publicKey);
-            const v = signatureBytes.slice(0, 32);
-            const h = signatureBytes.slice(32);
-            const Y = curve25519_1.curve25519.verify(v, h, publicKeyBytes);
-            const m = await SHA256(messageBytes);
-            const h2 = await SHA256(m, Y);
-            return Converters.byteArraysEqual(h, h2);
+        function verifySignature(signature, unsignedMessage, publicKey) {
+            return __awaiter(this, void 0, void 0, function () {
+                var signatureBytes, messageBytes, publicKeyBytes, v, h, Y, m, h2;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            signatureBytes = Converters.hexToBytes(signature);
+                            messageBytes = Converters.hexToBytes(unsignedMessage);
+                            publicKeyBytes = Converters.hexToBytes(publicKey);
+                            v = signatureBytes.slice(0, 32);
+                            h = signatureBytes.slice(32);
+                            Y = curve25519_1.curve25519.verify(v, h, publicKeyBytes);
+                            return [4 /*yield*/, SHA256(messageBytes)];
+                        case 1:
+                            m = _a.sent();
+                            return [4 /*yield*/, SHA256(m, Y)];
+                        case 2:
+                            h2 = _a.sent();
+                            return [2 /*return*/, Converters.byteArraysEqual(h, h2)];
+                    }
+                });
+            });
         }
         Crypto.verifySignature = verifySignature;
-        async function publicKeyToRSAccount(publicKeyHex) {
-            const accountId = await publicKeyToAccountId(publicKeyHex);
-            return accountIdToRS(accountId);
+        function publicKeyToRSAccount(publicKeyHex) {
+            return __awaiter(this, void 0, void 0, function () {
+                var accountId;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, publicKeyToAccountId(publicKeyHex)];
+                        case 1:
+                            accountId = _a.sent();
+                            return [2 /*return*/, accountIdToRS(accountId)];
+                    }
+                });
+            });
         }
         Crypto.publicKeyToRSAccount = publicKeyToRSAccount;
         function accountIdToRS(accountId) {
-            const rsaddr = new rs_address_1.RSAddress();
+            var rsaddr = new rs_address_1.RSAddress();
             rsaddr.set(accountId);
             return rsaddr.toString();
         }
@@ -956,20 +1096,56 @@ exports.curve25519 = function () {
 
 },{}],6:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RemoteAPICaller = void 0;
-const get_axios_1 = __importDefault(require("./get-axios"));
-class RemoteAPICaller {
-    constructor(baseURL) {
+var get_axios_1 = __importDefault(require("./get-axios"));
+var RemoteAPICaller = /** @class */ (function () {
+    function RemoteAPICaller(baseURL) {
         this.baseURL = baseURL;
         this.log = null;
     }
-    setLogger(logger) {
+    RemoteAPICaller.prototype.setLogger = function (logger) {
         this.log = logger;
-    }
+    };
     /**
     *  API call to a GMD node. This call is done over network.
     *
@@ -991,28 +1167,71 @@ class RemoteAPICaller {
         }
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
-    async apiCall(method, params) {
-        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
-        return (0, get_axios_1.default)(config).then((res) => {
-            if (this.log)
-                this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
-            return res.data;
+    RemoteAPICaller.prototype.apiCall = function (method, params) {
+        return __awaiter(this, void 0, void 0, function () {
+            var config;
+            var _this = this;
+            return __generator(this, function (_a) {
+                config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
+                return [2 /*return*/, (0, get_axios_1.default)(config).then(function (res) {
+                        if (_this.log)
+                            _this.log("Response status on request to ".concat(config.url, " is ").concat(res.status, "\nresponse body:\n").concat(JSON.stringify(res.data, null, 2)));
+                        return res.data;
+                    })];
+            });
         });
-    }
-}
+    };
+    return RemoteAPICaller;
+}());
 exports.RemoteAPICaller = RemoteAPICaller;
 
 },{"./get-axios":1}],7:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KeyEncryption = void 0;
-const crypto_util_1 = require("./crypto-util");
+var crypto_util_1 = require("./crypto-util");
 var Converters = crypto_util_1.CryptoUtil.Converters;
-const get_crypto_1 = __importDefault(require("./get-crypto"));
-const iterations = 223978;
+var get_crypto_1 = __importDefault(require("./get-crypto"));
+var iterations = 223978;
 exports.KeyEncryption = {
     /**
      * Encrypts message in hex format. Most common use is to encrypt private keys.
@@ -1025,11 +1244,15 @@ exports.KeyEncryption = {
      * characters, but this is not enforced in this SDK.
      * @returns a promise that resolves to an encrypted JSON. JSON contains: iv, salt, ciphertext.
      */
-    async encryptHex(messageHex, password) {
-        if (messageHex && messageHex.length % 2) {
-            throw new Error('Hex string to be encrypted cannot have a 0 length or have an even number of hex digits');
-        }
-        return this.encryptBytes(Converters.hexToBytes(messageHex), password);
+    encryptHex: function (messageHex, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                if (messageHex && messageHex.length % 2) {
+                    throw new Error('Hex string to be encrypted cannot have a 0 length or have an even number of hex digits');
+                }
+                return [2 /*return*/, this.encryptBytes(Converters.hexToBytes(messageHex), password)];
+            });
+        });
     },
     /**
      * Same as  KeyEncryption.encryptHex() but it encrypts any string,
@@ -1037,15 +1260,32 @@ exports.KeyEncryption = {
      * @param {*} password same as KeyEncryption.encryptHex()
      * @returns a promise that resolves to an encrypted JSON. JSON contains: iv, salt, ciphertext.
      */
-    async encryptStr(message, password) {
-        return this.encryptHex(Converters.strToHex(message), password);
+    encryptStr: function (message, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, this.encryptHex(Converters.strToHex(message), password)];
+            });
+        });
     },
-    async encryptBytes(bytes, password) {
-        const { iv, salt } = await this.generateIvAndSalt();
-        const encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
-        const encryptedByteArray = await get_crypto_1.default.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(bytes));
-        const ciphertext = Converters.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
-        return { iv: Converters.Uint8ArrayToHex(iv), salt: Converters.Uint8ArrayToHex(salt), ciphertext: ciphertext };
+    encryptBytes: function (bytes, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, iv, salt, encryptionKey, encryptedByteArray, ciphertext;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.generateIvAndSalt()];
+                    case 1:
+                        _a = _b.sent(), iv = _a.iv, salt = _a.salt;
+                        return [4 /*yield*/, this.genEncryptionKeyFromPassword(password, salt, iterations)];
+                    case 2:
+                        encryptionKey = _b.sent();
+                        return [4 /*yield*/, get_crypto_1.default.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(bytes))];
+                    case 3:
+                        encryptedByteArray = _b.sent();
+                        ciphertext = Converters.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
+                        return [2 /*return*/, { iv: Converters.Uint8ArrayToHex(iv), salt: Converters.Uint8ArrayToHex(salt), ciphertext: ciphertext }];
+                }
+            });
+        });
     },
     /**
      * Helper function used to decrypt to hex. Used in pair with KeyEncryption.encryptHex() most common use case is to encrypt/decrypt private key.
@@ -1054,9 +1294,18 @@ exports.KeyEncryption = {
      * @param {*} password
      * @returns a promise that resolves to the unencrypted hex string.
      */
-    async decryptToHex(encryptedJSON, password) {
-        const decryptedData = await this.decrypt(encryptedJSON, password);
-        return Converters.Uint8ArrayToHex(decryptedData);
+    decryptToHex: function (encryptedJSON, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var decryptedData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.decrypt(encryptedJSON, password)];
+                    case 1:
+                        decryptedData = _a.sent();
+                        return [2 /*return*/, Converters.Uint8ArrayToHex(decryptedData)];
+                }
+            });
+        });
     },
     /**
      * Decrypt to a string.  Used in pair with KeyEncryption.encryptStr().
@@ -1065,43 +1314,84 @@ exports.KeyEncryption = {
      * @param {*} password
      * @returns a promise that resolves to the unencrypted plain text UTF-16 encoded.
      */
-    async decryptToStr(encryptedJSON, password) {
-        const decryptedData = await this.decrypt(encryptedJSON, password);
-        return Converters.Uint8ArrayToStr(decryptedData);
+    decryptToStr: function (encryptedJSON, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var decryptedData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.decrypt(encryptedJSON, password)];
+                    case 1:
+                        decryptedData = _a.sent();
+                        return [2 /*return*/, Converters.Uint8ArrayToStr(decryptedData)];
+                }
+            });
+        });
     },
-    async decryptToBytes(encryptedJSON, password) {
-        const result = await this.decrypt(encryptedJSON, password);
-        return Array.from(result);
+    decryptToBytes: function (encryptedJSON, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.decrypt(encryptedJSON, password)];
+                    case 1:
+                        result = _a.sent();
+                        return [2 /*return*/, Array.from(result)];
+                }
+            });
+        });
     },
-    async decrypt(encryptedJSON, password) {
-        if (encryptedJSON && 'iv' in encryptedJSON && 'salt' in encryptedJSON && 'ciphertext' in encryptedJSON) {
-            const ciphertext = Converters.hexToUint8(encryptedJSON.ciphertext);
-            const iv = Converters.hexToUint8(encryptedJSON.iv);
-            const salt = Converters.hexToUint8(encryptedJSON.salt);
-            const encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
-            const result = await get_crypto_1.default.subtle.decrypt({ name: "AES-GCM", iv: iv }, encryptionKey, ciphertext);
-            return new Uint8Array(result);
-        }
-        else {
-            throw new Error('Encrypted JSON not correct');
-        }
+    decrypt: function (encryptedJSON, password) {
+        return __awaiter(this, void 0, void 0, function () {
+            var ciphertext, iv, salt, encryptionKey, result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(encryptedJSON && 'iv' in encryptedJSON && 'salt' in encryptedJSON && 'ciphertext' in encryptedJSON)) return [3 /*break*/, 3];
+                        ciphertext = Converters.hexToUint8(encryptedJSON.ciphertext);
+                        iv = Converters.hexToUint8(encryptedJSON.iv);
+                        salt = Converters.hexToUint8(encryptedJSON.salt);
+                        return [4 /*yield*/, this.genEncryptionKeyFromPassword(password, salt, iterations)];
+                    case 1:
+                        encryptionKey = _a.sent();
+                        return [4 /*yield*/, get_crypto_1.default.subtle.decrypt({ name: "AES-GCM", iv: iv }, encryptionKey, ciphertext)];
+                    case 2:
+                        result = _a.sent();
+                        return [2 /*return*/, new Uint8Array(result)];
+                    case 3: throw new Error('Encrypted JSON not correct');
+                }
+            });
+        });
     },
-    async generateIvAndSalt() {
-        const iv = get_crypto_1.default.getRandomValues(new Uint8Array(16));
-        const salt = get_crypto_1.default.getRandomValues(new Uint8Array(16));
-        return { iv: iv, salt: salt };
+    generateIvAndSalt: function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var iv, salt;
+            return __generator(this, function (_a) {
+                iv = get_crypto_1.default.getRandomValues(new Uint8Array(16));
+                salt = get_crypto_1.default.getRandomValues(new Uint8Array(16));
+                return [2 /*return*/, { iv: iv, salt: salt }];
+            });
+        });
     },
-    async genEncryptionKeyFromPassword(password, salt, iterations) {
-        const importedPassword = await get_crypto_1.default.subtle.importKey("raw", Converters.strToUint8(password), { "name": "PBKDF2" }, false, ["deriveKey"]);
-        return get_crypto_1.default.subtle.deriveKey({
-            "name": "PBKDF2",
-            "salt": salt,
-            "iterations": iterations,
-            "hash": "SHA-256"
-        }, importedPassword, {
-            "name": "AES-GCM",
-            "length": 128
-        }, false, ["encrypt", "decrypt"]);
+    genEncryptionKeyFromPassword: function (password, salt, iterations) {
+        return __awaiter(this, void 0, void 0, function () {
+            var importedPassword;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, get_crypto_1.default.subtle.importKey("raw", Converters.strToUint8(password), { "name": "PBKDF2" }, false, ["deriveKey"])];
+                    case 1:
+                        importedPassword = _a.sent();
+                        return [2 /*return*/, get_crypto_1.default.subtle.deriveKey({
+                                "name": "PBKDF2",
+                                "salt": salt,
+                                "iterations": iterations,
+                                "hash": "SHA-256"
+                            }, importedPassword, {
+                                "name": "AES-GCM",
+                                "length": 128
+                            }, false, ["encrypt", "decrypt"])];
+                }
+            });
+        });
     }
 };
 exports.default = exports.KeyEncryption;
@@ -1112,18 +1402,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const words = ["like", "just", "love", "know", "never", "want", "time", "out", "there", "make", "look", "eye", "down", "only", "think", "heart", "back", "then", "into", "about", "more", "away", "still", "them", "take", "thing", "even", "through", "long", "always", "world", "too", "friend", "tell", "try", "hand", "thought", "over", "here", "other", "need", "smile", "again", "much", "cry", "been", "night", "ever", "little", "said", "end", "some", "those", "around", "mind", "people", "girl", "leave", "dream", "left", "turn", "myself", "give", "nothing", "really", "off", "before", "something", "find", "walk", "wish", "good", "once", "place", "ask", "stop", "keep", "watch", "seem", "everything", "wait", "got", "yet", "made", "remember", "start", "alone", "run", "hope", "maybe", "believe", "body", "hate", "after", "close", "talk", "stand", "own", "each", "hurt", "help", "home", "god", "soul", "new", "many", "two", "inside", "should", "true", "first", "fear", "mean", "better", "play", "another", "gone", "change", "use", "wonder", "someone", "hair", "cold", "open", "best", "any", "behind", "happen", "water", "dark", "laugh", "stay", "forever", "name", "work", "show", "sky", "break", "came", "deep", "door", "put", "black", "together", "upon", "happy", "such", "great", "white", "matter", "fill", "past", "please", "burn", "cause", "enough", "touch", "moment", "soon", "voice", "scream", "anything", "stare", "sound", "red", "everyone", "hide", "kiss", "truth", "death", "beautiful", "mine", "blood", "broken", "very", "pass", "next", "forget", "tree", "wrong", "air", "mother", "understand", "lip", "hit", "wall", "memory", "sleep", "free", "high", "realize", "school", "might", "skin", "sweet", "perfect", "blue", "kill", "breath", "dance", "against", "fly", "between", "grow", "strong", "under", "listen", "bring", "sometimes", "speak", "pull", "person", "become", "family", "begin", "ground", "real", "small", "father", "sure", "feet", "rest", "young", "finally", "land", "across", "today", "different", "guy", "line", "fire", "reason", "reach", "second", "slowly", "write", "eat", "smell", "mouth", "step", "learn", "three", "floor", "promise", "breathe", "darkness", "push", "earth", "guess", "save", "song", "above", "along", "both", "color", "house", "almost", "sorry", "anymore", "brother", "okay", "dear", "game", "fade", "already", "apart", "warm", "beauty", "heard", "notice", "question", "shine", "began", "piece", "whole", "shadow", "secret", "street", "within", "finger", "point", "morning", "whisper", "child", "moon", "green", "story", "glass", "kid", "silence", "since", "soft", "yourself", "empty", "shall", "angel", "answer", "baby", "bright", "dad", "path", "worry", "hour", "drop", "follow", "power", "war", "half", "flow", "heaven", "act", "chance", "fact", "least", "tired", "children", "near", "quite", "afraid", "rise", "sea", "taste", "window", "cover", "nice", "trust", "lot", "sad", "cool", "force", "peace", "return", "blind", "easy", "ready", "roll", "rose", "drive", "held", "music", "beneath", "hang", "mom", "paint", "emotion", "quiet", "clear", "cloud", "few", "pretty", "bird", "outside", "paper", "picture", "front", "rock", "simple", "anyone", "meant", "reality", "road", "sense", "waste", "bit", "leaf", "thank", "happiness", "meet", "men", "smoke", "truly", "decide", "self", "age", "book", "form", "alive", "carry", "escape", "damn", "instead", "able", "ice", "minute", "throw", "catch", "leg", "ring", "course", "goodbye", "lead", "poem", "sick", "corner", "desire", "known", "problem", "remind", "shoulder", "suppose", "toward", "wave", "drink", "jump", "woman", "pretend", "sister", "week", "human", "joy", "crack", "grey", "pray", "surprise", "dry", "knee", "less", "search", "bleed", "caught", "clean", "embrace", "future", "king", "son", "sorrow", "chest", "hug", "remain", "sat", "worth", "blow", "daddy", "final", "parent", "tight", "also", "create", "lonely", "safe", "cross", "dress", "evil", "silent", "bone", "fate", "perhaps", "anger", "class", "scar", "snow", "tiny", "tonight", "continue", "control", "dog", "edge", "mirror", "month", "suddenly", "comfort", "given", "loud", "quickly", "gaze", "plan", "rush", "stone", "town", "battle", "ignore", "spirit", "stood", "stupid", "yours", "brown", "build", "dust", "hey", "kept", "pay", "phone", "twist", "although", "ball", "beyond", "hidden", "nose", "taken", "fail", "float", "pure", "somehow", "wash", "wrap", "angry", "cheek", "creature", "forgotten", "heat", "rip", "single", "space", "special", "weak", "whatever", "yell", "anyway", "blame", "job", "choose", "country", "curse", "drift", "echo", "figure", "grew", "laughter", "neck", "suffer", "worse", "yeah", "disappear", "foot", "forward", "knife", "mess", "somewhere", "stomach", "storm", "beg", "idea", "lift", "offer", "breeze", "field", "five", "often", "simply", "stuck", "win", "allow", "confuse", "enjoy", "except", "flower", "seek", "strength", "calm", "grin", "gun", "heavy", "hill", "large", "ocean", "shoe", "sigh", "straight", "summer", "tongue", "accept", "crazy", "everyday", "exist", "grass", "mistake", "sent", "shut", "surround", "table", "ache", "brain", "destroy", "heal", "nature", "shout", "sign", "stain", "choice", "doubt", "glance", "glow", "mountain", "queen", "stranger", "throat", "tomorrow", "city", "either", "fish", "flame", "rather", "shape", "spin", "spread", "ash", "distance", "finish", "image", "imagine", "important", "nobody", "shatter", "warmth", "became", "feed", "flesh", "funny", "lust", "shirt", "trouble", "yellow", "attention", "bare", "bite", "money", "protect", "amaze", "appear", "born", "choke", "completely", "daughter", "fresh", "friendship", "gentle", "probably", "six", "deserve", "expect", "grab", "middle", "nightmare", "river", "thousand", "weight", "worst", "wound", "barely", "bottle", "cream", "regret", "relationship", "stick", "test", "crush", "endless", "fault", "itself", "rule", "spill", "art", "circle", "join", "kick", "mask", "master", "passion", "quick", "raise", "smooth", "unless", "wander", "actually", "broke", "chair", "deal", "favorite", "gift", "note", "number", "sweat", "box", "chill", "clothes", "lady", "mark", "park", "poor", "sadness", "tie", "animal", "belong", "brush", "consume", "dawn", "forest", "innocent", "pen", "pride", "stream", "thick", "clay", "complete", "count", "draw", "faith", "press", "silver", "struggle", "surface", "taught", "teach", "wet", "bless", "chase", "climb", "enter", "letter", "melt", "metal", "movie", "stretch", "swing", "vision", "wife", "beside", "crash", "forgot", "guide", "haunt", "joke", "knock", "plant", "pour", "prove", "reveal", "steal", "stuff", "trip", "wood", "wrist", "bother", "bottom", "crawl", "crowd", "fix", "forgive", "frown", "grace", "loose", "lucky", "party", "release", "surely", "survive", "teacher", "gently", "grip", "speed", "suicide", "travel", "treat", "vein", "written", "cage", "chain", "conversation", "date", "enemy", "however", "interest", "million", "page", "pink", "proud", "sway", "themselves", "winter", "church", "cruel", "cup", "demon", "experience", "freedom", "pair", "pop", "purpose", "respect", "shoot", "softly", "state", "strange", "bar", "birth", "curl", "dirt", "excuse", "lord", "lovely", "monster", "order", "pack", "pants", "pool", "scene", "seven", "shame", "slide", "ugly", "among", "blade", "blonde", "closet", "creek", "deny", "drug", "eternity", "gain", "grade", "handle", "key", "linger", "pale", "prepare", "swallow", "swim", "tremble", "wheel", "won", "cast", "cigarette", "claim", "college", "direction", "dirty", "gather", "ghost", "hundred", "loss", "lung", "orange", "present", "swear", "swirl", "twice", "wild", "bitter", "blanket", "doctor", "everywhere", "flash", "grown", "knowledge", "numb", "pressure", "radio", "repeat", "ruin", "spend", "unknown", "buy", "clock", "devil", "early", "false", "fantasy", "pound", "precious", "refuse", "sheet", "teeth", "welcome", "add", "ahead", "block", "bury", "caress", "content", "depth", "despite", "distant", "marry", "purple", "threw", "whenever", "bomb", "dull", "easily", "grasp", "hospital", "innocence", "normal", "receive", "reply", "rhyme", "shade", "someday", "sword", "toe", "visit", "asleep", "bought", "center", "consider", "flat", "hero", "history", "ink", "insane", "muscle", "mystery", "pocket", "reflection", "shove", "silently", "smart", "soldier", "spot", "stress", "train", "type", "view", "whether", "bus", "energy", "explain", "holy", "hunger", "inch", "magic", "mix", "noise", "nowhere", "prayer", "presence", "shock", "snap", "spider", "study", "thunder", "trail", "admit", "agree", "bag", "bang", "bound", "butterfly", "cute", "exactly", "explode", "familiar", "fold", "further", "pierce", "reflect", "scent", "selfish", "sharp", "sink", "spring", "stumble", "universe", "weep", "women", "wonderful", "action", "ancient", "attempt", "avoid", "birthday", "branch", "chocolate", "core", "depress", "drunk", "especially", "focus", "fruit", "honest", "match", "palm", "perfectly", "pillow", "pity", "poison", "roar", "shift", "slightly", "thump", "truck", "tune", "twenty", "unable", "wipe", "wrote", "coat", "constant", "dinner", "drove", "egg", "eternal", "flight", "flood", "frame", "freak", "gasp", "glad", "hollow", "motion", "peer", "plastic", "root", "screen", "season", "sting", "strike", "team", "unlike", "victim", "volume", "warn", "weird", "attack", "await", "awake", "built", "charm", "crave", "despair", "fought", "grant", "grief", "horse", "limit", "message", "ripple", "sanity", "scatter", "serve", "split", "string", "trick", "annoy", "blur", "boat", "brave", "clearly", "cling", "connect", "fist", "forth", "imagination", "iron", "jock", "judge", "lesson", "milk", "misery", "nail", "naked", "ourselves", "poet", "possible", "princess", "sail", "size", "snake", "society", "stroke", "torture", "toss", "trace", "wise", "bloom", "bullet", "cell", "check", "cost", "darling", "during", "footstep", "fragile", "hallway", "hardly", "horizon", "invisible", "journey", "midnight", "mud", "nod", "pause", "relax", "shiver", "sudden", "value", "youth", "abuse", "admire", "blink", "breast", "bruise", "constantly", "couple", "creep", "curve", "difference", "dumb", "emptiness", "gotta", "honor", "plain", "planet", "recall", "rub", "ship", "slam", "soar", "somebody", "tightly", "weather", "adore", "approach", "bond", "bread", "burst", "candle", "coffee", "cousin", "crime", "desert", "flutter", "frozen", "grand", "heel", "hello", "language", "level", "movement", "pleasure", "powerful", "random", "rhythm", "settle", "silly", "slap", "sort", "spoken", "steel", "threaten", "tumble", "upset", "aside", "awkward", "bee", "blank", "board", "button", "card", "carefully", "complain", "crap", "deeply", "discover", "drag", "dread", "effort", "entire", "fairy", "giant", "gotten", "greet", "illusion", "jeans", "leap", "liquid", "march", "mend", "nervous", "nine", "replace", "rope", "spine", "stole", "terror", "accident", "apple", "balance", "boom", "childhood", "collect", "demand", "depression", "eventually", "faint", "glare", "goal", "group", "honey", "kitchen", "laid", "limb", "machine", "mere", "mold", "murder", "nerve", "painful", "poetry", "prince", "rabbit", "shelter", "shore", "shower", "soothe", "stair", "steady", "sunlight", "tangle", "tease", "treasure", "uncle", "begun", "bliss", "canvas", "cheer", "claw", "clutch", "commit", "crimson", "crystal", "delight", "doll", "existence", "express", "fog", "football", "gay", "goose", "guard", "hatred", "illuminate", "mass", "math", "mourn", "rich", "rough", "skip", "stir", "student", "style", "support", "thorn", "tough", "yard", "yearn", "yesterday", "advice", "appreciate", "autumn", "bank", "beam", "bowl", "capture", "carve", "collapse", "confusion", "creation", "dove", "feather", "girlfriend", "glory", "government", "harsh", "hop", "inner", "loser", "moonlight", "neighbor", "neither", "peach", "pig", "praise", "screw", "shield", "shimmer", "sneak", "stab", "subject", "throughout", "thrown", "tower", "twirl", "wow", "army", "arrive", "bathroom", "bump", "cease", "cookie", "couch", "courage", "dim", "guilt", "howl", "hum", "husband", "insult", "led", "lunch", "mock", "mostly", "natural", "nearly", "needle", "nerd", "peaceful", "perfection", "pile", "price", "remove", "roam", "sanctuary", "serious", "shiny", "shook", "sob", "stolen", "tap", "vain", "void", "warrior", "wrinkle", "affection", "apologize", "blossom", "bounce", "bridge", "cheap", "crumble", "decision", "descend", "desperately", "dig", "dot", "flip", "frighten", "heartbeat", "huge", "lazy", "lick", "odd", "opinion", "process", "puzzle", "quietly", "retreat", "score", "sentence", "separate", "situation", "skill", "soak", "square", "stray", "taint", "task", "tide", "underneath", "veil", "whistle", "anywhere", "bedroom", "bid", "bloody", "burden", "careful", "compare", "concern", "curtain", "decay", "defeat", "describe", "double", "dreamer", "driver", "dwell", "evening", "flare", "flicker", "grandma", "guitar", "harm", "horrible", "hungry", "indeed", "lace", "melody", "monkey", "nation", "object", "obviously", "rainbow", "salt", "scratch", "shown", "shy", "stage", "stun", "third", "tickle", "useless", "weakness", "worship", "worthless", "afternoon", "beard", "boyfriend", "bubble", "busy", "certain", "chin", "concrete", "desk", "diamond", "doom", "drawn", "due", "felicity", "freeze", "frost", "garden", "glide", "harmony", "hopefully", "hunt", "jealous", "lightning", "mama", "mercy", "peel", "physical", "position", "pulse", "punch", "quit", "rant", "respond", "salty", "sane", "satisfy", "savior", "sheep", "slept", "social", "sport", "tuck", "utter", "valley", "wolf", "aim", "alas", "alter", "arrow", "awaken", "beaten", "belief", "brand", "ceiling", "cheese", "clue", "confidence", "connection", "daily", "disguise", "eager", "erase", "essence", "everytime", "expression", "fan", "flag", "flirt", "foul", "fur", "giggle", "glorious", "ignorance", "law", "lifeless", "measure", "mighty", "muse", "north", "opposite", "paradise", "patience", "patient", "pencil", "petal", "plate", "ponder", "possibly", "practice", "slice", "spell", "stock", "strife", "strip", "suffocate", "suit", "tender", "tool", "trade", "velvet", "verse", "waist", "witch", "aunt", "bench", "bold", "cap", "certainly", "click", "companion", "creator", "dart", "delicate", "determine", "dish", "dragon", "drama", "drum", "dude", "everybody", "feast", "forehead", "former", "fright", "fully", "gas", "hook", "hurl", "invite", "juice", "manage", "moral", "possess", "raw", "rebel", "royal", "scale", "scary", "several", "slight", "stubborn", "swell", "talent", "tea", "terrible", "thread", "torment", "trickle", "usually", "vast", "violence", "weave", "acid", "agony", "ashamed", "awe", "belly", "blend", "blush", "character", "cheat", "common", "company", "coward", "creak", "danger", "deadly", "defense", "define", "depend", "desperate", "destination", "dew", "duck", "dusty", "embarrass", "engine", "example", "explore", "foe", "freely", "frustrate", "generation", "glove", "guilty", "health", "hurry", "idiot", "impossible", "inhale", "jaw", "kingdom", "mention", "mist", "moan", "mumble", "mutter", "observe", "ode", "pathetic", "pattern", "pie", "prefer", "puff", "rape", "rare", "revenge", "rude", "scrape", "spiral", "squeeze", "strain", "sunset", "suspend", "sympathy", "thigh", "throne", "total", "unseen", "weapon", "weary"];
-const get_crypto_1 = __importDefault(require("./get-crypto"));
-const PassPhraseGenerator = {
-    generatePass: (numberOfWords) => {
+var words = ["like", "just", "love", "know", "never", "want", "time", "out", "there", "make", "look", "eye", "down", "only", "think", "heart", "back", "then", "into", "about", "more", "away", "still", "them", "take", "thing", "even", "through", "long", "always", "world", "too", "friend", "tell", "try", "hand", "thought", "over", "here", "other", "need", "smile", "again", "much", "cry", "been", "night", "ever", "little", "said", "end", "some", "those", "around", "mind", "people", "girl", "leave", "dream", "left", "turn", "myself", "give", "nothing", "really", "off", "before", "something", "find", "walk", "wish", "good", "once", "place", "ask", "stop", "keep", "watch", "seem", "everything", "wait", "got", "yet", "made", "remember", "start", "alone", "run", "hope", "maybe", "believe", "body", "hate", "after", "close", "talk", "stand", "own", "each", "hurt", "help", "home", "god", "soul", "new", "many", "two", "inside", "should", "true", "first", "fear", "mean", "better", "play", "another", "gone", "change", "use", "wonder", "someone", "hair", "cold", "open", "best", "any", "behind", "happen", "water", "dark", "laugh", "stay", "forever", "name", "work", "show", "sky", "break", "came", "deep", "door", "put", "black", "together", "upon", "happy", "such", "great", "white", "matter", "fill", "past", "please", "burn", "cause", "enough", "touch", "moment", "soon", "voice", "scream", "anything", "stare", "sound", "red", "everyone", "hide", "kiss", "truth", "death", "beautiful", "mine", "blood", "broken", "very", "pass", "next", "forget", "tree", "wrong", "air", "mother", "understand", "lip", "hit", "wall", "memory", "sleep", "free", "high", "realize", "school", "might", "skin", "sweet", "perfect", "blue", "kill", "breath", "dance", "against", "fly", "between", "grow", "strong", "under", "listen", "bring", "sometimes", "speak", "pull", "person", "become", "family", "begin", "ground", "real", "small", "father", "sure", "feet", "rest", "young", "finally", "land", "across", "today", "different", "guy", "line", "fire", "reason", "reach", "second", "slowly", "write", "eat", "smell", "mouth", "step", "learn", "three", "floor", "promise", "breathe", "darkness", "push", "earth", "guess", "save", "song", "above", "along", "both", "color", "house", "almost", "sorry", "anymore", "brother", "okay", "dear", "game", "fade", "already", "apart", "warm", "beauty", "heard", "notice", "question", "shine", "began", "piece", "whole", "shadow", "secret", "street", "within", "finger", "point", "morning", "whisper", "child", "moon", "green", "story", "glass", "kid", "silence", "since", "soft", "yourself", "empty", "shall", "angel", "answer", "baby", "bright", "dad", "path", "worry", "hour", "drop", "follow", "power", "war", "half", "flow", "heaven", "act", "chance", "fact", "least", "tired", "children", "near", "quite", "afraid", "rise", "sea", "taste", "window", "cover", "nice", "trust", "lot", "sad", "cool", "force", "peace", "return", "blind", "easy", "ready", "roll", "rose", "drive", "held", "music", "beneath", "hang", "mom", "paint", "emotion", "quiet", "clear", "cloud", "few", "pretty", "bird", "outside", "paper", "picture", "front", "rock", "simple", "anyone", "meant", "reality", "road", "sense", "waste", "bit", "leaf", "thank", "happiness", "meet", "men", "smoke", "truly", "decide", "self", "age", "book", "form", "alive", "carry", "escape", "damn", "instead", "able", "ice", "minute", "throw", "catch", "leg", "ring", "course", "goodbye", "lead", "poem", "sick", "corner", "desire", "known", "problem", "remind", "shoulder", "suppose", "toward", "wave", "drink", "jump", "woman", "pretend", "sister", "week", "human", "joy", "crack", "grey", "pray", "surprise", "dry", "knee", "less", "search", "bleed", "caught", "clean", "embrace", "future", "king", "son", "sorrow", "chest", "hug", "remain", "sat", "worth", "blow", "daddy", "final", "parent", "tight", "also", "create", "lonely", "safe", "cross", "dress", "evil", "silent", "bone", "fate", "perhaps", "anger", "class", "scar", "snow", "tiny", "tonight", "continue", "control", "dog", "edge", "mirror", "month", "suddenly", "comfort", "given", "loud", "quickly", "gaze", "plan", "rush", "stone", "town", "battle", "ignore", "spirit", "stood", "stupid", "yours", "brown", "build", "dust", "hey", "kept", "pay", "phone", "twist", "although", "ball", "beyond", "hidden", "nose", "taken", "fail", "float", "pure", "somehow", "wash", "wrap", "angry", "cheek", "creature", "forgotten", "heat", "rip", "single", "space", "special", "weak", "whatever", "yell", "anyway", "blame", "job", "choose", "country", "curse", "drift", "echo", "figure", "grew", "laughter", "neck", "suffer", "worse", "yeah", "disappear", "foot", "forward", "knife", "mess", "somewhere", "stomach", "storm", "beg", "idea", "lift", "offer", "breeze", "field", "five", "often", "simply", "stuck", "win", "allow", "confuse", "enjoy", "except", "flower", "seek", "strength", "calm", "grin", "gun", "heavy", "hill", "large", "ocean", "shoe", "sigh", "straight", "summer", "tongue", "accept", "crazy", "everyday", "exist", "grass", "mistake", "sent", "shut", "surround", "table", "ache", "brain", "destroy", "heal", "nature", "shout", "sign", "stain", "choice", "doubt", "glance", "glow", "mountain", "queen", "stranger", "throat", "tomorrow", "city", "either", "fish", "flame", "rather", "shape", "spin", "spread", "ash", "distance", "finish", "image", "imagine", "important", "nobody", "shatter", "warmth", "became", "feed", "flesh", "funny", "lust", "shirt", "trouble", "yellow", "attention", "bare", "bite", "money", "protect", "amaze", "appear", "born", "choke", "completely", "daughter", "fresh", "friendship", "gentle", "probably", "six", "deserve", "expect", "grab", "middle", "nightmare", "river", "thousand", "weight", "worst", "wound", "barely", "bottle", "cream", "regret", "relationship", "stick", "test", "crush", "endless", "fault", "itself", "rule", "spill", "art", "circle", "join", "kick", "mask", "master", "passion", "quick", "raise", "smooth", "unless", "wander", "actually", "broke", "chair", "deal", "favorite", "gift", "note", "number", "sweat", "box", "chill", "clothes", "lady", "mark", "park", "poor", "sadness", "tie", "animal", "belong", "brush", "consume", "dawn", "forest", "innocent", "pen", "pride", "stream", "thick", "clay", "complete", "count", "draw", "faith", "press", "silver", "struggle", "surface", "taught", "teach", "wet", "bless", "chase", "climb", "enter", "letter", "melt", "metal", "movie", "stretch", "swing", "vision", "wife", "beside", "crash", "forgot", "guide", "haunt", "joke", "knock", "plant", "pour", "prove", "reveal", "steal", "stuff", "trip", "wood", "wrist", "bother", "bottom", "crawl", "crowd", "fix", "forgive", "frown", "grace", "loose", "lucky", "party", "release", "surely", "survive", "teacher", "gently", "grip", "speed", "suicide", "travel", "treat", "vein", "written", "cage", "chain", "conversation", "date", "enemy", "however", "interest", "million", "page", "pink", "proud", "sway", "themselves", "winter", "church", "cruel", "cup", "demon", "experience", "freedom", "pair", "pop", "purpose", "respect", "shoot", "softly", "state", "strange", "bar", "birth", "curl", "dirt", "excuse", "lord", "lovely", "monster", "order", "pack", "pants", "pool", "scene", "seven", "shame", "slide", "ugly", "among", "blade", "blonde", "closet", "creek", "deny", "drug", "eternity", "gain", "grade", "handle", "key", "linger", "pale", "prepare", "swallow", "swim", "tremble", "wheel", "won", "cast", "cigarette", "claim", "college", "direction", "dirty", "gather", "ghost", "hundred", "loss", "lung", "orange", "present", "swear", "swirl", "twice", "wild", "bitter", "blanket", "doctor", "everywhere", "flash", "grown", "knowledge", "numb", "pressure", "radio", "repeat", "ruin", "spend", "unknown", "buy", "clock", "devil", "early", "false", "fantasy", "pound", "precious", "refuse", "sheet", "teeth", "welcome", "add", "ahead", "block", "bury", "caress", "content", "depth", "despite", "distant", "marry", "purple", "threw", "whenever", "bomb", "dull", "easily", "grasp", "hospital", "innocence", "normal", "receive", "reply", "rhyme", "shade", "someday", "sword", "toe", "visit", "asleep", "bought", "center", "consider", "flat", "hero", "history", "ink", "insane", "muscle", "mystery", "pocket", "reflection", "shove", "silently", "smart", "soldier", "spot", "stress", "train", "type", "view", "whether", "bus", "energy", "explain", "holy", "hunger", "inch", "magic", "mix", "noise", "nowhere", "prayer", "presence", "shock", "snap", "spider", "study", "thunder", "trail", "admit", "agree", "bag", "bang", "bound", "butterfly", "cute", "exactly", "explode", "familiar", "fold", "further", "pierce", "reflect", "scent", "selfish", "sharp", "sink", "spring", "stumble", "universe", "weep", "women", "wonderful", "action", "ancient", "attempt", "avoid", "birthday", "branch", "chocolate", "core", "depress", "drunk", "especially", "focus", "fruit", "honest", "match", "palm", "perfectly", "pillow", "pity", "poison", "roar", "shift", "slightly", "thump", "truck", "tune", "twenty", "unable", "wipe", "wrote", "coat", "constant", "dinner", "drove", "egg", "eternal", "flight", "flood", "frame", "freak", "gasp", "glad", "hollow", "motion", "peer", "plastic", "root", "screen", "season", "sting", "strike", "team", "unlike", "victim", "volume", "warn", "weird", "attack", "await", "awake", "built", "charm", "crave", "despair", "fought", "grant", "grief", "horse", "limit", "message", "ripple", "sanity", "scatter", "serve", "split", "string", "trick", "annoy", "blur", "boat", "brave", "clearly", "cling", "connect", "fist", "forth", "imagination", "iron", "jock", "judge", "lesson", "milk", "misery", "nail", "naked", "ourselves", "poet", "possible", "princess", "sail", "size", "snake", "society", "stroke", "torture", "toss", "trace", "wise", "bloom", "bullet", "cell", "check", "cost", "darling", "during", "footstep", "fragile", "hallway", "hardly", "horizon", "invisible", "journey", "midnight", "mud", "nod", "pause", "relax", "shiver", "sudden", "value", "youth", "abuse", "admire", "blink", "breast", "bruise", "constantly", "couple", "creep", "curve", "difference", "dumb", "emptiness", "gotta", "honor", "plain", "planet", "recall", "rub", "ship", "slam", "soar", "somebody", "tightly", "weather", "adore", "approach", "bond", "bread", "burst", "candle", "coffee", "cousin", "crime", "desert", "flutter", "frozen", "grand", "heel", "hello", "language", "level", "movement", "pleasure", "powerful", "random", "rhythm", "settle", "silly", "slap", "sort", "spoken", "steel", "threaten", "tumble", "upset", "aside", "awkward", "bee", "blank", "board", "button", "card", "carefully", "complain", "crap", "deeply", "discover", "drag", "dread", "effort", "entire", "fairy", "giant", "gotten", "greet", "illusion", "jeans", "leap", "liquid", "march", "mend", "nervous", "nine", "replace", "rope", "spine", "stole", "terror", "accident", "apple", "balance", "boom", "childhood", "collect", "demand", "depression", "eventually", "faint", "glare", "goal", "group", "honey", "kitchen", "laid", "limb", "machine", "mere", "mold", "murder", "nerve", "painful", "poetry", "prince", "rabbit", "shelter", "shore", "shower", "soothe", "stair", "steady", "sunlight", "tangle", "tease", "treasure", "uncle", "begun", "bliss", "canvas", "cheer", "claw", "clutch", "commit", "crimson", "crystal", "delight", "doll", "existence", "express", "fog", "football", "gay", "goose", "guard", "hatred", "illuminate", "mass", "math", "mourn", "rich", "rough", "skip", "stir", "student", "style", "support", "thorn", "tough", "yard", "yearn", "yesterday", "advice", "appreciate", "autumn", "bank", "beam", "bowl", "capture", "carve", "collapse", "confusion", "creation", "dove", "feather", "girlfriend", "glory", "government", "harsh", "hop", "inner", "loser", "moonlight", "neighbor", "neither", "peach", "pig", "praise", "screw", "shield", "shimmer", "sneak", "stab", "subject", "throughout", "thrown", "tower", "twirl", "wow", "army", "arrive", "bathroom", "bump", "cease", "cookie", "couch", "courage", "dim", "guilt", "howl", "hum", "husband", "insult", "led", "lunch", "mock", "mostly", "natural", "nearly", "needle", "nerd", "peaceful", "perfection", "pile", "price", "remove", "roam", "sanctuary", "serious", "shiny", "shook", "sob", "stolen", "tap", "vain", "void", "warrior", "wrinkle", "affection", "apologize", "blossom", "bounce", "bridge", "cheap", "crumble", "decision", "descend", "desperately", "dig", "dot", "flip", "frighten", "heartbeat", "huge", "lazy", "lick", "odd", "opinion", "process", "puzzle", "quietly", "retreat", "score", "sentence", "separate", "situation", "skill", "soak", "square", "stray", "taint", "task", "tide", "underneath", "veil", "whistle", "anywhere", "bedroom", "bid", "bloody", "burden", "careful", "compare", "concern", "curtain", "decay", "defeat", "describe", "double", "dreamer", "driver", "dwell", "evening", "flare", "flicker", "grandma", "guitar", "harm", "horrible", "hungry", "indeed", "lace", "melody", "monkey", "nation", "object", "obviously", "rainbow", "salt", "scratch", "shown", "shy", "stage", "stun", "third", "tickle", "useless", "weakness", "worship", "worthless", "afternoon", "beard", "boyfriend", "bubble", "busy", "certain", "chin", "concrete", "desk", "diamond", "doom", "drawn", "due", "felicity", "freeze", "frost", "garden", "glide", "harmony", "hopefully", "hunt", "jealous", "lightning", "mama", "mercy", "peel", "physical", "position", "pulse", "punch", "quit", "rant", "respond", "salty", "sane", "satisfy", "savior", "sheep", "slept", "social", "sport", "tuck", "utter", "valley", "wolf", "aim", "alas", "alter", "arrow", "awaken", "beaten", "belief", "brand", "ceiling", "cheese", "clue", "confidence", "connection", "daily", "disguise", "eager", "erase", "essence", "everytime", "expression", "fan", "flag", "flirt", "foul", "fur", "giggle", "glorious", "ignorance", "law", "lifeless", "measure", "mighty", "muse", "north", "opposite", "paradise", "patience", "patient", "pencil", "petal", "plate", "ponder", "possibly", "practice", "slice", "spell", "stock", "strife", "strip", "suffocate", "suit", "tender", "tool", "trade", "velvet", "verse", "waist", "witch", "aunt", "bench", "bold", "cap", "certainly", "click", "companion", "creator", "dart", "delicate", "determine", "dish", "dragon", "drama", "drum", "dude", "everybody", "feast", "forehead", "former", "fright", "fully", "gas", "hook", "hurl", "invite", "juice", "manage", "moral", "possess", "raw", "rebel", "royal", "scale", "scary", "several", "slight", "stubborn", "swell", "talent", "tea", "terrible", "thread", "torment", "trickle", "usually", "vast", "violence", "weave", "acid", "agony", "ashamed", "awe", "belly", "blend", "blush", "character", "cheat", "common", "company", "coward", "creak", "danger", "deadly", "defense", "define", "depend", "desperate", "destination", "dew", "duck", "dusty", "embarrass", "engine", "example", "explore", "foe", "freely", "frustrate", "generation", "glove", "guilty", "health", "hurry", "idiot", "impossible", "inhale", "jaw", "kingdom", "mention", "mist", "moan", "mumble", "mutter", "observe", "ode", "pathetic", "pattern", "pie", "prefer", "puff", "rape", "rare", "revenge", "rude", "scrape", "spiral", "squeeze", "strain", "sunset", "suspend", "sympathy", "thigh", "throne", "total", "unseen", "weapon", "weary"];
+var get_crypto_1 = __importDefault(require("./get-crypto"));
+var PassPhraseGenerator = {
+    generatePass: function (numberOfWords) {
         if (!numberOfWords) {
             numberOfWords = 12;
         }
         //console.log("generating pass ");
-        const rndArray = new Uint32Array(numberOfWords);
+        var rndArray = new Uint32Array(numberOfWords);
         get_crypto_1.default.getRandomValues(rndArray);
-        const passPhrase = [];
-        for (const i in rndArray) {
+        var passPhrase = [];
+        for (var i in rndArray) {
             passPhrase.push(words[rndArray[i] % words.length]);
         }
         get_crypto_1.default.getRandomValues(rndArray);
@@ -1134,44 +1424,122 @@ exports.default = PassPhraseGenerator;
 
 },{"./get-crypto":2}],9:[function(require,module,exports){
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Provider = void 0;
-const gmd_api_caller_1 = require("./gmd-api-caller");
-class Provider extends gmd_api_caller_1.RemoteAPICaller {
-    constructor(baseURL) {
-        super(baseURL);
+var gmd_api_caller_1 = require("./gmd-api-caller");
+var Provider = /** @class */ (function (_super) {
+    __extends(Provider, _super);
+    function Provider(baseURL) {
+        return _super.call(this, baseURL) || this;
     }
     //Latest block
-    getBlockNumber() {
-        return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height);
-    }
-    async getBalance(rsAccount) {
-        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
-        return data.balanceNQT;
-    }
-    async createUnsignedTransaction(transaction) {
-        if (transaction.canProcessRequest()) {
-            const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
-            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes);
-        }
-        else {
-            throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
-        }
-    }
-    broadCastTransactionFromHex(signedTransactionHex) {
+    Provider.prototype.getBlockNumber = function () {
+        return this.apiCall('get', { requestType: 'getBlock' }).then(function (data) { return data.height; });
+    };
+    Provider.prototype.getBalance = function (rsAccount) {
+        return __awaiter(this, void 0, void 0, function () {
+            var data;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.apiCall('get', { requestType: 'getBalance', account: rsAccount })];
+                    case 1:
+                        data = _a.sent();
+                        return [2 /*return*/, data.balanceNQT];
+                }
+            });
+        });
+    };
+    Provider.prototype.createUnsignedTransaction = function (transaction) {
+        return __awaiter(this, void 0, void 0, function () {
+            var unsignedTransaction;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!transaction.canProcessRequest()) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.apiCall('post', transaction.requestJSON)];
+                    case 1:
+                        unsignedTransaction = _a.sent();
+                        transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes);
+                        return [3 /*break*/, 3];
+                    case 2: throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
+                    case 3: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Provider.prototype.broadCastTransactionFromHex = function (signedTransactionHex) {
         return this.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
-    }
-    async broadcastTransaction(transaction) {
-        if (transaction.canBroadcast() && transaction.signedTransactionBytes) {
-            const result = await this.broadCastTransactionFromHex(transaction.signedTransactionBytes);
-            transaction.onBroadcasted(result);
-            return result;
-        }
-        else {
-            throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
-        }
-    }
-}
+    };
+    Provider.prototype.broadcastTransaction = function (transaction) {
+        return __awaiter(this, void 0, void 0, function () {
+            var result;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(transaction.canBroadcast() && transaction.signedTransactionBytes)) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.broadCastTransactionFromHex(transaction.signedTransactionBytes)];
+                    case 1:
+                        result = _a.sent();
+                        transaction.onBroadcasted(result);
+                        return [2 /*return*/, result];
+                    case 2: throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
+                }
+            });
+        });
+    };
+    return Provider;
+}(gmd_api_caller_1.RemoteAPICaller));
 exports.Provider = Provider;
 module.exports = Provider;
 
@@ -1184,8 +1552,8 @@ module.exports = Provider;
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RSAddress = void 0;
-class RSAddress {
-    constructor() {
+var RSAddress = /** @class */ (function () {
+    function RSAddress() {
         this.codeword = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
         this.syndrome = [0, 0, 0, 0, 0];
         this.gexp = [1, 2, 4, 8, 16, 5, 10, 20, 13, 26, 17, 7, 14, 28, 29, 31, 27, 19, 3, 6, 12, 24, 21, 15, 30, 25, 23, 11, 22, 9, 18, 1];
@@ -1195,23 +1563,23 @@ class RSAddress {
         //var alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ345679';
         this.guess = [];
     }
-    ginv(a) {
+    RSAddress.prototype.ginv = function (a) {
         return this.gexp[31 - this.glog[a]];
-    }
-    gmult(a, b) {
+    };
+    RSAddress.prototype.gmult = function (a, b) {
         if (a == 0 || b == 0)
             return 0;
         var idx = (this.glog[a] + this.glog[b]) % 31;
         return this.gexp[idx];
-    } //__________________________
-    calc_discrepancy(lambda, r) {
+    }; //__________________________
+    RSAddress.prototype.calc_discrepancy = function (lambda, r) {
         var discr = 0;
         for (var i = 0; i < r; i++) {
             discr ^= this.gmult(lambda[i], this.syndrome[r - i]);
         }
         return discr;
-    } //__________________________
-    find_errors(lambda) {
+    }; //__________________________
+    RSAddress.prototype.find_errors = function (lambda) {
         var errloc = [];
         for (var i = 1; i <= 31; i++) {
             var sum = 0;
@@ -1226,8 +1594,8 @@ class RSAddress {
             }
         }
         return errloc;
-    } //__________________________
-    guess_errors() {
+    }; //__________________________
+    RSAddress.prototype.guess_errors = function () {
         var el = 0, b = [0, 0, 0, 0, 0], t = [];
         var deg_lambda = 0, lambda = [1, 0, 0, 0, 0]; // error+erasure locator poly
         // Berlekamp-Massey algorithm to determine error+erasure locator polynomial
@@ -1259,35 +1627,35 @@ class RSAddress {
             return false; // deg(lambda) unequal to number of roots => uncorrectable error
         // Compute err+eras evaluator poly omega(x) = s(x)*lambda(x) (modulo x**(4)). Also find deg(omega).
         var omega = [0, 0, 0, 0, 0];
-        for (let i = 0; i < 4; i++) {
-            let t = 0;
-            for (var j = 0; j < i; j++) {
-                t ^= this.gmult(this.syndrome[i + 1 - j], lambda[j]);
+        for (var i_1 = 0; i_1 < 4; i_1++) {
+            var t_1 = 0;
+            for (var j = 0; j < i_1; j++) {
+                t_1 ^= this.gmult(this.syndrome[i_1 + 1 - j], lambda[j]);
             }
-            omega[i] = t;
+            omega[i_1] = t_1;
         }
         // Compute error values in poly-form.
         for (r = 0; r < errors; r++) {
-            let t = 0;
+            var t_2 = 0;
             var pos = errloc[r];
             var root = 31 - pos;
             for (i = 0; i < 4; i++) // evaluate Omega at alpha^(-i)
              {
-                t ^= this.gmult(omega[i], this.gexp[(root * i) % 31]);
+                t_2 ^= this.gmult(omega[i], this.gexp[(root * i) % 31]);
             }
-            if (t) // evaluate Lambda' (derivative) at alpha^(-i); all odd powers disappear
+            if (t_2) // evaluate Lambda' (derivative) at alpha^(-i); all odd powers disappear
              {
                 var denom = this.gmult(lambda[1], 1) ^ this.gmult(lambda[3], this.gexp[(root * 2) % 31]);
                 if (denom == 0)
                     return false;
                 if (pos > 12)
                     pos -= 14;
-                this.codeword[pos] ^= this.gmult(t, this.ginv(denom));
+                this.codeword[pos] ^= this.gmult(t_2, this.ginv(denom));
             }
         }
         return true;
-    } //__________________________
-    encode() {
+    }; //__________________________
+    RSAddress.prototype.encode = function () {
         var p = [0, 0, 0, 0];
         for (var i = 12; i >= 0; i--) {
             var fb = this.codeword[i] ^ p[3];
@@ -1300,12 +1668,12 @@ class RSAddress {
         this.codeword[14] = p[1];
         this.codeword[15] = p[2];
         this.codeword[16] = p[3];
-    } //__________________________
-    reset() {
+    }; //__________________________
+    RSAddress.prototype.reset = function () {
         for (var i = 0; i < 17; i++)
             this.codeword[i] = 1;
-    } //__________________________
-    set_codeword(cw, len, skip) {
+    }; //__________________________
+    RSAddress.prototype.set_codeword = function (cw, len, skip) {
         if (typeof len === 'undefined')
             len = 17;
         if (typeof skip === 'undefined')
@@ -1314,8 +1682,8 @@ class RSAddress {
             if (i != skip)
                 this.codeword[this.cwmap[j++]] = cw[i];
         }
-    } //__________________________
-    add_guess() {
+    }; //__________________________
+    RSAddress.prototype.add_guess = function () {
         var s = this.toString(), len = this.guess.length;
         if (len > 2)
             return;
@@ -1324,8 +1692,8 @@ class RSAddress {
                 return;
         }
         this.guess[len] = s;
-    } //__________________________
-    ok() {
+    }; //__________________________
+    RSAddress.prototype.ok = function () {
         var sum = 0;
         for (var i = 1; i < 5; i++) {
             for (var j = 0, t = 0; j < 31; j++) {
@@ -1340,8 +1708,8 @@ class RSAddress {
             this.syndrome[i] = t;
         }
         return (sum == 0);
-    } //__________________________
-    from_acc(acc) {
+    }; //__________________________
+    RSAddress.prototype.from_acc = function (acc) {
         var inp = [], out = [], pos = 0, len = acc.length;
         if (len == 20 && acc.charAt(0) != '1')
             return false;
@@ -1370,8 +1738,8 @@ class RSAddress {
         }
         this.encode();
         return true;
-    } //__________________________
-    toString() {
+    }; //__________________________
+    RSAddress.prototype.toString = function () {
         var out = "GMD-";
         for (var i = 0; i < 17; i++) {
             out += this.alphabet[this.codeword[this.cwmap[i]]];
@@ -1379,8 +1747,8 @@ class RSAddress {
                 out += '-';
         }
         return out;
-    } //__________________________
-    account_id() {
+    }; //__________________________
+    RSAddress.prototype.account_id = function () {
         var out = '', inp = [], len = 13;
         for (var i = 0; i < 13; i++) {
             inp[i] = this.codeword[12 - i];
@@ -1402,8 +1770,8 @@ class RSAddress {
             out += String.fromCharCode(divide + '0'.charCodeAt(0));
         } while (newlen);
         return out.split("").reverse().join("");
-    } //__________________________
-    set(adr, allow_accounts) {
+    }; //__________________________
+    RSAddress.prototype.set = function (adr, allow_accounts) {
         if (typeof allow_accounts === 'undefined')
             allow_accounts = true;
         var len = 0;
@@ -1420,37 +1788,37 @@ class RSAddress {
         }
         else // address
          {
-            let clean = [];
+            var clean_1 = [];
             for (var i = 0; i < adr.length; i++) {
                 var pos = this.alphabet.indexOf(adr[i]);
                 if (pos >= 0) {
-                    clean[len++] = pos;
+                    clean_1[len++] = pos;
                     if (len > 18)
                         return false;
                 }
             }
         }
-        let clean = [];
+        var clean = [];
         if (len == 16) // guess deletion
          {
-            for (let i = 16; i >= 0; i--) {
+            for (var i_2 = 16; i_2 >= 0; i_2--) {
                 for (var j = 0; j < 32; j++) {
-                    clean[i] = j;
+                    clean[i_2] = j;
                     this.set_codeword(clean);
                     if (this.ok())
                         this.add_guess();
                 }
-                if (i > 0) {
-                    let t = clean[i - 1];
-                    clean[i - 1] = clean[i];
-                    clean[i] = t;
+                if (i_2 > 0) {
+                    var t = clean[i_2 - 1];
+                    clean[i_2 - 1] = clean[i_2];
+                    clean[i_2] = t;
                 }
             }
         }
         if (len == 18) // guess insertion
          {
-            for (let i = 0; i < 18; i++) {
-                this.set_codeword(clean, 18, i);
+            for (var i_3 = 0; i_3 < 18; i_3++) {
+                this.set_codeword(clean, 18, i_3);
                 if (this.ok())
                     this.add_guess();
             }
@@ -1464,53 +1832,111 @@ class RSAddress {
         }
         this.reset();
         return false;
-    }
-}
+    };
+    return RSAddress;
+}());
 exports.RSAddress = RSAddress;
 exports.default = RSAddress;
 
 },{}],11:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Signer = void 0;
-const crypto_util_1 = require("./crypto-util");
-const transaction_1 = require("./transactions/transaction");
+var crypto_util_1 = require("./crypto-util");
+var transaction_1 = require("./transactions/transaction");
 var Converters = crypto_util_1.CryptoUtil.Converters;
-class Signer {
-    constructor(publicKey, privKey) {
+var Signer = /** @class */ (function () {
+    function Signer(publicKey, privKey) {
         this.publicKey = publicKey;
         this.privateKey = privKey;
     }
-    async signTransactionBytes(unsignedTransactionHex) {
-        const sig = await crypto_util_1.CryptoUtil.Crypto.signHex(unsignedTransactionHex, this.privateKey);
-        return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
-    }
-    async signTransaction(transaction) {
-        if (transaction.state === transaction_1.TransactionState.UNSIGNED && transaction.unsignedTransactionBytes && Converters.isHex(transaction.unsignedTransactionBytes)) {
-            const signedTransactionBytes = await this.signTransactionBytes(transaction.unsignedTransactionBytes);
-            transaction.onSigned(signedTransactionBytes);
-        }
-    }
-    signHex(hexMessage) {
+    Signer.prototype.signTransactionBytes = function (unsignedTransactionHex) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sig;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, crypto_util_1.CryptoUtil.Crypto.signHex(unsignedTransactionHex, this.privateKey)];
+                    case 1:
+                        sig = _a.sent();
+                        return [2 /*return*/, unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320)];
+                }
+            });
+        });
+    };
+    Signer.prototype.signTransaction = function (transaction) {
+        return __awaiter(this, void 0, void 0, function () {
+            var signedTransactionBytes;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(transaction.state === transaction_1.TransactionState.UNSIGNED && transaction.unsignedTransactionBytes && Converters.isHex(transaction.unsignedTransactionBytes))) return [3 /*break*/, 2];
+                        return [4 /*yield*/, this.signTransactionBytes(transaction.unsignedTransactionBytes)];
+                    case 1:
+                        signedTransactionBytes = _a.sent();
+                        transaction.onSigned(signedTransactionBytes);
+                        _a.label = 2;
+                    case 2: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Signer.prototype.signHex = function (hexMessage) {
         return crypto_util_1.CryptoUtil.Crypto.signHex(hexMessage, this.privateKey);
-    }
-    signStr(message) {
+    };
+    Signer.prototype.signStr = function (message) {
         return this.signHex(Converters.strToHex(message));
-    }
-    static verifySignatureHex(signature, unsignedHexMessage, publicKey) {
+    };
+    Signer.verifySignatureHex = function (signature, unsignedHexMessage, publicKey) {
         return crypto_util_1.CryptoUtil.Crypto.verifySignature(signature, unsignedHexMessage, publicKey);
-    }
-    static verifySignatureStr(signature, unsignedStrMessage, publicKey) {
+    };
+    Signer.verifySignatureStr = function (signature, unsignedStrMessage, publicKey) {
         return this.verifySignatureHex(signature, Converters.strToHex(unsignedStrMessage), publicKey);
-    }
-}
+    };
+    return Signer;
+}());
 exports.Signer = Signer;
 
 },{"./crypto-util":4,"./transactions/transaction":12}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Transaction = exports.TransactionState = void 0;
-const crypto_util_1 = require("../crypto-util");
+var crypto_util_1 = require("../crypto-util");
 var Converters = crypto_util_1.CryptoUtil.Converters;
 var TransactionState;
 (function (TransactionState) {
@@ -1533,8 +1959,8 @@ var TransactionState;
  *
  * The state of the transaction can only go through each step in the specified order.
  */
-class Transaction {
-    constructor(requestJSON) {
+var Transaction = /** @class */ (function () {
+    function Transaction(requestJSON) {
         this._unsignedTransactionBytes = null;
         this._signedTransactionBytes = null;
         this._transactionID = null;
@@ -1542,13 +1968,13 @@ class Transaction {
         this._requestJSON = requestJSON;
         this._state = TransactionState.REQUEST_CREATED;
     }
-    canProcessRequest() {
+    Transaction.prototype.canProcessRequest = function () {
         if ('secretPhrase' in this._requestJSON) {
             throw new Error('Do not send secret password to node!');
         }
         return this._state === TransactionState.REQUEST_CREATED;
-    }
-    onTransactionRequestProcessed(unsignedTransactionBytes) {
+    };
+    Transaction.prototype.onTransactionRequestProcessed = function (unsignedTransactionBytes) {
         if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
             this._state = TransactionState.UNSIGNED;
@@ -1556,20 +1982,20 @@ class Transaction {
         else {
             throw new Error('onTransactionRequestProcessed: Transaction cannot be processed');
         }
-    }
-    canBeSigned() {
+    };
+    Transaction.prototype.canBeSigned = function () {
         return this._state === TransactionState.UNSIGNED && Converters.isHex(this._unsignedTransactionBytes);
-    }
-    onSigned(signedTransactionBytes) {
+    };
+    Transaction.prototype.onSigned = function (signedTransactionBytes) {
         if (this.canBeSigned() && Converters.isHex(signedTransactionBytes)) {
             this._signedTransactionBytes = signedTransactionBytes;
             this._state = TransactionState.SIGNED;
         }
-    }
-    canBroadcast() {
+    };
+    Transaction.prototype.canBroadcast = function () {
         return Converters.isHex(this.signedTransactionBytes) && this.state === TransactionState.SIGNED;
-    }
-    onBroadcasted(result) {
+    };
+    Transaction.prototype.onBroadcasted = function (result) {
         if (this.canBroadcast()) {
             this._transactionID = result.transaction;
             this._fullHash = result.fullHash;
@@ -1578,64 +2004,169 @@ class Transaction {
         else {
             throw new Error('Something went wrong on transaction broadcast');
         }
-    }
-    get requestJSON() {
-        return this._requestJSON;
-    }
-    get state() {
-        return this._state;
-    }
-    get unsignedTransactionBytes() {
-        return this._unsignedTransactionBytes;
-    }
-    get signedTransactionBytes() {
-        return this._signedTransactionBytes;
-    }
-}
+    };
+    Object.defineProperty(Transaction.prototype, "requestJSON", {
+        get: function () {
+            return this._requestJSON;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Transaction.prototype, "state", {
+        get: function () {
+            return this._state;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Transaction.prototype, "unsignedTransactionBytes", {
+        get: function () {
+            return this._unsignedTransactionBytes;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Transaction.prototype, "signedTransactionBytes", {
+        get: function () {
+            return this._signedTransactionBytes;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    return Transaction;
+}());
 exports.Transaction = Transaction;
 
 },{"../crypto-util":4}],13:[function(require,module,exports){
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Wallet = void 0;
-const crypto_util_1 = require("./crypto-util");
-const key_encryption_1 = require("./key-encryption");
-const pass_gen_1 = __importDefault(require("./pass-gen"));
-const signer_1 = require("./signer");
-class Wallet extends signer_1.Signer {
-    constructor(publicKey, privKey, accountId, provider = null) {
-        super(publicKey, privKey);
-        this.accountId = accountId;
-        this.accountRS = crypto_util_1.CryptoUtil.Crypto.accountIdToRS(accountId);
-        this.provider = provider;
+var crypto_util_1 = require("./crypto-util");
+var key_encryption_1 = require("./key-encryption");
+var pass_gen_1 = __importDefault(require("./pass-gen"));
+var signer_1 = require("./signer");
+var Wallet = /** @class */ (function (_super) {
+    __extends(Wallet, _super);
+    function Wallet(publicKey, privKey, accountId, provider) {
+        if (provider === void 0) { provider = null; }
+        var _this = _super.call(this, publicKey, privKey) || this;
+        _this.accountId = accountId;
+        _this.accountRS = crypto_util_1.CryptoUtil.Crypto.accountIdToRS(accountId);
+        _this.provider = provider;
+        return _this;
     }
-    connect(provider) {
+    Wallet.prototype.connect = function (provider) {
         this.provider = provider;
-    }
+    };
     //static wallet creation functions
-    static async fromPassphrase(passPhrase) {
-        const { publicKey, privateKey, accountId } = await crypto_util_1.CryptoUtil.Crypto.getWalletDetails(passPhrase);
-        return new Wallet(publicKey, privateKey, accountId);
-    }
-    static async encryptedJSONFromPassPhrase(passPhrase, encryptionPassword) {
-        const seed = await crypto_util_1.CryptoUtil.Crypto.getSeed(passPhrase);
-        return key_encryption_1.KeyEncryption.encryptBytes(seed, encryptionPassword);
-    }
-    static async fromEncryptedJSON(encryptedJSON, encryptionPassword) {
-        const seed = await key_encryption_1.KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
-        const { publicKey, privateKey, accountId } = await crypto_util_1.CryptoUtil.Crypto.getWalletDetailsFromSeed(seed);
-        return new Wallet(publicKey, privateKey, accountId);
-    }
-    static async accountIdFromPublicKey(publicKeyHex) {
-        return crypto_util_1.CryptoUtil.Crypto.publicKeyToAccountId(publicKeyHex);
-    }
-    static generatePassphrase(numberOfWords) {
+    Wallet.fromPassphrase = function (passPhrase) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, publicKey, privateKey, accountId;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, crypto_util_1.CryptoUtil.Crypto.getWalletDetails(passPhrase)];
+                    case 1:
+                        _a = _b.sent(), publicKey = _a.publicKey, privateKey = _a.privateKey, accountId = _a.accountId;
+                        return [2 /*return*/, new Wallet(publicKey, privateKey, accountId)];
+                }
+            });
+        });
+    };
+    Wallet.encryptedJSONFromPassPhrase = function (passPhrase, encryptionPassword) {
+        return __awaiter(this, void 0, void 0, function () {
+            var seed;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, crypto_util_1.CryptoUtil.Crypto.getSeed(passPhrase)];
+                    case 1:
+                        seed = _a.sent();
+                        return [2 /*return*/, key_encryption_1.KeyEncryption.encryptBytes(seed, encryptionPassword)];
+                }
+            });
+        });
+    };
+    Wallet.fromEncryptedJSON = function (encryptedJSON, encryptionPassword) {
+        return __awaiter(this, void 0, void 0, function () {
+            var seed, _a, publicKey, privateKey, accountId;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, key_encryption_1.KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword)];
+                    case 1:
+                        seed = _b.sent();
+                        return [4 /*yield*/, crypto_util_1.CryptoUtil.Crypto.getWalletDetailsFromSeed(seed)];
+                    case 2:
+                        _a = _b.sent(), publicKey = _a.publicKey, privateKey = _a.privateKey, accountId = _a.accountId;
+                        return [2 /*return*/, new Wallet(publicKey, privateKey, accountId)];
+                }
+            });
+        });
+    };
+    Wallet.accountIdFromPublicKey = function (publicKeyHex) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                return [2 /*return*/, crypto_util_1.CryptoUtil.Crypto.publicKeyToAccountId(publicKeyHex)];
+            });
+        });
+    };
+    Wallet.generatePassphrase = function (numberOfWords) {
         return pass_gen_1.default.generatePass(numberOfWords);
-    }
-}
+    };
+    return Wallet;
+}(signer_1.Signer));
 exports.Wallet = Wallet;
 module.exports = Wallet;
 
