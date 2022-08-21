@@ -102,7 +102,7 @@ export const KeyEncryption = {
         return { iv: iv, salt: salt };
     },
 
-    async genEncryptionKeyFromPassword(password: string, salt: Uint8Array, iterations: number): Promise<any> {
+    async genEncryptionKeyFromPassword(password: string, salt: Uint8Array, iterations: number) {
         const importedPassword = await webcrypto.subtle.importKey(
             "raw",
             Converters.strToUint8(password),

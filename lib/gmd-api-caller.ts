@@ -34,40 +34,19 @@ export class RemoteAPICaller {
         }
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
-    async apiCall(method: string, params: Record<string, any>): Promise<Record<string, any>> {
-        const { url, httpTimeout } = this.processParams(params);
-        const config = { method: method, url: url + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
-        if (httpTimeout && httpTimeout > 0) {
-            config.httpTimeout = httpTimeout;
-        }
-        return axios(config).then((res: any) => {
+    async apiCall(method: string, params: Record<string, any>) {
+        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
+
+        return axios(config).then((res: IAPIResponse) => {
             if (this.log) this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
             return res.data;
         });
     }
+}
 
-    private processParams(params: any): any {
-        let url;
-        let httpTimeout;
-        if (params) {
-            if ('secretPhrase' in params) {
-                delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
-            }
-            if ('httpTimeout' in params) {
-                httpTimeout = params.httpTimeout;
-                delete params.httpTimeout;
-            }
-
-            if ('baseURL' in params) {
-                url = params.baseURL;
-                delete params.baseURL;
-            } else {
-                url = this.baseURL.toString();
-            }
-        }
-        return { url, httpTimeout };
-    }
-
-
+export interface IAPIResponse {
+    status: number;
+    statusText: string;
+    data: Record<string, string | number | boolean>;
 }
 

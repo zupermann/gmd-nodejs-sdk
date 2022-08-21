@@ -24,29 +24,31 @@ export enum TransactionState {
  * The state of the transaction can only go through each step in the specified order.
  */
 export abstract class Transaction {
-    private _requestJSON: Record<string, any>;
+    private _requestJSON: IRequestJSON;
     private _unsignedTransactionBytes: string | null = null;
     private _signedTransactionBytes: string | null = null;
-    private _transactionJSON: Record<string, any> | null = null;
     private _state: TransactionState;
+    private _transactionID: string | null = null;
+    private _fullHash: string | null = null;
 
 
     abstract getRequestType(): string;
 
-    constructor(requestJSON: Record<string, any>) {
-        requestJSON.requestType = this.getRequestType();
+    constructor(requestJSON: IRequestJSON) {
         this._requestJSON = requestJSON;
         this._state = TransactionState.REQUEST_CREATED;
     }
 
     canProcessRequest(): boolean {
+        if ('secretPhrase' in this._requestJSON) {
+            throw new Error('Do not send secret password to node!');
+        }
         return this._state === TransactionState.REQUEST_CREATED;
     }
 
-    onTransactionRequestProcessed(unsignedTransactionBytes: string, transactionJSON: Record<string, any>) {
+    onTransactionRequestProcessed(unsignedTransactionBytes: string) {
         if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
-            this._transactionJSON = transactionJSON;
             this._state = TransactionState.UNSIGNED;
         } else {
             throw new Error('onTransactionRequestProcessed: Transaction cannot be processed');
@@ -68,14 +70,18 @@ export abstract class Transaction {
         return Converters.isHex(this.signedTransactionBytes) && this.state === TransactionState.SIGNED;
     }
 
-    onBroadcasted(result: any) {
+    onBroadcasted(result: ITransactionBroadcasted) {
         if (this.canBroadcast()) {
+            this._transactionID = result.transaction;
+            this._fullHash = result.fullHash;
             this._state == TransactionState.BROADCASTED;
+        } else {
+            throw new Error('Something went wrong on transaction broadcast');
         }
 
     }
 
-    get requestJSON(): Record<string, any> {
+    get requestJSON(): IRequestJSON {
         return this._requestJSON;
     }
 
@@ -91,4 +97,19 @@ export abstract class Transaction {
         return this._signedTransactionBytes;
     }
 
+}
+
+
+export interface IRequestJSON {
+    requestType: string,
+    recipient: string,
+    publicKey: string,
+    feeNQT: string,
+    deadline: number,
+    message?: string
+}
+
+export interface ITransactionBroadcasted {
+    fullHash: string,
+    transaction: string
 }

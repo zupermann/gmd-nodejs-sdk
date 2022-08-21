@@ -104,7 +104,7 @@ var CryptoUtil;
         }
         Converters.byteArraysEqual = byteArraysEqual;
         function isHex(str) {
-            let re = /^[0-9a-fA-F]+$/;
+            const re = /^[0-9a-fA-F]+$/;
             return str != null && str.length > 0 && re.test(str);
         }
         Converters.isHex = isHex;
@@ -990,37 +990,12 @@ class RemoteAPICaller {
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
     async apiCall(method, params) {
-        const { url, httpTimeout } = this.processParams(params);
-        const config = { method: method, url: url + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
-        if (httpTimeout && httpTimeout > 0) {
-            config.httpTimeout = httpTimeout;
-        }
+        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString(), httpTimeout: "" };
         return (0, get_axios_1.default)(config).then((res) => {
             if (this.log)
                 this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);
             return res.data;
         });
-    }
-    processParams(params) {
-        let url;
-        let httpTimeout;
-        if (params) {
-            if ('secretPhrase' in params) {
-                delete params.secretPhrase; // password is not sent to server - remove it from params - it is needed only to do local signing
-            }
-            if ('httpTimeout' in params) {
-                httpTimeout = params.httpTimeout;
-                delete params.httpTimeout;
-            }
-            if ('baseURL' in params) {
-                url = params.baseURL;
-                delete params.baseURL;
-            }
-            else {
-                url = this.baseURL.toString();
-            }
-        }
-        return { url, httpTimeout };
     }
 }
 exports.RemoteAPICaller = RemoteAPICaller;
@@ -1168,13 +1143,14 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
     getBlockNumber() {
         return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height);
     }
-    getBalance(rsAccount) {
-        return this.apiCall('get', { requestType: 'getBalance', account: rsAccount }).then(data => data.balanceNQT);
+    async getBalance(rsAccount) {
+        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
+        return data.balanceNQT;
     }
     async createUnsignedTransaction(transaction) {
         if (transaction.canProcessRequest()) {
             const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
-            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes, unsignedTransaction.transactionJSON);
+            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes);
         }
         else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
@@ -1196,26 +1172,6 @@ class Provider extends gmd_api_caller_1.RemoteAPICaller {
 }
 exports.Provider = Provider;
 module.exports = Provider;
-// export enum TransactionType {
-//     PAYMENT = 0,
-//     MESSAGING = 1,
-//     COLORED_COINS = 2,
-//     DIGITAL_GOODS = 3,
-//     ACCOUNT_CONTROL = 4,
-//     MONETARY_SYSTEM = 5,
-//     DATA = 6,
-//     SHUFFLING = 7
-// }
-// const TransactionSubtype = [
-//     ["ORDINARY_PAYMENT"],
-//     ["ARBITRARY_MESSAGE", "ALIAS_ASSIGNMENT", "POLL_CREATION", "VOTE_CASTING", "HUB_ANNOUNCEMENT", "ACCOUNT_INFO", "ALIAS_SELL", "ALIAS_BUY", "ALIAS_DELETE", "PHASING_VOTE_CASTING", "ACCOUNT_PROPERTY", "ACCOUNT_PROPERTY_DELETE"],
-//     ["ASSET_ISSUANCE", "ASSET_TRANSFER", "ASK_ORDER_PLACEMENT", "BID_ORDER_PLACEMENT", "ASK_ORDER_CANCELLATION", "BID_ORDER_CANCELLATION", "DIVIDEND_PAYMENT", "ASSET_DELETE", "ASSET_INCREASE", "PROPERTY_SET", "PROPERTY_DELETE"],
-//     ["LISTING", "DELISTING", "PRICE_CHANGE", "QUANTITY_CHANGE", "PURCHASE", "DELIVERY", "FEEDBACK", "REFUND"],
-//     ["EFFECTIVE_BALANCE_LEASING", "PHASING_ONLY"],
-//     ["CURRENCY_ISSUANCE", "RESERVE_INCREASE", "RESERVE_CLAIM", "CURRENCY_TRANSFER", "PUBLISH_EXCHANGE_OFFER", "EXCHANGE_BUY", "EXCHANGE_SELL", "CURRENCY_MINTING", "CURRENCY_DELETION"],
-//     ["UPLOAD", "EXTEND"],
-//     ["CREATION", "REGISTRATION", "PROCESSING", "RECIPIENTS", "VERIFICATION", "CANCELLATION"]
-// ]
 
 },{"./gmd-api-caller":6}],10:[function(require,module,exports){
 "use strict";
@@ -1579,18 +1535,17 @@ class Transaction {
     constructor(requestJSON) {
         this._unsignedTransactionBytes = null;
         this._signedTransactionBytes = null;
-        this._transactionJSON = null;
-        requestJSON.requestType = this.getRequestType();
+        this._transactionID = null;
+        this._fullHash = null;
         this._requestJSON = requestJSON;
         this._state = TransactionState.REQUEST_CREATED;
     }
     canProcessRequest() {
         return this._state === TransactionState.REQUEST_CREATED;
     }
-    onTransactionRequestProcessed(unsignedTransactionBytes, transactionJSON) {
+    onTransactionRequestProcessed(unsignedTransactionBytes) {
         if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
-            this._transactionJSON = transactionJSON;
             this._state = TransactionState.UNSIGNED;
         }
         else {
@@ -1611,7 +1566,12 @@ class Transaction {
     }
     onBroadcasted(result) {
         if (this.canBroadcast()) {
+            this._transactionID = result.transaction;
+            this._fullHash = result.fullHash;
             this._state == TransactionState.BROADCASTED;
+        }
+        else {
+            throw new Error('Something went wrong on transaction broadcast');
         }
     }
     get requestJSON() {

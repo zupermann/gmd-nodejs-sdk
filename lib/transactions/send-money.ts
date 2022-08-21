@@ -1,12 +1,12 @@
-import { Transaction } from "./transaction";
+import { IRequestJSON, Transaction } from "./transaction";
 
 export class SendMoney extends Transaction {
-
+    static readonly endpointName = "sendMoney";
     getRequestType(): string {
-        return "sendMoney";
+        return SendMoney.endpointName;
     }
 
-    private constructor(requestJSON: Record<string, any>) {
+    private constructor(requestJSON: ISendMoneyRequest) {
         super(requestJSON)
     }
 
@@ -14,16 +14,20 @@ export class SendMoney extends Transaction {
         feeNQT = '100000000', deadline = 1440, message = ""): SendMoney {
 
         const reqJSON = {
+            requestType: SendMoney.endpointName,
             recipient: recipient,
             amountNQT: amountNQT,
             publicKey: senderPublicKey,
             feeNQT: feeNQT,
             deadline: deadline,
             message: message
-
         }
         return new SendMoney(reqJSON);
     }
+}
+
+export interface ISendMoneyRequest extends IRequestJSON {
+    amountNQT: string
 }
 
 module.exports = SendMoney;
