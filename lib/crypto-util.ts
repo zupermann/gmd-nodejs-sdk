@@ -86,7 +86,7 @@ export namespace CryptoUtil {
         }
 
         export function isHex(str: string | null): boolean {
-            let re = /^[0-9a-fA-F]+$/;
+            const re = /^[0-9a-fA-F]+$/;
             return str != null && str.length > 0 && re.test(str);
         }
     }
