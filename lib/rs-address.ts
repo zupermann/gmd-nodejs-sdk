@@ -41,7 +41,7 @@ export class RSAddress {
     } //__________________________
 
     find_errors(lambda: any) {
-        var errloc = [];
+        var errloc: number[] = [];
 
         for (var i = 1; i <= 31; i++) {
             var sum = 0;
@@ -64,7 +64,7 @@ export class RSAddress {
     guess_errors() {
         var el = 0,
             b = [0, 0, 0, 0, 0],
-            t = [];
+            t: number[] = [];
 
         var deg_lambda = 0,
             lambda = [1, 0, 0, 0, 0]; // error+erasure locator poly
@@ -213,8 +213,8 @@ export class RSAddress {
     } //__________________________
 
     from_acc(acc: any) {
-        var inp = [],
-            out = [],
+        var inp: number[] = [],
+            out: number[] = [],
             pos = 0,
             len = acc.length;
 
@@ -269,7 +269,7 @@ export class RSAddress {
 
     account_id() {
         var out = '',
-            inp = [],
+            inp: number[] = [],
             len = 13;
 
         for (var i = 0; i < 13; i++) {
@@ -318,7 +318,7 @@ export class RSAddress {
             if (allow_accounts) return this.from_acc(adr);
         } else // address
         {
-            let clean = [];
+            let clean: number[] = [];
 
             for (var i = 0; i < adr.length; i++) {
                 var pos = this.alphabet.indexOf(adr[i]);

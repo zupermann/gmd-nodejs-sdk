@@ -11,7 +11,7 @@ const PassPhraseGenerator = {
         //console.log("generating pass ");
         const rndArray = new Uint32Array(numberOfWords);
         webcrypto.getRandomValues(rndArray);
-        const passPhrase = [];
+        const passPhrase: string[] = [];
         for (const i in rndArray) {
             passPhrase.push(words[rndArray[i] % words.length]);
         }

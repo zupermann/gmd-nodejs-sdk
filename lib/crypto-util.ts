@@ -1,5 +1,5 @@
 import webcrypto from './get-crypto';
-import curve25519 from './curve25519';
+import { Curve25519 } from './curve25519';
 
 import { RSAddress } from './rs-address'
 
@@ -13,9 +13,10 @@ export namespace CryptoUtil {
         }
 
         export function strToBytes(str: string): number[] {
-            const result = [];
+            const result: number[] = [];
             for (let i = 0; i < str.length; i++) {
-                result.push(str.charCodeAt(i));
+                const code = str.charCodeAt(i);
+                result.push(code);
             }
             return result;
         }
@@ -29,9 +30,9 @@ export namespace CryptoUtil {
         }
 
         export function hexToBytes(hex: string): number[] {
-            const bytes = [];
+            const bytes: number[] = [];
             for (let c = 0; c < hex.length; c += 2) {
-                bytes.push(parseInt(hex.substr(c, 2), 16));
+                bytes.push(parseInt(hex.slice(c, 2), 16));
             }
             return bytes;
         }
@@ -129,6 +130,7 @@ export namespace CryptoUtil {
             const s = Converters.hexToBytes(privateKey);
             const m = await SHA256(messageBytes);
             const x = await SHA256(m, s);
+            const curve25519 = new Curve25519();
             const y = curve25519.keygen(x).p;
             const h = await SHA256(m, y);
             const v = curve25519.sign(h, x, s);
@@ -156,7 +158,7 @@ export namespace CryptoUtil {
         }
 
         export async function getWalletDetailsFromSeed(seed: number[]): Promise<IMinWalletDetails> {
-            const { p, s } = curve25519.keygen(seed);
+            const { p, s } = new Curve25519().keygen(seed);
             const publicKey = Converters.bytesToHex(p);
             const privateKey = Converters.bytesToHex(s);
             const accountId = await publicKeyToAccountId(publicKey);
@@ -176,7 +178,7 @@ export namespace CryptoUtil {
             const publicKeyBytes = Converters.hexToBytes(publicKey);
             const v = signatureBytes.slice(0, 32);
             const h = signatureBytes.slice(32);
-            const Y = curve25519.verify(v, h, publicKeyBytes);
+            const Y = (new Curve25519()).verify(v, h, publicKeyBytes);
 
             const m = await SHA256(messageBytes);
             const h2 = await SHA256(m, Y);
