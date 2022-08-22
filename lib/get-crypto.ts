@@ -4,4 +4,5 @@
  * Swapping is configured in packge.json
  */
 /* eslint @typescript-eslint/no-var-requires: "off" */
-export default require('crypto').webcrypto //Node equivalent of window.crypto in browser
+import { webcrypto } from "crypto"
+export default webcrypto //Node equivalent of window.crypto in browser

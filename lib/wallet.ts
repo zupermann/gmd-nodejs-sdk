@@ -1,8 +1,8 @@
-import { CryptoUtil } from './crypto-util';
-import { KeyEncryption, IEncryptedJSON } from './key-encryption';
-import PassPhraseGenerator from './pass-gen'
-import { Provider } from './provider';
-import { Signer } from './signer';
+import { CryptoUtil } from './crypto-util.js';
+import { KeyEncryption, IEncryptedJSON } from './key-encryption.js';
+import PassPhraseGenerator from './pass-gen.js'
+import { Provider } from './provider.js';
+import { Signer } from './signer.js';
 
 
 export class Wallet extends Signer {
@@ -45,5 +45,3 @@ export class Wallet extends Signer {
         return PassPhraseGenerator.generatePass(numberOfWords);
     }
 }
-
-module.exports = Wallet;

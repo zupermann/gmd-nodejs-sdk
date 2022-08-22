@@ -1,11 +1,11 @@
-const Wallet = require('../dist/wallet.js')
+import { Wallet } from '../dist/index.js';
 const secretPassphrase = "this is a paasphrase example";
 const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
 const privKey = "39c8834113346ed3ba6ac90eff170a302a9264680f9d5a578931dd2c22d65e05";
 const accountId = '5224136646640665215';
 const accountRS = 'GMD-W2MZ-M9WK-G2LJ-6WYZJ';
 
-const testWallet = async () => {
+export const testWallet = async () => {
     console.log('Testing wallet from passphrase');
     await test1();
     console.log('Wallet from passphrase test OK');
@@ -47,5 +47,3 @@ const test3 = async () => {
     console.assert(typeof wallet.accountRS === 'string' && wallet.accountRS.length > 0, "New wallet failed. No accountRS key generated.");
 }
 
-
-module.exports = testWallet;

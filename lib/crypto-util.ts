@@ -1,7 +1,7 @@
-import webcrypto from './get-crypto';
-import { curve25519 } from './curve25519';
+import webcrypto from './get-crypto.js';
+import { curve25519 } from './curve25519.js';
 
-import { RSAddress } from './rs-address'
+import { RSAddress } from './rs-address.js'
 
 
 export namespace CryptoUtil {

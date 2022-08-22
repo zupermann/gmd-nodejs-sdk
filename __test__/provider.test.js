@@ -1,10 +1,10 @@
-const Provider = require('../dist/provider');
+import { Provider } from '../dist/index.js';
 
-const testProvider = async () => {
+export const testProvider = async () => {
     let provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
     console.log(JSON.stringify(provider, null, 2));
 
-    paramsGetTransactions = {
+    const paramsGetTransactions = {
         requestType: 'getTransactionsBulk',
         pageSize: 3,
         page: 0
@@ -17,5 +17,3 @@ const testProvider = async () => {
     let blockNo = await provider.getBlockNumber();
     console.log('blockNo=' + blockNo);
 }
-
-module.exports = testProvider;

@@ -4,11 +4,12 @@
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
     "test": "tsc && node ./__test__/main.test.js",
-    "build-browser": "tsc && browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
-    "build-browser-test": "npm run build-browser && browserify ./__test__/main.test.js -o ./__test__/browser/test-bundle.js",
+    "build-browser": "tsc && browserify ./browser/main.js -p esmify -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
+    "build-browser-test": "npm run build-browser && browserify ./__test__/main.test.js -p esmify -o ./__test__/browser/test-bundle.js",
     "lint": "npx eslint .",
-    "build": "tsc && npx eslint . && npm run build-browser"
+    "build": "npx tsc && npx eslint . && npm run build-browser"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/zupermann/GMD-nodejs-sdk.git"
@@ -31,6 +32,7 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
+    "esmify": "^2.1.1",
     "typescript": "^4.7.4",
     "uglify-js": "^3.16.3"
   },
