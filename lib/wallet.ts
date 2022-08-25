@@ -20,6 +20,14 @@ export class Wallet extends Signer {
         this.provider = provider;
     }
 
+    async getBalance(): Promise<string> {
+        if (this.provider == null) {
+            throw new Error('Cannot get balance if no provider connected'); //TODO refine errors
+        } else {
+            return this.provider.getBalance(this.accountRS);
+        }
+    }
+
     //static wallet creation functions
     static async fromPassphrase(passPhrase: string) {
         const { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetails(passPhrase);
