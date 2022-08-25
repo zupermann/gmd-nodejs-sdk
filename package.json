@@ -4,24 +4,18 @@
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
     "test": "tsc && node ./__test__/main.test.js",
-    "build-browser": "tsc && browserify ./browser/main.js -p esmify -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
-    "build-browser-test": "npm run build-browser && browserify ./__test__/main.test.js -p esmify -o ./__test__/browser/test-bundle.js",
     "lint": "npx eslint .",
-    "build": "npx tsc && npx eslint . && npm run build-browser"
+    "build": "npx tsc && npx eslint ."
   },
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/zupermann/GMD-nodejs-sdk.git"
   },
-  "browser": {
-    "./dist/get-crypto.js": "./browser/get-crypto-window.js",
-    "axios": false,
-    "./dist/get-axios.js": "./browser/get-axios-browser.js"
-  },
   "dependencies": {
     "axios": "^0.26.0"
   },
+  "main": "./dist/index.js",
   "devDependencies": {
     "@types/node": "^18.7.3",
     "@typescript-eslint/eslint-plugin": "^5.33.1",
@@ -40,7 +34,8 @@
     "node": ">=16.10.0"
   },
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "browser/dist/**/*"
   ],
   "keywords": [
     "CoopNetwork",
