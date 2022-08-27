@@ -1,42 +1,39 @@
 {
-  "name": "gmd-sdk",
-  "version": "2.0.0",
+  "name": "gmd-nodejs-sdk",
+  "version": "2.0.5-0",
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
     "test": "tsc && node ./__test__/main.test.js",
-    "build-browser": "tsc && browserify ./browser/main.js -o ./browser/dist/gmd-sdk.js && uglifyjs ./browser/dist/gmd-sdk.js -c -m -o ./browser/dist/gmd-sdk.min.js",
-    "build-browser-test": "npm run build-browser && browserify ./__test__/main.test.js -o ./__test__/browser/test-bundle.js",
     "lint": "npx eslint .",
-    "build": "tsc && npx eslint . && npm run build-browser"
+    "build": "npx tsc && npx eslint ."
   },
+  "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/CoopNetwork/GMD-nodejs-sdk.git"
-  },
-  "browser": {
-    "./dist/get-crypto.js": "./browser/get-crypto-window.js",
-    "axios": false,
-    "./dist/get-axios.js": "./browser/get-axios-browser.js"
+    "url": "https://github.com/zupermann/GMD-nodejs-sdk.git"
   },
   "dependencies": {
     "axios": "^0.26.0"
   },
+  "main": "./dist/index.js",
   "devDependencies": {
     "@types/node": "^18.7.3",
     "@typescript-eslint/eslint-plugin": "^5.33.1",
     "@typescript-eslint/parser": "^5.33.1",
-    "browserify": "^17.0.0",
     "eslint": "^8.22.0",
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
-    "typescript": "^4.7.4",
-    "uglify-js": "^3.16.3"
+    "esmify": "^2.1.1",
+    "typescript": "^4.7.4"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.10.0"
   },
+  "files": [
+    "dist/**/*"
+  ],
   "keywords": [
     "CoopNetwork",
     "GMD",
@@ -45,7 +42,7 @@
   "author": "George A. (https://github.com/zupermann)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/CoopNetwork/gmd-nodejs-sdk/issues"
+    "url": "https://github.com/zupermann/gmd-nodejs-sdk/issues"
   },
-  "homepage": "https://github.com/CoopNetwork/gmd-nodejs-sdk#readme"
+  "homepage": "https://github.com/zupermann/gmd-nodejs-sdk#readme"
 }

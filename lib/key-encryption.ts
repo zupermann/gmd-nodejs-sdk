@@ -1,7 +1,7 @@
-import { CryptoUtil } from "./crypto-util";
+import { CryptoUtil } from "./crypto-util.js";
 import Converters = CryptoUtil.Converters;
 
-import webcrypto from "./get-crypto";
+import webcrypto from "./get-crypto.js";
 
 const iterations = 223978;
 

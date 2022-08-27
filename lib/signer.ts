@@ -1,5 +1,5 @@
-import { CryptoUtil } from './crypto-util';
-import { Transaction, TransactionState } from './transactions/transaction';
+import { CryptoUtil } from './crypto-util.js';
+import { Transaction, TransactionState } from './transactions/transaction.js';
 import Converters = CryptoUtil.Converters;
 
 export class Signer {

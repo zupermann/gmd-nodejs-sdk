@@ -1,5 +1,5 @@
-import { RemoteAPICaller } from "./gmd-api-caller";
-import { ITransactionBroadcasted, Transaction } from "./transactions/transaction";
+import { RemoteAPICaller } from "./gmd-api-caller.js";
+import { ITransactionBroadcasted, Transaction } from "./transactions/transaction.js";
 
 
 
@@ -19,12 +19,12 @@ export class Provider extends RemoteAPICaller implements IProvider {
 
     //Latest block
     getBlockNumber(): Promise<number> {
-        return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height);
+        return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height as number);
     }
 
     async getBalance(rsAccount: string): Promise<string> {
-        const data: IBalanaceResponse = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
-        return data.balanceNQT;
+        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
+        return data.balanceNQT as string;
     }
 
 
@@ -32,14 +32,16 @@ export class Provider extends RemoteAPICaller implements IProvider {
     async createUnsignedTransaction(transaction: Transaction) {
         if (transaction.canProcessRequest()) {
             const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
-            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes);
+            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes as string);
         } else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
         }
     }
 
-    broadCastTransactionFromHex(signedTransactionHex: string): Promise<ITransactionBroadcasted> {
-        return this.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
+    async broadCastTransactionFromHex(signedTransactionHex: string): Promise<ITransactionBroadcasted> {
+        const data = await this.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
+        const ret = (data as unknown) as ITransactionBroadcasted;
+        return ret;
     }
 
     async broadcastTransaction(transaction: Transaction) {
@@ -51,8 +53,5 @@ export class Provider extends RemoteAPICaller implements IProvider {
             throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
         }
     }
-
-
 }
 
-module.exports = Provider;

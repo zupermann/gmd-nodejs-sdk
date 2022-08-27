@@ -1,8 +1,8 @@
-const testWallet = require('./wallet.test');
-const testProvider = require('./provider.test');
-const testSendMoney = require('./send-money.test');
+import { testWallet } from './wallet.test.js';
+import { testProvider } from './provider.test.js';
+import { testSendMoney } from './send-money.test.js';
 
-(async () => {
+export const test = async () => {
     console.log('---Testing wallet...');
     await testWallet();
     console.log('---Testing wallet finished.');
@@ -15,4 +15,6 @@ const testSendMoney = require('./send-money.test');
     console.log('---Testing send money...');
     await testSendMoney();
     console.log('---Testing send money finished.');
-})();
+};
+
+await test();

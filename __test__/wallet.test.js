@@ -1,11 +1,11 @@
-const Wallet = require('../dist/wallet.js')
+import { Wallet, Provider } from '../dist/index.js';
 const secretPassphrase = "this is a paasphrase example";
 const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
 const privKey = "39c8834113346ed3ba6ac90eff170a302a9264680f9d5a578931dd2c22d65e05";
 const accountId = '5224136646640665215';
 const accountRS = 'GMD-W2MZ-M9WK-G2LJ-6WYZJ';
 
-const testWallet = async () => {
+export const testWallet = async () => {
     console.log('Testing wallet from passphrase');
     await test1();
     console.log('Wallet from passphrase test OK');
@@ -17,10 +17,14 @@ const testWallet = async () => {
     console.log('Testing new wallet generation');
     await test3();
     console.log('New wallet generation test OK');
+
+    console.log('Testing get balance');
+    await test4();
+    console.log('Get balance test OK');
 };
 
 const test1 = async () => {
-    let wallet = await Wallet.fromPassphrase(secretPassphrase);
+    const wallet = await Wallet.fromPassphrase(secretPassphrase);
     console.assert(wallet.publicKey == pubKey, "Wallet.fromPassphrase failed publicKey");
     console.assert(wallet.privateKey == privKey, "Wallet.fromPassphrase failed privateKey");
     console.assert(wallet.accountId == accountId, "Wallet.fromPassphrase failed accountId");
@@ -28,8 +32,8 @@ const test1 = async () => {
 }
 
 const test2 = async () => {
-    let encryptedJSON = await Wallet.encryptedJSONFromPassPhrase(secretPassphrase, "password example 123@@!");
-    let wallet = await Wallet.fromEncryptedJSON(encryptedJSON, "password example 123@@!");
+    const encryptedJSON = await Wallet.encryptedJSONFromPassPhrase(secretPassphrase, "password example 123@@!");
+    const wallet = await Wallet.fromEncryptedJSON(encryptedJSON, "password example 123@@!");
     console.assert(wallet.publicKey == pubKey, "Wallet.fromEncryptedJSON failed publicKey");
     console.assert(wallet.privateKey == privKey, "Wallet.fromEncryptedJSON failed privateKey");
     console.assert(wallet.accountId == accountId, "Wallet.fromEncryptedJSON failed accountId");
@@ -37,9 +41,9 @@ const test2 = async () => {
 }
 
 const test3 = async () => {
-    let passPhrase = Wallet.generatePassphrase();
+    const passPhrase = Wallet.generatePassphrase();
     console.log('new passphrase generated:' + passPhrase);
-    let wallet = await Wallet.fromPassphrase(passPhrase);
+    const wallet = await Wallet.fromPassphrase(passPhrase);
     console.log('New wallet generated: ' + JSON.stringify(wallet, null, 2));
     console.assert(typeof wallet.publicKey === 'string' && wallet.publicKey.length > 0, "New wallet failed. No public key generated.");
     console.assert(typeof wallet.privateKey === 'string' && wallet.privateKey.length > 0, "New wallet failed. No private key generated.");
@@ -47,5 +51,14 @@ const test3 = async () => {
     console.assert(typeof wallet.accountRS === 'string' && wallet.accountRS.length > 0, "New wallet failed. No accountRS key generated.");
 }
 
+const test4 = async () => {
+    const provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
+    const wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
+    wallet.connect(provider);
 
-module.exports = testWallet;
+    const balance = await wallet.getBalance();
+    console.assert(balance != undefined);
+
+
+}
+
