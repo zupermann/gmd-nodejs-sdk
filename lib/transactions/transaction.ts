@@ -74,7 +74,7 @@ export abstract class Transaction {
         if (this.canBroadcast()) {
             this._transactionID = result.transaction;
             this._fullHash = result.fullHash;
-            this._state == TransactionState.BROADCASTED;
+            this._state = TransactionState.BROADCASTED;
         } else {
             throw new Error('Something went wrong on transaction broadcast');
         }

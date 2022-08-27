@@ -1,9 +1,11 @@
 import { Wallet, Provider } from '../dist/index.js';
+import { TransactionState } from '../dist/transactions/transaction.js';
 const secretPassphrase = "this is a paasphrase example";
 const pubKey = "9c7bba1b3e2647290a92342d622c0c0514521a35a1670a20612c64666f035938";
 const privKey = "39c8834113346ed3ba6ac90eff170a302a9264680f9d5a578931dd2c22d65e05";
 const accountId = '5224136646640665215';
 const accountRS = 'GMD-W2MZ-M9WK-G2LJ-6WYZJ';
+const provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
 
 export const testWallet = async () => {
     console.log('Testing wallet from passphrase');
@@ -21,6 +23,10 @@ export const testWallet = async () => {
     console.log('Testing get balance');
     await test4();
     console.log('Get balance test OK');
+
+    console.log('Testing send GMD via wallet');
+    await test5();
+    console.log('Send GMD via wallet OK');
 };
 
 const test1 = async () => {
@@ -52,13 +58,20 @@ const test3 = async () => {
 }
 
 const test4 = async () => {
-    const provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
     const wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
     wallet.connect(provider);
 
     const balance = await wallet.getBalance();
     console.assert(balance != undefined);
-
-
 }
+
+const test5 = async () => {
+    const wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
+    wallet.connect(provider);
+    const transaction = await wallet.sendGMD('GMD-43MP-76UW-L69N-ALW39', '10000');
+    console.assert(transaction.signedTransactionBytes && transaction.signedTransactionBytes.length > 0);
+    console.assert(transaction.state == TransactionState.BROADCASTED);
+    console.log(JSON.stringify(transaction, null, 2));
+}
+
 

@@ -6,17 +6,12 @@
 
 
 ### Instructions
-- To run tests: 
   ```
   npm install
+  npm run build
   npm run test
   ```
-- To use in your NodeJS app:
-  ```
-  npm install gmd-nodejs-sdk
-  ```
 
-##### For browser usage please see browser directory readme.md and index.html example.
 
 ### Examples on hot to call the GMD node API
 - For a complete list of API endpoints and their exact parameters you can see them on any node in a browser at address <GMD node address>/test (e.g. https://node.thecoopnetwork.io/test )
@@ -24,6 +19,8 @@
 
 #### Wallet
 ```
+    import { Wallet, Provider } from 'gmd-sdk';
+
     //generate a random passphrase of 12 words
     let passPhrase = Wallet.generatePassphrase(12);
     
@@ -35,10 +32,20 @@
     let encryptedJSON = await Wallet.encryptedJSONFromPassPhrase(passPhrase, "password example 123@@!");
     //recover wallet from encrypted json:
     let wallet = await Wallet.fromEncryptedJSON(encryptedJSON, "password example 123@@!"); 
+
+    //Any wallet operation requiring connection to remote node needs a provider. Provider may be set using wallet.connect(provider) For example wallet.getBallance() needs connectiion to a node.
+    
+    const provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
+    const wallet = await Wallet.fromPassphrase('some passphrase example of just a few words');
+    wallet.connect(provider);
+    const balance = await wallet.getBalance();
+
+    
+
 ```
 
-### Provider
-- Provider is the component that haddles all interaction with a remote GMD node. It extends the RemoteAPICaller class wich enables the calling of the REST API exposed by a node. Full list of REST API endpoints https://node.thecoopnetwork.io/test: 
+#### Provider
+- Provider is the component that haddles all interactions with a remote GMD node. It extends the RemoteAPICaller class wich enables the calling of the REST API exposed by a node. Full list of REST API endpoints: https://node.thecoopnetwork.io/test
 - Usage example:
 ```
     const provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
@@ -53,7 +60,7 @@
     console.log('Blockchain height: ' + blockNo);
 ```
 
-### Transaction 
+#### Transaction 
 - Transaction is an abstract class that models all blockcahin transactions performed on the Coop Network blockchain.
 - Any transaction has 5 steps:
   1. Create request JSON
@@ -67,14 +74,28 @@
   - For now, only concrete implementation of Transaction is "SendMoney" class, but further transactions will be added in the future.
   - Example on how to use "SendMoney":
   ```
-    provider = new Provider(new URL('https://node.coopnetwork.io:6877'));
+    provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
     wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
 
     transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey); // Step 1 - local
     await provider.createUnsignedTransaction(transaction); // Step 2 - remote call
     await wallet.signTransaction(transaction); // Step 3 - local call
     await provider.broadcastTransaction(transaction); // Step 4 - remote call
-
   ```
+#### Encryption
+- This is an exmaple of encrypting on arbitrary string (encryptStr/encryptStr). 
+```
+import KeyEncryption from "gmd-sdk";
 
+const testString = "String was correctly decrypted";
+const password = "Some password1!@#$%^&*()_+{}:|<>?/.,\;][=-"
 
+(async () => {
+    const encrypted = await KeyEncryption.encryptStr(testString, password);
+
+    const decrypted = await KeyEncryption.decryptToStr(encrypted, password);
+    console.assert(decrypted == testString, "decryption failed");
+})();
+```
+- For encrypt/decrypt hex strings use encryptHex/decryptHex (this is useful for encrypting private keys). Example similar to above except input is in the hex form (digits "0123456789abcdef"). The number of hex digits must be even (as each byte is 2 hex digits and this string is coverted to bytes before encryption). Caller must ensure that number of hex digits is even, or pad with addition 0 prefix.
+- For encrypt/decrypt array of bytes, use encryptBytes/decryptToBytes.
