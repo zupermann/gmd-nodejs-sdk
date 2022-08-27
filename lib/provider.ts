@@ -1,4 +1,5 @@
-import { RemoteAPICaller } from "./gmd-api-caller.js";
+
+import { RemoteAPICallerHelper } from "./remote-api-caller-helper.js";
 import { ITransactionBroadcasted, Transaction } from "./transactions/transaction.js";
 
 
@@ -12,22 +13,10 @@ export interface IBalanaceResponse {
     balanceNQT: string
 }
 
-export class Provider extends RemoteAPICaller implements IProvider {
+export class Provider extends RemoteAPICallerHelper implements IProvider {
     constructor(baseURL: URL) {
         super(baseURL);
     }
-
-    //Latest block
-    getBlockNumber(): Promise<number> {
-        return this.apiCall('get', { requestType: 'getBlock' }).then(data => data.height as number);
-    }
-
-    async getBalance(rsAccount: string): Promise<string> {
-        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
-        return data.balanceNQT as string;
-    }
-
-
 
     async createUnsignedTransaction(transaction: Transaction) {
         if (transaction.canProcessRequest()) {

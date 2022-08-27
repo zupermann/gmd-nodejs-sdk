@@ -22,12 +22,10 @@ export class Wallet extends Signer {
         this.provider = provider;
     }
 
-    async getBalance(): Promise<string> {
-        if (this.provider == null) {
-            throw new Error('Cannot get balance if no provider connected'); //TODO refine errors
-        } else {
-            return this.provider.getBalance(this.accountRS);
-        }
+    async getBalance(): Promise<string | undefined> {
+        this.#checkProvider();
+        return await this.provider?.getBalance(this.accountRS);
+
     }
 
     async sendGMD(to: string, amount: string) {
@@ -38,12 +36,22 @@ export class Wallet extends Signer {
     }
 
     async createUnsignedSendGMDTransaction(to: string, amount: string) {
-        if (this.provider == null) {
-            throw new Error('Cannot send GMD if no provider is connected');
-        }
+        this.#checkProvider();
         const transaction = SendMoney.createTransaction(to, amount, this.publicKey);
-        await this.provider.createUnsignedTransaction(transaction);
+        await this.provider?.createUnsignedTransaction(transaction);
         return transaction;
+    }
+
+    async getTransactions(outbound: boolean, pageSize: number, page: number) {
+        this.#checkProvider();
+        this.provider?.getTransactions(outbound, this.accountRS, pageSize, page);
+    }
+
+
+    #checkProvider() {
+        if (this.provider == null) {
+            throw new Error('Wallet operation requires a Provider to be connected');
+        }
     }
 
     //static wallet creation functions

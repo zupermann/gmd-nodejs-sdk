@@ -82,4 +82,20 @@
     await wallet.signTransaction(transaction); // Step 3 - local call
     await provider.broadcastTransaction(transaction); // Step 4 - remote call
   ```
+#### Encryption
+- This is an exmaple of encrypting on arbitrary string (encryptStr/encryptStr). 
+```
+import KeyEncryption from "gmd-sdk";
 
+const testString = "String was correctly decrypted";
+const password = "Some password1!@#$%^&*()_+{}:|<>?/.,\;][=-"
+
+(async () => {
+    const encrypted = await KeyEncryption.encryptStr(testString, password);
+
+    const decrypted = await KeyEncryption.decryptToStr(encrypted, password);
+    console.assert(decrypted == testString, "decryption failed");
+})();
+```
+- For encrypt/decrypt hex strings use encryptHex/decryptHex (this is useful for encrypting private keys). Example similar to above except input is in the hex form (digits "0123456789abcdef"). The number of hex digits must be even (as each byte is 2 hex digits and this string is coverted to bytes before encryption). Caller must ensure that number of hex digits is even, or pad with addition 0 prefix.
+- For encrypt/decrypt array of bytes, use encryptBytes/decryptToBytes.
