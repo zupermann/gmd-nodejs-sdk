@@ -3,6 +3,8 @@ import { KeyEncryption, IEncryptedJSON } from './key-encryption.js';
 import PassPhraseGenerator from './pass-gen.js'
 import { Provider } from './provider.js';
 import { Signer } from './signer.js';
+import { SendMoney } from './transactions/send-money.js';
+
 
 
 export class Wallet extends Signer {
@@ -26,6 +28,22 @@ export class Wallet extends Signer {
         } else {
             return this.provider.getBalance(this.accountRS);
         }
+    }
+
+    async sendGMD(to: string, amount: string) {
+        const transaction = await this.createUnsignedSendGMDTransaction(to, amount);
+        await this.signTransaction(transaction);
+        await this.provider?.broadcastTransaction(transaction);
+        return transaction;
+    }
+
+    async createUnsignedSendGMDTransaction(to: string, amount: string) {
+        if (this.provider == null) {
+            throw new Error('Cannot send GMD if no provider is connected');
+        }
+        const transaction = SendMoney.createTransaction(to, amount, this.publicKey);
+        await this.provider.createUnsignedTransaction(transaction);
+        return transaction;
     }
 
     //static wallet creation functions
