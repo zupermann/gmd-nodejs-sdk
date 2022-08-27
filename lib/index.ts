@@ -1,5 +1,9 @@
-export * from "./wallet";
-export * from "./provider";
-export * from "./signer";
-export * from "./transactions/transaction";
-export * from "./transactions/send-money";
+import { Provider } from "./provider.js";
+import { Signer } from "./signer.js";
+import { Transaction } from "./transactions/transaction.js";
+import { SendMoney } from "./transactions/send-money.js";
+import { Wallet } from "./wallet.js";
+
+export {
+    Wallet, Provider, Signer, Transaction, SendMoney
+}

@@ -1,4 +1,4 @@
-import { IRequestJSON, Transaction } from "./transaction";
+import { IRequestJSON, Transaction } from "./transaction.js";
 
 export class SendMoney extends Transaction {
     static readonly endpointName = "sendMoney";
@@ -29,5 +29,3 @@ export class SendMoney extends Transaction {
 export interface ISendMoneyRequest extends IRequestJSON {
     amountNQT: string
 }
-
-module.exports = SendMoney;

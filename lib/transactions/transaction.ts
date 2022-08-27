@@ -1,4 +1,4 @@
-import { CryptoUtil } from "../crypto-util";
+import { CryptoUtil } from "../crypto-util.js";
 
 import Converters = CryptoUtil.Converters;
 
