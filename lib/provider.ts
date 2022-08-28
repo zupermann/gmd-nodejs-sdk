@@ -1,6 +1,6 @@
 
 import { RemoteAPICallerHelper } from "./remote-api-caller-helper.js";
-import { ITransactionBroadcasted, Transaction } from "./transactions/transaction.js";
+import { ITransactionBroadcasted, Transaction, ITransaction, IUnsignedTransaction } from "./transactions/transaction.js";
 
 
 
@@ -21,7 +21,7 @@ export class Provider extends RemoteAPICallerHelper implements IProvider {
     async createUnsignedTransaction(transaction: Transaction) {
         if (transaction.canProcessRequest()) {
             const unsignedTransaction = await this.apiCall('post', transaction.requestJSON);
-            transaction.onTransactionRequestProcessed(unsignedTransaction.unsignedTransactionBytes as string);
+            transaction.onTransactionRequestProcessed((unsignedTransaction as unknown as IUnsignedTransaction).unsignedTransactionBytes);
         } else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
         }
@@ -41,6 +41,11 @@ export class Provider extends RemoteAPICallerHelper implements IProvider {
         } else {
             throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(transaction));
         }
+    }
+    async calculateFee(transaction: Transaction) {
+        const data = await this.apiCall('post', { ...transaction.requestJSON, feeNQT: '0' });
+        const transactionData = data as unknown as ITransaction;
+        return transactionData.transactionJSON.feeNQT;
     }
 }
 

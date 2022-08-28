@@ -19,7 +19,7 @@ export class RemoteAPICallerHelper extends RemoteAPICaller {
 
     async getBalance(rsAccount: string): Promise<string> {
         const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount });
-        return data.balanceNQT as string;
+        return (data as unknown as IGetBalanceResponse).balanceNQT;
     }
 
     async getTransactions(outbound: boolean, rsAccount: string, pageSize = 10, page = 0, type: number | null = null, subtype: number | null = null) {
@@ -41,6 +41,14 @@ export class RemoteAPICallerHelper extends RemoteAPICaller {
             request.filterByReceiver = rsAccount;
         }
         const data = await this.apiCall('get', request);
-        return data.Transactions;
+        return (data as unknown as IGetTransactionsResponse).Transactions;
     }
+}
+
+interface IGetBalanceResponse {
+    balanceNQT: string
+}
+
+interface IGetTransactionsResponse {
+    Transactions: Array<unknown>;
 }

@@ -97,6 +97,15 @@ export abstract class Transaction {
         return this._signedTransactionBytes;
     }
 
+    setFee(fee: string) {
+        if (this.state === TransactionState.REQUEST_CREATED) {
+            this.requestJSON.feeNQT = fee;
+        } else {
+            throw new Error('Cannot set fee after the unsigned transaction was already created');//TODO refine errors
+        }
+
+    }
+
 }
 
 
@@ -112,4 +121,16 @@ export interface IRequestJSON {
 export interface ITransactionBroadcasted {
     fullHash: string,
     transaction: string
+}
+
+export interface ITransaction {
+    transactionJSON: ITransactionJSON
+}
+
+export interface ITransactionJSON {
+    feeNQT: string
+}
+
+export interface IUnsignedTransaction {
+    unsignedTransactionBytes: string
 }

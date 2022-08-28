@@ -47,6 +47,5 @@ export class RemoteAPICaller {
 export interface IAPIResponse {
     status: number;
     statusText: string;
-    data: Record<string, string | number | boolean>;
+    data: Record<string, unknown>;
 }
-

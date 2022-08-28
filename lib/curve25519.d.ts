@@ -11,5 +11,4 @@ declare function keygen(k: any): {
     s: any[];
     k: any;
 };
-export {};
-//# sourceMappingURL=curve25519.d.ts.map
+export { };
