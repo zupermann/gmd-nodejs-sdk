@@ -60,15 +60,6 @@
     console.log('Blockchain height: ' + blockNo);
 ```
 
-- Calculating fee for a transaction request (before signing it) in NQT (1 GMD = 100,000,000 NQT)
-```
-    const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
-    const fee = await provider.calculateFee(transaction);
-    
-    // calculateFee() does not change the state of the transaction but only returns a fee. To set the fee 
-    // before the unsigned transaction is created, call Transaction.setFee(). Setting fee will throw error if unsigned transaction was already created.
-    transaction.setFee(fee);
-```
 
 #### Transaction 
 - Transaction is an abstract class that models all blockcahin transactions performed on the Coop Network blockchain.
@@ -88,10 +79,21 @@
     wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
 
     transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey); // Step 1 - local
-    await provider.createUnsignedTransaction(transaction); // Step 2 - remote call
-    await wallet.signTransaction(transaction); // Step 3 - local call
-    await provider.broadcastTransaction(transaction); // Step 4 - remote call
+    await transaction.createUnsignedTransaction(provider); // Step 2 - remote call
+    await transaction.signTransaction(wallet); // Step 3 - local call
+    await transaction.broadcastTransaction(provider); // Step 4 - remote call
   ```
+
+  - Calculating fee for a transaction request (before signing it) in NQT (1 GMD = 100,000,000 NQT)
+```
+    const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
+    const fee = await transaction.calculateFee(provider);
+    
+    // calculateFee() does not change the state of the transaction but only returns a fee. To set the fee 
+    // before the unsigned transaction is created, call Transaction.setFee(). Setting fee will throw error if unsigned transaction was already created.
+    transaction.setFee(fee);
+```
+
 #### Encryption
 - This is an example of encrypting on arbitrary string (encryptStr/decryptToStr). 
 ```

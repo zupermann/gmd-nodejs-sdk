@@ -1,4 +1,6 @@
 import { CryptoUtil } from "../crypto-util.js";
+import { RemoteAPICaller } from "../gmd-api-caller.js";
+import { Signer } from "../signer.js";
 
 import Converters = CryptoUtil.Converters;
 
@@ -34,28 +36,66 @@ export abstract class Transaction {
 
     abstract getRequestType(): string;
 
+    //========== Step 1 (local)=============
     constructor(requestJSON: IRequestJSON) {
         this._requestJSON = requestJSON;
         this._state = TransactionState.REQUEST_CREATED;
     }
 
-    canProcessRequest(): boolean {
+    async calculateFee(remote: RemoteAPICaller) {
+        const data = await remote.apiCall('post', { ...this.requestJSON, feeNQT: '0' } as unknown as Record<string, string>);
+        const transactionData = data as unknown as ITransaction;
+        return transactionData.transactionJSON.feeNQT;
+    }
+
+    setFee(fee: string) {
+        if (this.state === TransactionState.REQUEST_CREATED) {
+            this.requestJSON.feeNQT = fee;
+        } else {
+            throw new Error('Cannot set fee after the unsigned transaction was already created');//TODO refine errors
+        }
+    }
+    //======================================
+
+
+    //========== Step 2 (remote)=============
+    async createUnsignedTransaction(remote: RemoteAPICaller) {
+        if (this.canCreateUnsignedTransaction()) {
+            const unsignedTransaction = await remote.apiCall('post', this.requestJSON as unknown as Record<string, string>);
+            this.onCreatedUnsignedTransaction((unsignedTransaction as unknown as IUnsignedTransaction).unsignedTransactionBytes);
+        } else {
+            throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(this));
+        }
+    }
+
+    canCreateUnsignedTransaction(): boolean {
         if ('secretPhrase' in this._requestJSON) {
             throw new Error('Do not send secret password to node!');
         }
         return this._state === TransactionState.REQUEST_CREATED;
     }
 
-    onTransactionRequestProcessed(unsignedTransactionBytes: string) {
-        if (this.canProcessRequest() && Converters.isHex(unsignedTransactionBytes)) {
+    onCreatedUnsignedTransaction(unsignedTransactionBytes: string) {
+        if (this.canCreateUnsignedTransaction() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
             this._state = TransactionState.UNSIGNED;
         } else {
             throw new Error('onTransactionRequestProcessed: Transaction cannot be processed');
         }
     }
+    //======================================
 
 
+    //========== Step 3 (local)=============
+    async signTransaction(signer: Signer) {
+        if (this.state === TransactionState.UNSIGNED && this.unsignedTransactionBytes && Converters.isHex(this.unsignedTransactionBytes)) {
+            const signedTransactionBytes = await signer.signTransactionBytes(this.unsignedTransactionBytes);
+            this.onSigned(signedTransactionBytes);
+            return this;
+        } else {
+            throw new Error('Cannot sign transaction ' + JSON.stringify(this));
+        }
+    }
     canBeSigned(): boolean {
         return this._state === TransactionState.UNSIGNED && Converters.isHex(this._unsignedTransactionBytes);
     }
@@ -64,6 +104,24 @@ export abstract class Transaction {
             this._signedTransactionBytes = signedTransactionBytes;
             this._state = TransactionState.SIGNED;
         }
+    }
+    //=======================================
+
+
+    //========== Step 4 (remote)=============
+    async broadcastTransaction(remote: RemoteAPICaller) {
+        if (this.canBroadcast() && this.signedTransactionBytes) {
+            const result: ITransactionBroadcasted = await this.broadCastTransactionFromHex(this.signedTransactionBytes, remote)
+            this.onBroadcasted(result);
+            return result;
+        } else {
+            throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(this));
+        }
+    }
+
+    async broadCastTransactionFromHex(signedTransactionHex: string, remote: RemoteAPICaller): Promise<ITransactionBroadcasted> {
+        const data = await remote.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
+        return data as unknown as ITransactionBroadcasted;
     }
 
     canBroadcast(): boolean {
@@ -80,6 +138,8 @@ export abstract class Transaction {
         }
 
     }
+    //=======================================
+
 
     get requestJSON(): IRequestJSON {
         return this._requestJSON;
@@ -96,16 +156,6 @@ export abstract class Transaction {
     get signedTransactionBytes(): string | null {
         return this._signedTransactionBytes;
     }
-
-    setFee(fee: string) {
-        if (this.state === TransactionState.REQUEST_CREATED) {
-            this.requestJSON.feeNQT = fee;
-        } else {
-            throw new Error('Cannot set fee after the unsigned transaction was already created');//TODO refine errors
-        }
-
-    }
-
 }
 
 

@@ -10,13 +10,13 @@ export const testSendMoney = async () => {
         const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
         //Optional: calculate fee. If fee is not calculated the default valur of 100,000,000 NQT (1 GMD) will be attempted.
         ////////////
-        const fee = await provider.calculateFee(transaction);
+        const fee = await transaction.calculateFee(provider);
         console.log('fee is: ' + fee)
         transaction.setFee(fee);
         ////////////
-        await provider.createUnsignedTransaction(transaction);
-        await wallet.signTransaction(transaction);
-        await provider.broadcastTransaction(transaction);
+        await transaction.createUnsignedTransaction(provider);
+        await transaction.signTransaction(wallet);
+        await transaction.broadcastTransaction(provider);
     }
     catch (error) {
         console.log('Error on send money :' + error);

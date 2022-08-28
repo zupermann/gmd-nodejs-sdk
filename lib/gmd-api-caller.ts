@@ -34,8 +34,8 @@ export class RemoteAPICaller {
         }
     * @returns {Promise} that will resolve to the body of the server response (usually a JSON).
     */
-    async apiCall(method: string, params: Record<string, any>) {
-        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString() } as AxiosRequestConfig<Record<string, any>>;
+    async apiCall(method: string, params: Record<string, string>) {
+        const config = { method: method, url: this.baseURL + 'nxt?' + (new URLSearchParams(params)).toString() } as AxiosRequestConfig<Record<string, unknown>>;
 
         return axios(config).then((res: IAPIResponse) => {
             if (this.log) this.log(`Response status on request to ${config.url} is ${res.status}\nresponse body:\n${JSON.stringify(res.data, null, 2)}`);

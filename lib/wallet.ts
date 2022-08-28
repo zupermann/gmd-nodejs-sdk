@@ -30,15 +30,15 @@ export class Wallet extends Signer {
 
     async sendGMD(to: string, amount: string) {
         const transaction = await this.createUnsignedSendGMDTransaction(to, amount);
-        await this.signTransaction(transaction);
-        await this.provider?.broadcastTransaction(transaction);
+        await transaction.signTransaction(this);
+        await transaction.broadcastTransaction(this.provider as Provider);
         return transaction;
     }
 
     async createUnsignedSendGMDTransaction(to: string, amount: string) {
         this.#checkProvider();
         const transaction = SendMoney.createTransaction(to, amount, this.publicKey);
-        await this.provider?.createUnsignedTransaction(transaction);
+        await transaction.createUnsignedTransaction(this.provider as Provider);
         return transaction;
     }
 
