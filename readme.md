@@ -60,6 +60,7 @@
     console.log('Blockchain height: ' + blockNo);
 ```
 
+
 #### Transaction 
 - Transaction is an abstract class that models all blockcahin transactions performed on the Coop Network blockchain.
 - Any transaction has 5 steps:
@@ -78,12 +79,23 @@
     wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
 
     transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey); // Step 1 - local
-    await provider.createUnsignedTransaction(transaction); // Step 2 - remote call
-    await wallet.signTransaction(transaction); // Step 3 - local call
-    await provider.broadcastTransaction(transaction); // Step 4 - remote call
+    await transaction.createUnsignedTransaction(provider); // Step 2 - remote call
+    await transaction.signTransaction(wallet); // Step 3 - local call
+    await transaction.broadcastTransaction(provider); // Step 4 - remote call
   ```
+
+  - Calculating fee for a transaction request (before signing it) in NQT (1 GMD = 100,000,000 NQT)
+```
+    const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
+    const fee = await transaction.calculateFee(provider);
+    
+    // calculateFee() does not change the state of the transaction but only returns a fee. To set the fee 
+    // before the unsigned transaction is created, call Transaction.setFee(). Setting fee will throw error if unsigned transaction was already created.
+    transaction.setFee(fee);
+```
+
 #### Encryption
-- This is an exmaple of encrypting on arbitrary string (encryptStr/encryptStr). 
+- This is an example of encrypting on arbitrary string (encryptStr/decryptToStr). 
 ```
 import KeyEncryption from "gmd-sdk";
 
@@ -97,5 +109,5 @@ const password = "Some password1!@#$%^&*()_+{}:|<>?/.,\;][=-"
     console.assert(decrypted == testString, "decryption failed");
 })();
 ```
-- For encrypt/decrypt hex strings use encryptHex/decryptHex (this is useful for encrypting private keys). Example similar to above except input is in the hex form (digits "0123456789abcdef"). The number of hex digits must be even (as each byte is 2 hex digits and this string is coverted to bytes before encryption). Caller must ensure that number of hex digits is even, or pad with addition 0 prefix.
+- For encrypt/decrypt hex strings use encryptHex/decryptToHex (this is useful for encrypting private keys). Example similar to above except input is in the hex format (digits "0123456789abcdef", no 0x prefix). The number of hex digits must be even (as each byte is 2 hex digits and this string is coverted to bytes before encryption). Caller must ensure that number of hex digits is even, or pad with addition 0 prefix.
 - For encrypt/decrypt array of bytes, use encryptBytes/decryptToBytes.
