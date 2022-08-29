@@ -195,6 +195,44 @@ export namespace CryptoUtil {
             return rsaddr.toString();
         }
 
+        export function GmdToNqt(gmd: string): string {
+            const regex = /^\d*(\.\d{1,8})?$/; //maximum 8 decimals
+            if (regex.test(gmd)) {
+                let [n, d] = gmd.split('.');
+                while (n.charAt(0) === '0') { //remove leading zeros
+                    n = n.slice(1);
+                }
+                d = d ? d.padEnd(8, '0') : '';
+                const ret = n + d;
+                return ret ? ret : '0';
+            } else {
+                throw new Error("Coneversion GMD to NQT error. At most 8 decimqals are supported, unsigned. GMD input=" + gmd);
+            }
+        }
+
+        export function NqtToGmd(nqt: string): string {
+            const regex = /^\d+$/;
+            if (regex.test(nqt)) {
+                if (/^0+$/.test(nqt)) {
+                    return '0';
+                }
+                let n = '';
+                let d = '';
+                if (nqt.length <= 8) {
+                    d = nqt.padStart(8, '0');
+                } else {
+                    n = nqt.slice(0, -8);
+                    d = nqt.slice(-8);
+                }
+                n = n.replace(/^0+/, ""); //remove leading zeros
+                d = d.replace(/0+$/, ""); //remove trailing decimal zeros
+
+                return (n ? n : '0') + (d ? '.' + d : '');
+            }
+            else {
+                throw new Error("Coneversion NQT to GMD error. Invalid input=" + nqt);
+            }
+        }
     }
 
 }

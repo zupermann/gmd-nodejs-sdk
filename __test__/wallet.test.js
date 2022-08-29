@@ -68,7 +68,7 @@ const test4 = async () => {
 const test5 = async () => {
     const wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
     wallet.connect(provider);
-    const transaction = await wallet.sendGMD('GMD-43MP-76UW-L69N-ALW39', '10000');
+    const transaction = await wallet.sendGMD('GMD-43MP-76UW-L69N-ALW39', '0.0001');
     console.assert(transaction.signedTransactionBytes && transaction.signedTransactionBytes.length > 0);
     console.assert(transaction.state == TransactionState.BROADCASTED);
     console.log(JSON.stringify(transaction, null, 2));

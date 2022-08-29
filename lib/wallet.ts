@@ -28,16 +28,16 @@ export class Wallet extends Signer {
 
     }
 
-    async sendGMD(to: string, amount: string) {
-        const transaction = await this.createUnsignedSendGMDTransaction(to, amount);
+    async sendGMD(to: string, amountGMD: string) {
+        const transaction = await this.createUnsignedSendGMDTransaction(to, amountGMD);
         await transaction.signTransaction(this);
         await transaction.broadcastTransaction(this.provider as Provider);
         return transaction;
     }
 
-    async createUnsignedSendGMDTransaction(to: string, amount: string) {
+    async createUnsignedSendGMDTransaction(to: string, amountGMD: string) {
         this.#checkProvider();
-        const transaction = SendMoney.createTransaction(to, amount, this.publicKey);
+        const transaction = SendMoney.createTransaction(to, amountGMD, this.publicKey);
         await transaction.createUnsignedTransaction(this.provider as Provider);
         return transaction;
     }
