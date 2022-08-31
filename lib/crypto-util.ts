@@ -95,8 +95,7 @@ export namespace CryptoUtil {
     export namespace Crypto {
         export interface IMinWalletDetails {
             publicKey: string,
-            privateKey: string,
-            accountId: string
+            privateKey: string
         }
 
 
@@ -159,8 +158,7 @@ export namespace CryptoUtil {
             const { p, s } = curve25519.keygen(seed);
             const publicKey = Converters.bytesToHex(p);
             const privateKey = Converters.bytesToHex(s);
-            const accountId = await publicKeyToAccountId(publicKey);
-            return { publicKey: publicKey, privateKey: privateKey, accountId: accountId }
+            return { publicKey: publicKey, privateKey: privateKey }
         }
 
         export async function publicKeyToAccountId(publicKeyHex: string): Promise<string> {

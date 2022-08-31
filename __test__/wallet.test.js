@@ -27,6 +27,10 @@ export const testWallet = async () => {
     console.log('Testing send GMD via wallet');
     await test5();
     console.log('Send GMD via wallet OK');
+
+    console.log('Testing wallet encryption');
+    await test6();
+    console.log('Wallet encryption OK');
 };
 
 const test1 = async () => {
@@ -72,6 +76,18 @@ const test5 = async () => {
     console.assert(transaction.signedTransactionBytes && transaction.signedTransactionBytes.length > 0);
     console.assert(transaction.state == TransactionState.BROADCASTED);
     console.log(JSON.stringify(transaction, null, 2));
+}
+
+const test6 = async () => {
+    const wallet = await Wallet.fromPassphrase(secretPassphrase);
+    const encryptedJSON = await wallet.encrypt('password');
+
+    const wallet2 = await Wallet.fromEncryptedJSON(encryptedJSON, 'password');
+    const err = 'decryption failed';
+    console.assert(wallet2.publicKey === pubKey, err);
+    console.assert(wallet2.privateKey === privKey, err);
+    console.assert(wallet2.accountId === accountId, err);
+    console.assert(wallet2.accountRS === accountRS, err);
 }
 
 
