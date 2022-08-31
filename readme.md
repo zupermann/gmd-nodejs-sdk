@@ -78,7 +78,7 @@
     provider = new Provider(new URL('https://node.thecoopnetwork.io:6877'));
     wallet = await Wallet.fromPassphrase('screen drawn leave power connect confidence liquid everytime wall either poet shook');
 
-    transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey); // Step 1 - local
+    transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '0.0001', wallet.publicKey); // Step 1 - local
     await transaction.createUnsignedTransaction(provider); // Step 2 - remote call
     await transaction.signTransaction(wallet); // Step 3 - local call
     await transaction.broadcastTransaction(provider); // Step 4 - remote call
@@ -86,7 +86,7 @@
 
   - Calculating fee for a transaction request (before signing it) in NQT (1 GMD = 100,000,000 NQT)
 ```
-    const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '10000', wallet.publicKey);
+    const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '0.0001', wallet.publicKey);
     const fee = await transaction.calculateFee(provider);
     
     // calculateFee() does not change the state of the transaction but only returns a fee. To set the fee 

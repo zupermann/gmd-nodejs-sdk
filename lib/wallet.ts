@@ -28,16 +28,16 @@ export class Wallet extends Signer {
 
     }
 
-    async sendGMD(to: string, amount: string) {
-        const transaction = await this.createUnsignedSendGMDTransaction(to, amount);
+    async sendGMD(to: string, amountGMD: string) {
+        const transaction = await this.createUnsignedSendGMDTransaction(to, amountGMD);
         await transaction.signTransaction(this);
         await transaction.broadcastTransaction(this.provider as Provider);
         return transaction;
     }
 
-    async createUnsignedSendGMDTransaction(to: string, amount: string) {
+    async createUnsignedSendGMDTransaction(to: string, amountGMD: string) {
         this.#checkProvider();
-        const transaction = SendMoney.createTransaction(to, amount, this.publicKey);
+        const transaction = SendMoney.createTransaction(to, amountGMD, this.publicKey);
         await transaction.createUnsignedTransaction(this.provider as Provider);
         return transaction;
     }
@@ -45,6 +45,10 @@ export class Wallet extends Signer {
     async getTransactions(outbound: boolean, pageSize: number, page: number) {
         this.#checkProvider();
         this.provider?.getTransactions(outbound, this.accountRS, pageSize, page);
+    }
+
+    async encrypt(password: string) {
+        return KeyEncryption.encryptHex(this.publicKey + this.privateKey, password);
     }
 
 
@@ -56,18 +60,21 @@ export class Wallet extends Signer {
 
     //static wallet creation functions
     static async fromPassphrase(passPhrase: string) {
-        const { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetails(passPhrase);
+        const { publicKey, privateKey } = await CryptoUtil.Crypto.getWalletDetails(passPhrase);
+        const accountId = await CryptoUtil.Crypto.publicKeyToAccountId(publicKey);
         return new Wallet(publicKey, privateKey, accountId);
     }
 
     static async encryptedJSONFromPassPhrase(passPhrase: string, encryptionPassword: string) {
-        const seed = await CryptoUtil.Crypto.getSeed(passPhrase);
-        return KeyEncryption.encryptBytes(seed, encryptionPassword);
+        const { publicKey, privateKey } = await CryptoUtil.Crypto.getWalletDetails(passPhrase);
+        return KeyEncryption.encryptHex(publicKey + privateKey, encryptionPassword);
     }
 
     static async fromEncryptedJSON(encryptedJSON: IEncryptedJSON, encryptionPassword: string): Promise<Wallet> {
-        const seed = await KeyEncryption.decryptToBytes(encryptedJSON, encryptionPassword);
-        const { publicKey, privateKey, accountId } = await CryptoUtil.Crypto.getWalletDetailsFromSeed(seed);
+        const decrypted = await KeyEncryption.decryptToHex(encryptedJSON, encryptionPassword);
+        const publicKey = decrypted.substring(0, 64);
+        const privateKey = decrypted.substring(64);
+        const accountId = await CryptoUtil.Crypto.publicKeyToAccountId(publicKey);
         return new Wallet(publicKey, privateKey, accountId);
     }
 
