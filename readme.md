@@ -84,7 +84,7 @@
     await transaction.broadcastTransaction(provider); // Step 4 - remote call
   ```
 
-  - Calculating fee for a transaction request (before signing it) in NQT (1 GMD = 100,000,000 NQT)
+  - Calculating fee for a transaction request (before signing it) in GMD
 ```
     const transaction = SendMoney.createTransaction('GMD-43MP-76UW-L69N-ALW39', '0.0001', wallet.publicKey);
     const fee = await transaction.calculateFee(provider);
