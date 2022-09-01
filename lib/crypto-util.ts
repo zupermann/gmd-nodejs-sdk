@@ -200,7 +200,8 @@ export namespace CryptoUtil {
                 while (n.charAt(0) === '0') { //remove leading zeros
                     n = n.slice(1);
                 }
-                d = d ? d.padEnd(8, '0') : '';
+                d = d ? d : "";
+                d = d.padEnd(8, '0');
                 const ret = n + d;
                 return ret ? ret : '0';
             } else {
