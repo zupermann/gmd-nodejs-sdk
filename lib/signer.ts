@@ -1,5 +1,4 @@
 import { CryptoUtil } from './crypto-util.js';
-import { Transaction, TransactionState } from './transactions/transaction.js';
 import Converters = CryptoUtil.Converters;
 
 export class Signer {
@@ -13,13 +12,6 @@ export class Signer {
     async signTransactionBytes(unsignedTransactionHex: string): Promise<string> {
         const sig = await CryptoUtil.Crypto.signHex(unsignedTransactionHex, this.privateKey);
         return unsignedTransactionHex.slice(0, 192) + sig + unsignedTransactionHex.slice(320);
-    }
-
-    async signTransaction(transaction: Transaction) {
-        if (transaction.state === TransactionState.UNSIGNED && transaction.unsignedTransactionBytes && Converters.isHex(transaction.unsignedTransactionBytes)) {
-            const signedTransactionBytes = await this.signTransactionBytes(transaction.unsignedTransactionBytes);
-            transaction.onSigned(signedTransactionBytes);
-        }
     }
 
     signHex(hexMessage: string): Promise<string> {

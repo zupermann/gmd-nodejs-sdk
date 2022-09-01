@@ -2,3 +2,4 @@ browser/dist
 /__test__/
 /dist/
 /lib/rs-address.ts
+/lib/curve25519.d.ts

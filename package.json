@@ -1,6 +1,6 @@
 {
-  "name": "gmd-nodejs-sdk",
-  "version": "2.0.5-0",
+  "name": "gmd-sdk",
+  "version": "2.0.6",
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
     "test": "tsc && node ./__test__/main.test.js",
@@ -10,7 +10,7 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zupermann/GMD-nodejs-sdk.git"
+    "url": "https://github.com/CoopNetwork/GMD-nodejs-sdk"
   },
   "dependencies": {
     "axios": "^0.26.0"
@@ -25,7 +25,6 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.2.4",
     "eslint-plugin-promise": "^6.0.0",
-    "esmify": "^2.1.1",
     "typescript": "^4.7.4"
   },
   "engines": {
@@ -42,7 +41,7 @@
   "author": "George A. (https://github.com/zupermann)",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/zupermann/gmd-nodejs-sdk/issues"
+    "url": "https://github.com/CoopNetwork/GMD-nodejs-sdk/issues"
   },
-  "homepage": "https://github.com/zupermann/gmd-nodejs-sdk#readme"
+  "homepage": "https://github.com/CoopNetwork/GMD-nodejs-sdk#readme"
 }
