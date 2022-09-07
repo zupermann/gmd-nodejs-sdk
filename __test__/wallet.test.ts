@@ -1,4 +1,4 @@
-import { describe, expect, test } from '@jest/globals';
+import { expect, test } from '@jest/globals';
 import { Wallet, Provider } from '../dist/index.js';
 import { TransactionState } from '../dist/transactions/transaction.js';
 

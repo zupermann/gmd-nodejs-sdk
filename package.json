@@ -3,7 +3,8 @@
   "version": "2.0.6",
   "description": "SDK to interact with Coop Network GMD node using NodeJS or browser",
   "scripts": {
-    "test": "tsc && node ./__test__/main.test.js",
+    "test": "tsc && npx jest",
+    "test-coverage": "jest --coverage",
     "lint": "npx eslint .",
     "build": "npx tsc && npx eslint ."
   },
