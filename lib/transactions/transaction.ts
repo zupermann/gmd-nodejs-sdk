@@ -5,13 +5,13 @@ import { Signer } from "../signer.js";
 import Converters = CryptoUtil.Converters;
 
 export enum TransactionState {
-    ERROR = 0,
-    REQUEST_CREATED = 1,
-    UNSIGNED = 2,
-    SIGNED = 3,
-    BROADCASTED = 4,
-    CONFIRMED = 5,
-    REJECTED = 6
+    ERROR = 'error',
+    REQUEST_CREATED = 'request_created',
+    UNSIGNED = 'unsigned',
+    SIGNED = 'signed',
+    BROADCASTED = 'broadcasted',
+    CONFIRMED = 'confirmed',
+    REJECTED = 'rejected'
 }
 
 /**
@@ -176,7 +176,7 @@ export class Transaction {
         }
     }
 
-    static async getTransactionJSONFromBytes(bytes: string, remote: RemoteAPICaller) {
+    public static async getTransactionJSONFromBytes(bytes: string, remote: RemoteAPICaller) {
         const data = await remote.apiCall('get', { requestType: 'parseTransaction', transactionBytes: bytes });
         return data as unknown as ITransactionJSON;
     }
@@ -204,9 +204,9 @@ export interface ITransaction {
 export interface ITransactionJSON {
     senderPublicKey: string,
     feeNQT: string,
-    type: number,
+    type: TransactionType,
     subtype: number,
-    version: number,
+    version: 1,
     phased: boolean,
     ecBlockId: string,
     attachment: unknown,
@@ -225,4 +225,15 @@ export interface ITransactionJSON {
 
 export interface IUnsignedTransaction {
     unsignedTransactionBytes: string
+}
+
+export enum TransactionType {
+    PAYMENT = 0,
+    MESSAGING = 1,
+    COLORED_COINS = 2,
+    DIGITAL_GOODS = 3,
+    ACCOUNT_CONTROL = 4,
+    MONETARY_SYSTEM = 5,
+    DATA = 6,
+    SHUFFLING = 7
 }
