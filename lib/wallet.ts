@@ -23,7 +23,7 @@ export class Wallet extends Signer {
     }
 
     async getBalance(): Promise<string | undefined> {
-        this.#checkProvider();
+        this.checkProvider();
         return await this.provider?.getBalance(this.accountRS);
 
     }
@@ -36,14 +36,14 @@ export class Wallet extends Signer {
     }
 
     async createUnsignedSendGMDTransaction(to: string, amountGMD: string) {
-        this.#checkProvider();
+        this.checkProvider();
         const transaction = SendMoney.createTransaction(to, amountGMD, this.publicKey);
         await transaction.createUnsignedTransaction(this.provider as Provider);
         return transaction;
     }
 
     async getTransactions(outbound: boolean, pageSize: number, page: number) {
-        this.#checkProvider();
+        this.checkProvider();
         this.provider?.getTransactions(outbound, this.accountRS, pageSize, page);
     }
 
@@ -52,7 +52,7 @@ export class Wallet extends Signer {
     }
 
 
-    #checkProvider() {
+    private checkProvider() {
         if (this.provider == null) {
             throw new Error('Wallet operation requires a Provider to be connected');
         }
