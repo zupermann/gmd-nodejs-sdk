@@ -121,8 +121,8 @@ export class Transaction {
         }
     }
 
-    async broadCastTransactionFromHex(signedTransactionHex: string, remote: RemoteAPICaller): Promise<ITransactionBroadcasted> {
-        return await remote.apiCall<ITransactionBroadcasted>('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
+    broadCastTransactionFromHex(signedTransactionHex: string, remote: RemoteAPICaller): Promise<ITransactionBroadcasted> {
+        return remote.apiCall<ITransactionBroadcasted>('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
     }
 
     canBroadcast(): boolean {
@@ -174,8 +174,8 @@ export class Transaction {
         }
     }
 
-    public static async getTransactionJSONFromBytes(bytes: string, remote: RemoteAPICaller) {
-        return await remote.apiCall<ITransactionJSON>('get', { requestType: 'parseTransaction', transactionBytes: bytes });
+    public static getTransactionJSONFromBytes(bytes: string, remote: RemoteAPICaller) {
+        return remote.apiCall<ITransactionJSON>('get', { requestType: 'parseTransaction', transactionBytes: bytes });
     }
 }
 
