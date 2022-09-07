@@ -1,5 +1,6 @@
-import { Wallet } from '../lib/index';
+import { describe, expect, test } from '@jest/globals';
+import { Wallet } from '../dist/index.js';
 
-test('wallet test', () => {
-    Wallet.fromPassphrase('abc').then(a => console.log(a));
+test('wallet test', async () => {
+    await Wallet.fromPassphrase('abc').then(a => console.log(a));
 })
