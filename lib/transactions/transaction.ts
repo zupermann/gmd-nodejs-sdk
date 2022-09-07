@@ -65,7 +65,7 @@ export class Transaction {
     async createUnsignedTransaction(remote: RemoteAPICaller) {
         if (this.canCreateUnsignedTransaction()) {
             const unsignedTransaction = await remote.apiCall('post', this.requestJSON as unknown as Record<string, string>);
-            this.#onCreatedUnsignedTransaction((unsignedTransaction as unknown as IUnsignedTransaction).unsignedTransactionBytes);
+            this.onCreatedUnsignedTransaction((unsignedTransaction as unknown as IUnsignedTransaction).unsignedTransactionBytes);
         } else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(this));
         }
@@ -78,7 +78,7 @@ export class Transaction {
         return this.state === TransactionState.REQUEST_CREATED;
     }
 
-    #onCreatedUnsignedTransaction(unsignedTransactionBytes: string) {
+    private onCreatedUnsignedTransaction(unsignedTransactionBytes: string) {
         if (this.canCreateUnsignedTransaction() && Converters.isHex(unsignedTransactionBytes)) {
             this._unsignedTransactionBytes = unsignedTransactionBytes;
             this._state = TransactionState.UNSIGNED;
@@ -93,7 +93,7 @@ export class Transaction {
     async signTransaction(signer: Signer) {
         if (this.state === TransactionState.UNSIGNED && this.unsignedTransactionBytes && Converters.isHex(this.unsignedTransactionBytes)) {
             const signedTransactionBytes = await signer.signTransactionBytes(this.unsignedTransactionBytes);
-            this.#onSigned(signedTransactionBytes);
+            this.onSigned(signedTransactionBytes);
             return this;
         } else {
             throw new Error('Cannot sign transaction ' + JSON.stringify(this));
@@ -102,7 +102,7 @@ export class Transaction {
     canBeSigned(): boolean {
         return this._state === TransactionState.UNSIGNED && Converters.isHex(this._unsignedTransactionBytes);
     }
-    #onSigned(signedTransactionBytes: string) {
+    private onSigned(signedTransactionBytes: string) {
         if (this.canBeSigned() && Converters.isHex(signedTransactionBytes)) {
             this._signedTransactionBytes = signedTransactionBytes;
             this._state = TransactionState.SIGNED;
@@ -115,7 +115,7 @@ export class Transaction {
     async broadcastTransaction(remote: RemoteAPICaller) {
         if (this.canBroadcast() && this.signedTransactionBytes) {
             const result: ITransactionBroadcasted = await this.broadCastTransactionFromHex(this.signedTransactionBytes, remote)
-            this.#onBroadcasted(result);
+            this.onBroadcasted(result);
             return result;
         } else {
             throw new Error('broadCastTransaction cannot be processed. transaction=' + JSON.stringify(this));
@@ -131,7 +131,7 @@ export class Transaction {
         return Converters.isHex(this.signedTransactionBytes) && this.state === TransactionState.SIGNED;
     }
 
-    #onBroadcasted(result: ITransactionBroadcasted) {
+    private onBroadcasted(result: ITransactionBroadcasted) {
         if (this.canBroadcast()) {
             this._transactionID = result.transaction;
             this._fullHash = result.fullHash;
