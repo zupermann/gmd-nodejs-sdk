@@ -13,11 +13,7 @@ export namespace CryptoUtil {
         }
 
         export function strToBytes(str: string): number[] {
-            const result = [];
-            for (let i = 0; i < str.length; i++) {
-                result.push(str.charCodeAt(i));
-            }
-            return result;
+            return Array.from(str).map(c => c.charCodeAt(0));
         }
 
         export function hexToString(hex: string): string {

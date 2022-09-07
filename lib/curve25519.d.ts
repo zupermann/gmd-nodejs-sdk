@@ -4,11 +4,11 @@ export namespace curve25519 {
     export { keygen };
 }
 /********* DIGITAL SIGNATURES *********/
-declare function sign(h: any, x: any, s: any): any[] | undefined;
-declare function verify(v: any, h: any, P: any): any[];
-declare function keygen(k: any): {
-    p: any[];
-    s: any[];
-    k: any;
+declare function sign(h: number[], x: number[], s: number[]): number[] | undefined;
+declare function verify(v: number[], h: number[], P: number[]): number[];
+declare function keygen(k: number[]): {
+    p: number[];
+    s: number[];
+    k: number[];
 };
 export { };

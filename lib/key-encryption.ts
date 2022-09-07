@@ -16,7 +16,7 @@ interface ISaltIV {
     salt: Uint8Array;
 }
 
-export const KeyEncryption = {
+export class KeyEncryption {
     /**
      * Encrypts message in hex format. Most common use is to encrypt private keys.
      *
@@ -28,12 +28,12 @@ export const KeyEncryption = {
      * characters, but this is not enforced in this SDK.
      * @returns a promise that resolves to an encrypted JSON. JSON contains: iv, salt, ciphertext.
      */
-    async encryptHex(messageHex: string, password: string): Promise<IEncryptedJSON> {
+    public static async encryptHex(messageHex: string, password: string): Promise<IEncryptedJSON> {
         if (messageHex && messageHex.length % 2) {
             throw new Error('Hex string to be encrypted cannot have a 0 length or have an even number of hex digits');
         }
-        return this.encryptBytes(Converters.hexToBytes(messageHex), password);
-    },
+        return KeyEncryption.encryptBytes(Converters.hexToBytes(messageHex), password);
+    }
 
     /**
      * Same as  KeyEncryption.encryptHex() but it encrypts any string,
@@ -41,17 +41,17 @@ export const KeyEncryption = {
      * @param {*} password same as KeyEncryption.encryptHex()
      * @returns a promise that resolves to an encrypted JSON. JSON contains: iv, salt, ciphertext.
      */
-    async encryptStr(message: string, password: string): Promise<IEncryptedJSON> {
+    public static async encryptStr(message: string, password: string): Promise<IEncryptedJSON> {
         return this.encryptHex(Converters.strToHex(message), password);
-    },
+    }
 
-    async encryptBytes(bytes: number[], password: string): Promise<IEncryptedJSON> {
+    public static async encryptBytes(bytes: number[], password: string): Promise<IEncryptedJSON> {
         const { iv, salt } = await this.generateIvAndSalt();
         const encryptionKey = await this.genEncryptionKeyFromPassword(password, salt, iterations);
         const encryptedByteArray = await webcrypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, encryptionKey, new Uint8Array(bytes));
         const ciphertext = Converters.Uint8ArrayToHex(new Uint8Array(encryptedByteArray));
         return { iv: Converters.Uint8ArrayToHex(iv), salt: Converters.Uint8ArrayToHex(salt), ciphertext: ciphertext };
-    },
+    }
 
     /**
      * Helper function used to decrypt to hex. Used in pair with KeyEncryption.encryptHex() most common use case is to encrypt/decrypt private key.
@@ -60,10 +60,10 @@ export const KeyEncryption = {
      * @param {*} password 
      * @returns a promise that resolves to the unencrypted hex string.
      */
-    async decryptToHex(encryptedJSON: IEncryptedJSON, password: string): Promise<string> {
+    public static async decryptToHex(encryptedJSON: IEncryptedJSON, password: string): Promise<string> {
         const decryptedData = await this.decrypt(encryptedJSON, password);
         return Converters.Uint8ArrayToHex(decryptedData);
-    },
+    }
 
     /**
      * Decrypt to a string.  Used in pair with KeyEncryption.encryptStr().
@@ -72,17 +72,17 @@ export const KeyEncryption = {
      * @param {*} password 
      * @returns a promise that resolves to the unencrypted plain text UTF-16 encoded.
      */
-    async decryptToStr(encryptedJSON: IEncryptedJSON, password: string): Promise<string> {
+    public static async decryptToStr(encryptedJSON: IEncryptedJSON, password: string): Promise<string> {
         const decryptedData = await this.decrypt(encryptedJSON, password);
         return Converters.Uint8ArrayToStr(decryptedData);
-    },
+    }
 
-    async decryptToBytes(encryptedJSON: IEncryptedJSON, password: string): Promise<number[]> {
+    public static async decryptToBytes(encryptedJSON: IEncryptedJSON, password: string): Promise<number[]> {
         const result = await this.decrypt(encryptedJSON, password);
         return Array.from(result);
-    },
+    }
 
-    async decrypt(encryptedJSON: IEncryptedJSON, password: string): Promise<Uint8Array> {
+    private static async decrypt(encryptedJSON: IEncryptedJSON, password: string): Promise<Uint8Array> {
         if (encryptedJSON && 'iv' in encryptedJSON && 'salt' in encryptedJSON && 'ciphertext' in encryptedJSON) {
             const ciphertext = Converters.hexToUint8(encryptedJSON.ciphertext);
             const iv = Converters.hexToUint8(encryptedJSON.iv);
@@ -94,15 +94,15 @@ export const KeyEncryption = {
         } else {
             throw new Error('Encrypted JSON not correct');
         }
-    },
+    }
 
-    async generateIvAndSalt(): Promise<ISaltIV> {
+    private static async generateIvAndSalt(): Promise<ISaltIV> {
         const iv = webcrypto.getRandomValues(new Uint8Array(16));
         const salt = webcrypto.getRandomValues(new Uint8Array(16));
         return { iv: iv, salt: salt };
-    },
+    }
 
-    async genEncryptionKeyFromPassword(password: string, salt: Uint8Array, iterations: number) {
+    private static async genEncryptionKeyFromPassword(password: string, salt: Uint8Array, iterations: number) {
         const importedPassword = await webcrypto.subtle.importKey(
             "raw",
             Converters.strToUint8(password),
@@ -127,7 +127,7 @@ export const KeyEncryption = {
         );
     }
 
-};
+}
 
 
 export default KeyEncryption;
