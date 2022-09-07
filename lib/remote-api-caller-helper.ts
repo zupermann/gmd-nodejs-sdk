@@ -7,13 +7,13 @@ import { RemoteAPICaller } from "./gmd-api-caller.js";
 export class RemoteAPICallerHelper extends RemoteAPICaller {
     //Latest block
     async getBlockNumber(): Promise<number> {
-        const data = await this.apiCall('get', { requestType: 'getBlock' } as Record<string, string>)
-        return data.height as number;
+        const data = await this.apiCall<{ height: number }>('get', { requestType: 'getBlock' } as Record<string, string>)
+        return data.height;
     }
 
     async getBalance(rsAccount: string): Promise<string> {
-        const data = await this.apiCall('get', { requestType: 'getBalance', account: rsAccount } as Record<string, string>);
-        const nqt = (data as unknown as IGetBalanceResponse).balanceNQT;
+        const data = await this.apiCall<IGetBalanceResponse>('get', { requestType: 'getBalance', account: rsAccount } as Record<string, string>);
+        const nqt = data.balanceNQT;
         return CryptoUtil.Crypto.NqtToGmd(nqt);
     }
 
@@ -35,8 +35,8 @@ export class RemoteAPICallerHelper extends RemoteAPICaller {
         } else {
             request.filterByReceiver = rsAccount;
         }
-        const data = await this.apiCall('get', request as unknown as Record<string, string>);
-        return (data as unknown as IGetTransactionsResponse).Transactions;
+        const data = await this.apiCall<IGetTransactionsResponse>('get', request as unknown as Record<string, string | number | boolean>);
+        return data.Transactions;
     }
 }
 
@@ -55,5 +55,5 @@ interface IGetBalanceResponse {
 }
 
 interface IGetTransactionsResponse {
-    Transactions: Array<unknown>;
+    Transactions: Array<Record<string, string | number | boolean>>;
 }

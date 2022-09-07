@@ -14,12 +14,12 @@ test('Get transactions bulk', async () => {
     }
 
 
-    let data = await provider.apiCall('get', paramsGetTransactions);
+    let data = await provider.apiCall<{ Transactions: Array<Record<string, string | number>> }>('get', paramsGetTransactions);
     expect(Array.isArray(data.Transactions)).toBe(true);
-    expect((data.Transactions as Array<unknown>).length).toBe(pageSize);
-    const fullhash0 = ((data.Transactions as Array<unknown>)[0] as Record<string, string | number>).FULL_HASH;
-    const height1 = ((data.Transactions as Array<unknown>)[1] as Record<string, string | number>).HEIGHT;
-    const sender2 = ((data.Transactions as Array<unknown>)[2] as Record<string, string | number>).SENDER_ID;
+    expect(data.Transactions.length).toBe(pageSize);
+    const fullhash0 = data.Transactions[0].FULL_HASH;
+    const height1 = data.Transactions[1].HEIGHT;
+    const sender2 = data.Transactions[2].SENDER_ID;
     expect(fullhash0).toMatch(keyRegex);
     expect(height1).not.toBeNaN();
     expect(sender2).toMatch(rsRegex);
@@ -34,6 +34,6 @@ test('Get outbound tansactions', async () => {
     const rs = 'GMD-N2L2-GZXR-NES8-CJMBC';
     const data = await provider.getTransactions(true, rs, 1, 0);
     expect(Array.isArray(data)).toBe(true);
-    expect((data[0] as Record<string, string>).SENDER_ID).toBe(rs);
-    expect((data[0] as Record<string, string>).FULL_HASH).toMatch(keyRegex);
+    expect(data[0].SENDER_ID).toBe(rs);
+    expect(data[0].FULL_HASH).toMatch(keyRegex);
 });

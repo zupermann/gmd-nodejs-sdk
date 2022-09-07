@@ -46,8 +46,7 @@ export class Transaction {
     }
 
     async calculateFee(remote: RemoteAPICaller) {
-        const data = await remote.apiCall('post', { ...this.requestJSON, feeNQT: '0' } as unknown as Record<string, string>);
-        const transactionData = data as unknown as ITransaction;
+        const transactionData = await remote.apiCall<ITransaction>('post', { ...this.requestJSON, feeNQT: '0' } as unknown as Record<string, string>);
         return CryptoUtil.Crypto.NqtToGmd(transactionData.transactionJSON.feeNQT);
     }
 
@@ -64,8 +63,8 @@ export class Transaction {
     //========== Step 2 (remote)=============
     async createUnsignedTransaction(remote: RemoteAPICaller) {
         if (this.canCreateUnsignedTransaction()) {
-            const unsignedTransaction = await remote.apiCall('post', this.requestJSON as unknown as Record<string, string>);
-            this.onCreatedUnsignedTransaction((unsignedTransaction as unknown as IUnsignedTransaction).unsignedTransactionBytes);
+            const unsignedTransaction = await remote.apiCall<IUnsignedTransaction>('post', this.requestJSON as unknown as Record<string, string>);
+            this.onCreatedUnsignedTransaction(unsignedTransaction.unsignedTransactionBytes);
         } else {
             throw new Error('createUnsignedTransaction cannot be processed. transaction=' + JSON.stringify(this));
         }
@@ -123,8 +122,7 @@ export class Transaction {
     }
 
     async broadCastTransactionFromHex(signedTransactionHex: string, remote: RemoteAPICaller): Promise<ITransactionBroadcasted> {
-        const data = await remote.apiCall('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
-        return data as unknown as ITransactionBroadcasted;
+        return await remote.apiCall<ITransactionBroadcasted>('post', { requestType: 'broadcastTransaction', transactionBytes: signedTransactionHex });
     }
 
     canBroadcast(): boolean {
@@ -177,8 +175,7 @@ export class Transaction {
     }
 
     public static async getTransactionJSONFromBytes(bytes: string, remote: RemoteAPICaller) {
-        const data = await remote.apiCall('get', { requestType: 'parseTransaction', transactionBytes: bytes });
-        return data as unknown as ITransactionJSON;
+        return await remote.apiCall<ITransactionJSON>('get', { requestType: 'parseTransaction', transactionBytes: bytes });
     }
 }
 
