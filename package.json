@@ -8,7 +8,7 @@
     "lint": "npx eslint .",
     "build": "npx tsc && npx eslint ."
   },
-  "type": "module",
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/CoopNetwork/GMD-nodejs-sdk"
