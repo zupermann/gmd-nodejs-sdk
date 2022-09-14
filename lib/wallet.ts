@@ -24,7 +24,7 @@ export class Wallet extends Signer {
 
     async getBalance(): Promise<string | undefined> {
         this.checkProvider();
-        return await this.provider?.getBalance(this.accountRS);
+        return this.provider?.getBalance(this.accountRS);
 
     }
 
