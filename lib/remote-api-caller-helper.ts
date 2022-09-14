@@ -1,5 +1,6 @@
 import { CryptoUtil } from "./crypto-util.js";
 import { RemoteAPICaller } from "./gmd-api-caller.js";
+import { IError, ITransactionJSON } from "./transactions/transaction.js";
 
 
 
@@ -37,6 +38,10 @@ export class RemoteAPICallerHelper extends RemoteAPICaller {
         }
         const data = await this.apiCall<IGetTransactionsResponse>('get', request as unknown as Record<string, string | number | boolean>);
         return data.Transactions;
+    }
+
+    getTransaction(fullHash: string) {
+        return this.apiCall<ITransactionJSON | IError>('get', { requestType: 'getTransaction', fullHash: fullHash });
     }
 }
 
