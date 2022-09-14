@@ -5,7 +5,7 @@ const testString = "String was correctly decrypted";
 //const testHex = "03af56c690be02";
 const testHex = "c15aea1c549747369dbc6cef86516e4c";
 const testHexInvalid = "03af56c690be021";
-const password = "[{Infura}, {ID}, {Provider}, {GMD}, {CoopNetwork}]";
+const password = "Password 123 !@#$%^&*()_+{}:|<>?/.,\;][=-";
 
 
 test('Encrypt decrypt arbitrary string', async () => {
