@@ -1,3 +1,5 @@
+# This repository is not maintained here anymore, it was moved here: https://github.com/TheCoopNetwork/GMD-nodejs-sdk
+
 ### Intro 
 
 - This is an SDK to interact with Coop Network Node.
